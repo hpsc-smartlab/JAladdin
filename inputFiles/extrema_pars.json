@@ -1,0 +1,12 @@
+{
+  "_comment": "extreme points of the route",
+  "start_lat": 37.32163,
+  "start_lon": 10.60461,
+  "end_lat": 35.65,
+  "end_lon": 12.5,
+  "bbox_deltaLat_u": 0.50,
+  "bbox_deltaLon_l": 0.60,
+  "bbox_deltaLat_d": 0.30,
+  "bbox_deltaLon_r": 0.50,
+  "minCoastDist": 0
+}

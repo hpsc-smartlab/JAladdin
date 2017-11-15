@@ -1,0 +1,11 @@
+{
+  "_comment": "ship parameters",
+  "vessType": 1,
+  "sailClass": 12,
+  "P_max_hp": 360,
+  "maxv": 20.0,
+  "length(m)": 30.0,
+  "beam(m)": 5.2,
+  "draught(m)": 1.6,
+  "obs_roll_period(s)": 8.6
+}
