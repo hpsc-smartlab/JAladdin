@@ -33,5 +33,59 @@ public class Const {
         this.N2kN=Math.pow(10,-3);
     }
 
+    public double getDeg2rad(){
+        return deg2rad;
+    }
 
+    public double getM2ft(){
+        return m2ft;
+    }
+
+    public double getMs2kts(){
+        return ms2kts;
+    }
+
+    public double getNM2m(){
+        return NM2m;
+    }
+
+    public double getHp2W(){
+        return hp2W;
+    }
+
+    public double getG0() {
+        return g0;
+    }
+
+    public double getMissValue() {
+        return missValue;
+    }
+
+    public double getN2kN() {
+        return N2kN;
+    }
+
+    public double getNu_water() {
+        return nu_water;
+    }
+
+    public double getPer2c() {
+        return Per2c;
+    }
+
+    public double getRho_water() {
+        return rho_water;
+    }
+
+    public double getTwelve() {
+        return twelve;
+    }
+
+    public double getTwentyfour() {
+        return twentyfour;
+    }
+
+    public Integer getInt_precision() {
+        return int_precision;
+    }
 }
