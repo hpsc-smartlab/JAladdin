@@ -15,6 +15,12 @@ public class SpatialGrid {
         this.minNoGridPoints = 4; //minimum number of grid points along either direction (meridional or zonal) - TWA inconsistencies may result from tto small such a value
     }
 
+    public void setInvStepFields(long flag){//relocatable model input fields
+        if(flag == 2){
+            this.invStepFields = 60; //inverse grid size [deg^{-1}]
+        }
+    }
+
     public double getNodesLargeN() {
         return nodesLargeN;
     }

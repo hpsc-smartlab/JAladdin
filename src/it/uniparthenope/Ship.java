@@ -13,6 +13,11 @@ public class Ship {
     private double beam;
     private double draught;
     private double obs_roll_period;
+    private double roll_period;
+    private double bottomDraughtfactor;
+    private double TEsaturFactor;
+    private double Rspectrum;
+    private double Nvel;
 
     public Ship(){
         this.sailType = 4; //sailboats
@@ -34,6 +39,15 @@ public class Ship {
             System.out.println("Ship integrity check violated.");
             System.exit(-1);
         }
+        if( this.vessType != this.sailType){
+            this.roll_period = this.obs_roll_period;
+        } else {
+            this.roll_period = 1;
+        }
+        this.bottomDraughtfactor = 1; //bottomDraughtfactor*draught is threshold for effect of sea bottom on enhanced frictional
+        this.TEsaturFactor = 10; //max allowed TE in plots is ship.roll_period*ship.TEsaturFactor
+        this.Rspectrum = 0;
+        this.Nvel = 1; //Default value for steps in power reduction.
     }
 
     private boolean IntegrityCheck(){
@@ -49,6 +63,15 @@ public class Ship {
             }
         }
         return check;
+    }
+
+    public void setStepsInPowerReduction(long flag){
+        if(flag==1){
+            this.Nvel = 7;
+        } else { this.Nvel = 1; }
+        if (this.vessType == this.sailType){ //sailboat
+            this.Nvel = 1;
+        }
     }
 
     public long getVessType() {
@@ -91,4 +114,27 @@ public class Ship {
         return this.sailType;
     }
 
+    public double getRoll_period() {
+        return roll_period;
+    }
+
+    public double getBottomDraughtfactor() {
+        return bottomDraughtfactor;
+    }
+
+    public double getTEsaturFactor() {
+        return TEsaturFactor;
+    }
+
+    public double getRspectrum() {
+        return Rspectrum;
+    }
+
+    public double getNvel() {
+        return Nvel;
+    }
+
+    public void setVessType(long vessType) {
+        this.vessType = vessType;
+    }
 }
