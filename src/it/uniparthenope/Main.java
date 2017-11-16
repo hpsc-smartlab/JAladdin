@@ -15,5 +15,6 @@ public class Main {
         v.LoadData();
         v.CalculateParameters();
         System.out.println("Data loaded");
+
     }
 }
