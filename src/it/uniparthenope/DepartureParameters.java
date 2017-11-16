@@ -6,6 +6,7 @@ public class DepartureParameters {
     private long day;
     private long hour;
     private long min;
+    private long now_flag;
 
     public DepartureParameters(){
         //getting data from datetime_pars.json parsing
@@ -15,6 +16,7 @@ public class DepartureParameters {
         this.day = parser.getValueAsLong("day");
         this.hour = parser.getValueAsLong("hour");
         this.min = parser.getValueAsLong("min");
+        this.now_flag = 0;
     }
 
     public long getYear() {
@@ -35,5 +37,33 @@ public class DepartureParameters {
 
     public long getMin() {
         return min;
+    }
+
+    public long getNow_flag() {
+        return now_flag;
+    }
+
+    public void setYear(long year) {
+        this.year = year;
+    }
+
+    public void setMonth(long month) {
+        this.month = month;
+    }
+
+    public void setDay(long day) {
+        this.day = day;
+    }
+
+    public void setHour(long hour) {
+        this.hour = hour;
+    }
+
+    public void setMin(long min) {
+        this.min = min;
+    }
+
+    public void setNow_flag(long now_flag) {
+        this.now_flag = now_flag;
     }
 }
