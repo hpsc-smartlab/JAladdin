@@ -32,8 +32,7 @@ public class ExtremePoints {
         this.bbox_deltaLat_d = parser.getValueAsDouble("bbox_deltaLat_d");
         this.bbox_deltaLon_r = parser.getValueAsDouble("bbox_deltaLon_r");
         this.minCoastDist = parser.getValueAsLong("minCoastDist");
-        boolean check = RegionCheck();
-        if(!check){
+        if(!RegionCheck()){
             System.out.println("Extreme points integrity check violated.");
             System.exit(-1);
         }
