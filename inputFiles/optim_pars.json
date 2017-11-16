@@ -1,6 +1,6 @@
 {
   "_comment": "optimization parameters",
-  "intentional_spped_red": 1,
+  "intentional_speed_red": 1,
   "windModel": 12,
   "waveModel": 1
 }
