@@ -30,6 +30,25 @@ public class Ship {
         this.beam = parser.getValueAsDouble("beam(m)");
         this.draught = parser.getValueAsDouble("draught(m)");
         this.obs_roll_period = parser.getValueAsDouble("obs_roll_period(s)");
+        if(!IntegrityCheck()){
+            System.out.println("Ship integrity check violated.");
+            System.exit(-1);
+        }
+    }
+
+    private boolean IntegrityCheck(){
+        boolean check = true;
+        if(this.vessType != this.sailType){
+            if( this.P_max_hp <= 0 ||
+                    this.maxv <= 0 ||
+                    this.length <= 0 ||
+                    this.beam <=0 ||
+                    this.draught <= 0 ||
+                    this.obs_roll_period <= 0){
+                check = false;
+            }
+        }
+        return check;
     }
 
     public long getVessType() {
