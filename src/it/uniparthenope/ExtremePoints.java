@@ -19,6 +19,8 @@ public class ExtremePoints {
     private double UL_lon;
     private double DR_lat;
     private double DR_lon;
+    private String cycType;
+
 
     public ExtremePoints(){
         //getting data from extrema_pars.json parsing
@@ -36,6 +38,7 @@ public class ExtremePoints {
             System.out.println("Extreme points integrity check violated.");
             System.exit(-1);
         }
+        this.cycType = "dd"; //cycloid type: 'id' % 'inverted_descent'; 'dd' % 'direct_descent'
     }
 
     private boolean RegionCheck(){
@@ -112,5 +115,25 @@ public class ExtremePoints {
 
     public double getDR_lon() {
         return DR_lon;
+    }
+
+    public void setStart_lat(double start_lat) {
+        this.start_lat = start_lat;
+    }
+
+    public void setStart_lon(double start_lon) {
+        this.start_lon = start_lon;
+    }
+
+    public void setEnd_lat(double end_lat) {
+        this.end_lat = end_lat;
+    }
+
+    public void setEnd_lon(double end_lon) {
+        this.end_lon = end_lon;
+    }
+
+    public void setCycType(String cycType) {
+        this.cycType = cycType;
     }
 }
