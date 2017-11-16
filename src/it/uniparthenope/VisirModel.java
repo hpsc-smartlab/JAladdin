@@ -1,16 +1,25 @@
 package it.uniparthenope;
 
 public class VisirModel {
+    //input data
     private int bar_flag;
     private int timedep_flag;
     private Const constants;
     private Optim optim;
     private Ship ship;
+    private Visualization visualization;
     private SpatialGrid sGrid;
     private TemporalGrid tGrid;
+    private ExtremePoints extreme_pts;
+    private DepartureParameters dep_datetime;
+    private SafetyParameters safety;
+
+    //approssimating computation time
     private long startTime;
     private long estimatedTime;
 
+
+    //Constructor
     public VisirModel(int bar_flag, int timedep_flag){//Initialize with standard values defined in settings.m
         this.Tic();//Start the "timer"
 
@@ -33,6 +42,17 @@ public class VisirModel {
         this.ship = new Ship();
         this.sGrid = new SpatialGrid();
         this.tGrid = new TemporalGrid();
+        this.visualization = new Visualization();
+
+    }
+
+    public void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
+        this.extreme_pts = new ExtremePoints();
+        this.dep_datetime = new DepartureParameters();
+        this.ship.LoadVesselParameters();
+        this.safety = new SafetyParameters();
+        this.optim.OptimizationParameters();
+        this.visualization.VisualizationParameters();
     }
 
     private void Tic(){//Equivalent to MATLAB tic function
@@ -43,6 +63,7 @@ public class VisirModel {
         this.estimatedTime = System.nanoTime() - this.startTime;
     }
 
+    /*****************Getter methods*********************/
     public Const getConstants() {
         return this.constants;
     }
@@ -63,6 +84,22 @@ public class VisirModel {
         return this.tGrid;
     }
 
+    public ExtremePoints getExtreme_pts() {
+        return extreme_pts;
+    }
+
+    public SafetyParameters getSafety() {
+        return safety;
+    }
+
+    public DepartureParameters getDep_datetime() {
+        return dep_datetime;
+    }
+
+    public Visualization getVisualization() {
+        return visualization;
+    }
+
     public int getBar_flag() {
         return bar_flag;
     }
@@ -74,4 +111,6 @@ public class VisirModel {
     public long getEstimatedTime() {
         return estimatedTime;
     }
+
+    /******************************************************/
 }
