@@ -13,6 +13,7 @@ public class VisirModel {
     private ExtremePoints extreme_pts;
     private DepartureParameters dep_datetime;
     private SafetyParameters safety;
+    private EnvironmentalFields forcing;
 
     //approssimating computation time
     private long startTime;
@@ -54,6 +55,35 @@ public class VisirModel {
         this.optim.OptimizationParameters();
         this.visualization.VisualizationParameters();
     }
+
+    public void CalculateParameters(){//Set some parameters based on other parameters
+        this.ship.setStepsInPowerReduction(this.optim.getIntentional_speed_red());
+        this.sGrid.setInvStepFields(this.optim.getWaveModel());
+        this.forcing = new EnvironmentalFields(this.ship.getVessType(), this.ship.getSailType(),this.optim.getWindModel());
+        this.safety.setCriteria();
+        this.visualization.setData();
+        if(this.forcing.getAnalytic() == 1){
+            this.extreme_pts.setStart_lat(41.0);
+            this.extreme_pts.setStart_lon(10.0);
+            this.extreme_pts.setEnd_lat(40.5);
+            this.extreme_pts.setEnd_lon(11.0);
+            this.extreme_pts.setCycType("id");
+            this.dep_datetime.setYear(14);
+            this.dep_datetime.setMonth(1);
+            this.dep_datetime.setDay(1);
+            this.dep_datetime.setHour(0);
+            this.dep_datetime.setMin(0);
+            this.visualization.setEnv_forcing(1);
+            this.visualization.setWaypoint_info(0);
+            this.visualization.setSafegram(0);
+            this.visualization.setScientific_mode(1);
+            this.visualization.setH_s(1);
+            this.visualization.setCustomMax(Double.NaN);
+            this.ship.setVessType(1);
+            this.timedep_flag = 0;
+        }
+    }
+
 
     private void Tic(){//Equivalent to MATLAB tic function
         this.startTime = System.nanoTime();
