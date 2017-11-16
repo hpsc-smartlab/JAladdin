@@ -27,8 +27,8 @@ public class MyJSONParser {
         return value;
     }
 
-    public int getValueAsInt(String key){
-        int value = (int) object.get(key);
+    public long getValueAsLong(String key){
+        long value = (long) object.get(key);
         return value;
     }
 

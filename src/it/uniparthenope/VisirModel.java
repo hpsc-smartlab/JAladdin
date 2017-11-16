@@ -2,8 +2,8 @@ package it.uniparthenope;
 
 public class VisirModel {
     //input data
-    private int bar_flag;
-    private int timedep_flag;
+    private long bar_flag;
+    private long timedep_flag;
     private Const constants;
     private Optim optim;
     private Ship ship;
@@ -20,7 +20,7 @@ public class VisirModel {
 
 
     //Constructor
-    public VisirModel(int bar_flag, int timedep_flag){//Initialize with standard values defined in settings.m
+    public VisirModel(long bar_flag, long timedep_flag){//Initialize with standard values defined in settings.m
         this.Tic();//Start the "timer"
 
         //bar_flag = 1: fresh compution of edges not crossing coastline (mode 1 of GMD-D paper)
@@ -100,11 +100,11 @@ public class VisirModel {
         return visualization;
     }
 
-    public int getBar_flag() {
+    public long getBar_flag() {
         return bar_flag;
     }
 
-    public int getTimedep_flag() {
+    public long getTimedep_flag() {
         return timedep_flag;
     }
 

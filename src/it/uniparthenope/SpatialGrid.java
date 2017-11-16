@@ -1,11 +1,11 @@
 package it.uniparthenope;
 
 public class SpatialGrid {
-    private int numberOfNeighbors;
-    private int numberOfShortestPaths;
+    private long numberOfNeighbors;
+    private long numberOfShortestPaths;
     private double nodesLargeN;
-    private int invStepFields;
-    private int minNoGridPoints;
+    private long invStepFields;
+    private long minNoGridPoints;
 
     public SpatialGrid(){
         this.numberOfNeighbors = 24;
@@ -19,39 +19,20 @@ public class SpatialGrid {
         return nodesLargeN;
     }
 
-    public int getInvStepFields() {
+    public long getInvStepFields() {
         return invStepFields;
     }
 
-    public int getMinNoGridPoints() {
+    public long getMinNoGridPoints() {
         return minNoGridPoints;
     }
 
-    public int getNumberOfNeighbors() {
+    public long getNumberOfNeighbors() {
         return numberOfNeighbors;
     }
 
-    public int getNumberOfShortestPaths() {
+    public long getNumberOfShortestPaths() {
         return numberOfShortestPaths;
     }
 
-    public void setInvStepFields(int invStepFields) {
-        this.invStepFields = invStepFields;
-    }
-
-    public void setMinNoGridPoints(int minNoGridPoints) {
-        this.minNoGridPoints = minNoGridPoints;
-    }
-
-    public void setNodesLargeN(double nodesLargeN) {
-        this.nodesLargeN = nodesLargeN;
-    }
-
-    public void setNumberOfNeighbors(int numberOfNeighbors) {
-        this.numberOfNeighbors = numberOfNeighbors;
-    }
-
-    public void setNumberOfShortestPaths(int numberOfShortestPaths) {
-        this.numberOfShortestPaths = numberOfShortestPaths;
-    }
 }

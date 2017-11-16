@@ -2,11 +2,11 @@ package it.uniparthenope;
 
 public class Optim {
     //from settings.m
-    private int relocAnlsCode;//code of the "analysis" of the  relocatable wave model
+    private long relocAnlsCode;//code of the "analysis" of the  relocatable wave model
 
-    private int intentional_speed_red;
-    private int windModel;
-    private int waveModel;
+    private long intentional_speed_red;
+    private long windModel;
+    private long waveModel;
 
     public Optim(){
         this.relocAnlsCode = 20;
@@ -15,24 +15,24 @@ public class Optim {
     public void OptimizationParameters(){
         //getting data from optim_pars.json parsing
         MyJSONParser parser = new MyJSONParser("optim_pars.json");
-        this.intentional_speed_red = parser.getValueAsInt("intentional_speed_red");
-        this.windModel = parser.getValueAsInt("windModel");
-        this.waveModel = parser.getValueAsInt("waveModel");
+        this.intentional_speed_red = parser.getValueAsLong("intentional_speed_red");
+        this.windModel = parser.getValueAsLong("windModel");
+        this.waveModel = parser.getValueAsLong("waveModel");
     }
 
-    public int getRelocAnlsCode() {
+    public long getRelocAnlsCode() {
         return relocAnlsCode;
     }
 
-    public int getIntentional_speed_red() {
+    public long getIntentional_speed_red() {
         return intentional_speed_red;
     }
 
-    public int getWindModel() {
+    public long getWindModel() {
         return windModel;
     }
 
-    public int getWaveModel() {
+    public long getWaveModel() {
         return waveModel;
     }
 

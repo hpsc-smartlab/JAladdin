@@ -10,7 +10,7 @@ public class ExtremePoints {
     private double bbox_deltaLon_l;
     private double bbox_deltaLat_d;
     private double bbox_deltaLon_r;
-    private double minCoastDist;
+    private long minCoastDist;
 
     public ExtremePoints(){
         //getting data from extrema_pars.json parsing
@@ -23,7 +23,7 @@ public class ExtremePoints {
         this.bbox_deltaLon_l = parser.getValueAsDouble("bbox_deltaLon_l");
         this.bbox_deltaLat_d = parser.getValueAsDouble("bbox_deltaLat_d");
         this.bbox_deltaLon_r = parser.getValueAsDouble("bbox_deltaLon_r");
-        this.minCoastDist = parser.getValueAsDouble("minCoastDist");
+        this.minCoastDist = parser.getValueAsLong("minCoastDist");
     }
 
     public double getStart_lat() {
@@ -58,7 +58,7 @@ public class ExtremePoints {
         return bbox_deltaLon_r;
     }
 
-    public double getMinCoastDist() {
+    public long getMinCoastDist() {
         return minCoastDist;
     }
 

@@ -1,39 +1,39 @@
 package it.uniparthenope;
 
 public class DepartureParameters {
-    private int year;
-    private int month;
-    private int day;
-    private int hour;
-    private int min;
+    private long year;
+    private long month;
+    private long day;
+    private long hour;
+    private long min;
 
     public DepartureParameters(){
         //getting data from datetime_pars.json parsing
         MyJSONParser parser = new MyJSONParser("datetime_pars.json");
-        this.year = parser.getValueAsInt("year");
-        this.month = parser.getValueAsInt("month");
-        this.day = parser.getValueAsInt("day");
-        this.hour = parser.getValueAsInt("hour");
-        this.min = parser.getValueAsInt("min");
+        this.year = parser.getValueAsLong("year");
+        this.month = parser.getValueAsLong("month");
+        this.day = parser.getValueAsLong("day");
+        this.hour = parser.getValueAsLong("hour");
+        this.min = parser.getValueAsLong("min");
     }
 
-    public int getYear() {
+    public long getYear() {
         return year;
     }
 
-    public int getMonth() {
+    public long getMonth() {
         return month;
     }
 
-    public int getDay() {
+    public long getDay() {
         return day;
     }
 
-    public int getHour() {
+    public long getHour() {
         return hour;
     }
 
-    public int getMin() {
+    public long getMin() {
         return min;
     }
 }

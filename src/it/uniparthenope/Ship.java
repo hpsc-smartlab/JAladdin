@@ -2,12 +2,12 @@ package it.uniparthenope;
 
 public class Ship {
     /*defined in settings.m*/
-    private int sailType;
+    private long sailType;
     private double etaEngine;
     /***********************/
-    private int vessType;
-    private int sailClass;
-    private int P_max_hp;
+    private long vessType;
+    private long sailClass;
+    private long P_max_hp;
     private double maxv;
     private double length;
     private double beam;
@@ -22,25 +22,25 @@ public class Ship {
     public void LoadVesselParameters(){
         //getting data from ship_pars.json parsing
         MyJSONParser parser = new MyJSONParser("ship_pars.json");
-        this.vessType = parser.getValueAsInt("vessType");
-        this.sailClass = parser.getValueAsInt("sailClass");
-        this.P_max_hp = parser.getValueAsInt("P_max_hp");
+        this.vessType = parser.getValueAsLong("vessType");
+        this.sailClass = parser.getValueAsLong("sailClass");
+        this.P_max_hp = parser.getValueAsLong("P_max_hp");
         this.maxv = parser.getValueAsDouble("maxv");
-        this.length = parser.getValueAsDouble("length");
-        this.beam = parser.getValueAsDouble("beam");
-        this.draught = parser.getValueAsDouble("draught");
-        this.obs_roll_period = parser.getValueAsDouble("obs_roll_period");
+        this.length = parser.getValueAsDouble("length(m)");
+        this.beam = parser.getValueAsDouble("beam(m)");
+        this.draught = parser.getValueAsDouble("draught(m)");
+        this.obs_roll_period = parser.getValueAsDouble("obs_roll_period(s)");
     }
 
-    public int getVessType() {
+    public long getVessType() {
         return vessType;
     }
 
-    public int getSailClass() {
+    public long getSailClass() {
         return sailClass;
     }
 
-    public int getP_max_hp() {
+    public long getP_max_hp() {
         return P_max_hp;
     }
 
@@ -68,15 +68,8 @@ public class Ship {
         return etaEngine;
     }
 
-    public double getSailType(){
+    public long getSailType(){
         return this.sailType;
     }
 
-    public void setEtaEngine(double etaEngine) {
-        this.etaEngine = etaEngine;
-    }
-
-    public void setSailType(int sailType){
-        this.sailType = sailType;
-    }
 }

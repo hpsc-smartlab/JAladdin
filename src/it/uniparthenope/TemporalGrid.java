@@ -2,7 +2,7 @@ package it.uniparthenope;
 
 public class TemporalGrid {
     private double Dt;
-    private int minNt;
+    private long minNt;
 
     public TemporalGrid(){
         this.Dt = 1.00;//h
@@ -13,15 +13,8 @@ public class TemporalGrid {
         return Dt;
     }
 
-    public void setDt(double dt) {
-        Dt = dt;
-    }
-
-    public int getMinNt() {
+    public long getMinNt() {
         return minNt;
     }
 
-    public void setMinNt(int minNt) {
-        this.minNt = minNt;
-    }
 }

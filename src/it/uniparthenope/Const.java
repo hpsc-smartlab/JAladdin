@@ -11,7 +11,7 @@ public class Const {
     private double missValue;
     private double rho_water;
     private double nu_water;
-    private Integer int_precision;
+    private long int_precision;
     private double twentyfour;
     private double twelve;
     private double N2kN;
@@ -85,7 +85,7 @@ public class Const {
         return twentyfour;
     }
 
-    public Integer getInt_precision() {
+    public long getInt_precision() {
         return int_precision;
     }
 }
