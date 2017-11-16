@@ -1,4 +1,5 @@
 <component name="libraryTable">
+
   <library name="json-simple-1.1.1">
     <CLASSES>
       <root url="jar://$USER_HOME$/Desktop/json-simple-1.1.1.jar!/" />
@@ -6,4 +7,5 @@
     <JAVADOC />
     <SOURCES />
   </library>
+
 </component>
