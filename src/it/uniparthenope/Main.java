@@ -11,19 +11,19 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        //VisirModel v = new VisirModel(2,2);//Same input provided for testing .m files
-        //v.LoadData();
-        try {
-            InputStream stream = new FileInputStream("inputFiles/graph/freeedges_DB.dat.csv");
-            MyCSVParser parser = new MyCSVParser(stream);
-            ArrayList<Double> values = parser.getDoubleValues();
-            for(Double value: values){
-                System.out.println("Element: "+value);
-            }
-
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        VisirModel v = new VisirModel(2,2);//Same input provided for testing .m files
+        v.LoadData();
+//        try {
+//            InputStream stream = new FileInputStream("inputFiles/graph/freeedges_DB.dat.csv");
+//            MyCSVParser parser = new MyCSVParser(stream);
+//            ArrayList<Double> values = parser.getDoubleValues();
+//            for(Double value: values){
+//                System.out.println("Element: "+value);
+//            }
+//
+//        } catch (Exception e){
+//            e.printStackTrace();
+//        }
         System.out.println("Data loaded");
     }
 }
