@@ -14,6 +14,7 @@ public class Main {
         VisirModel v = new VisirModel(2,2);//Same input provided for testing .m files
         v.LoadData();
         v.CalculateParameters();
+        v.vessel_Response();
         System.out.println("Data loaded");
 
     }
