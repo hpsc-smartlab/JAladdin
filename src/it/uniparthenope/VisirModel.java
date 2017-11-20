@@ -1,5 +1,8 @@
 package it.uniparthenope;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 public class VisirModel {
     //input data
     private long bar_flag;
@@ -14,6 +17,12 @@ public class VisirModel {
     private DepartureParameters dep_datetime;
     private SafetyParameters safety;
     private EnvironmentalFields forcing;
+    private Double[][] vel_LUT;
+    private ArrayList<Double> H_array_m;
+    private Double minWind;
+    private Double maxWind;
+    private Double polar_twa;
+    private Double polar_tws;
 
     //approssimating computation time
     private long startTime;
@@ -84,6 +93,71 @@ public class VisirModel {
         }
     }
 
+    private class Output{
+        public ArrayList<Double> H_array_m;
+        public Double[][] vel_LUT;
+    }
+
+    private void ship_Model(){//called from vessel_Response.m, ship_model.m implementation
+        //Look-up table for involuntary ship speed reduction in waves.
+        this.ship.setFn_max(this.constants.getMs2kts(), this.constants.getG0());
+        //LUT independent variables:
+        long Nh = 25; //40
+        long Nl = 40; //30
+        double Hmax = 8.0; //[m]
+        long ih2 = (long) Math.floor(Nh/2);
+        long il2 = (long) Math.floor(Nl/2);
+
+        //Significant wave height
+        //Adding to H_array_m (Nh-1) elements between 10^-1 and 10^log10(Hmax)
+        ArrayList<Double> H_array_m = Utility.logspace(-1.0, Hmax, Nh-1);
+        H_array_m.add(0, 0.0);//adding 0 at first element of H_array_m
+        //preallocations:
+        Double[][] vel_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
+        Double[][] Rc_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
+        Double[][] Raw_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
+        ArrayList<Double> P_level_thro = new ArrayList<Double>();
+        Double max = Collections.max(this.ship.getP_level_hp());
+        for(Double element : this.ship.getP_level_hp()){
+            P_level_thro.add((100*element) / max);
+        }
+        //pars for v_Bowditch:
+        Double m2ft = 3.2808399;
+        Double a3_ref = 0.0248; //[kts/ ft^2]
+        Double a2_ref = 0.0165; //[kts/ ft^2]
+        Double a1_ref = 0.0083; //[kts/ ft^2]
+        Double v0_ref = 18.0; //kts
+        //LUT computation
+        for(int ih = 1; ih< Nh; ih++){
+            this.ship.ship_resistance(H_array_m.get(ih), this.constants);
+            for(int j = 1; j<this.ship.getP_level_hp().size(); j++){
+                vel_LUT[ih][j] = this.ship.getV_out_kts().get(j);
+                Rc_LUT[ih][j] = this.ship.getR_c().get(j);
+                Raw_LUT[ih][j] = this.ship.getR_aw().get(j);
+                //v_Bowditch(ih)= max( 0, vel_LUT(1,1)/v0_ref* ( v0_ref - a2_ref *  (m2ft*H_array_m(ih)).^2) );
+            }
+        }
+        System.out.println("5");
+        this.ship.ship_resistance(0.0, this.constants);
+        ArrayList<Double> v0 = this.ship.getV_out_kts();
+        ArrayList<Double> Rc0 = this.ship.getR_c();
+        ArrayList<Double> Raw0 = this.ship.getR_aw();
+//        for ip=1: numel(P_level_hp)
+//          disp([ min(vel_LUT(:,ip)), max(vel_LUT(:,ip)) ])
+//        end
+        //graphical output not implemented.
+        this.H_array_m = H_array_m;
+        this.vel_LUT = vel_LUT;
+    }
+
+    public void vessel_Response(){//vessel_Response.m implementation
+        this.ship.shipPowerLevels();
+        this.ship_Model();
+        this.maxWind = Double.NaN;
+        this.minWind = Double.NaN;
+        this.polar_twa = Double.NaN;
+        this.polar_tws = Double.NaN;
+    }
 
     private void Tic(){//Equivalent to MATLAB tic function
         this.startTime = System.nanoTime();
@@ -140,6 +214,14 @@ public class VisirModel {
 
     public long getEstimatedTime() {
         return estimatedTime;
+    }
+
+    public Double[][] getVel_LUT() {
+        return vel_LUT;
+    }
+
+    public ArrayList<Double> getH_array_m() {
+        return H_array_m;
     }
 
     /******************************************************/
