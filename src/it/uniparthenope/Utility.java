@@ -78,8 +78,6 @@ public class Utility {
         Double b= 10*x0;
         //Checking initial conditions:
         //Function evaluations in a and b
-        System.out.println("Parameters:");
-        System.out.println("k3 = "+k3+", k2= "+k2+", k0= "+k0+"n_exp= "+n_exp+", v_max_ms= "+ v_max_ms+",x0= "+x0);
         Double fa = k3 * Math.pow(a, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(a, 2) + k0;//Function evaluation in 'a'
         Double fb = k3 * Math.pow(b, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(b, 2) + k0;//Function evaluation in 'b'
         Double zero = Double.NaN;
@@ -92,34 +90,13 @@ public class Utility {
         }
 
         return zero;
-//        Double deltaX = 0.001;
-//        Double minD = -2.0*x0;
-//        Double maxD = 2.0*x0;
-        //System.out.println("x0 "+x0);
-        //Domain definition
-//        ArrayList<Double> domain = new ArrayList<Double>();
-//        for(Double xval = minD; xval <= maxD; xval+=deltaX){
-//            domain.add(xval);
-//        }
-//        //Function evaluation
-//        ArrayList<Double> values = new ArrayList<Double>();
-//        for(Double element : domain){
-//            Double value = k3 * Math.pow(element, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(element, 2) + k0;
-//        }
-        //function zero
-//        Double zero = Double.NaN;
-//        boolean found = false;
-//        int i = 0;
-//        while((!found) && (i<values.size()-1)){
-//            if(Math.abs(values.get(i))<=0.01){
-//                found = true;
-//                zero = domain.get(i);
-//            }
-//            i++;
-//        }
+    }
 
-//        return zero;
-
+    public static Double fzero_secant(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
+        //This function return zeros of the function defined in ship_resitance.m file
+        //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
+        //This function uses secant method to find function root.
+        return secant(x0, (x0+ 0.5), k3, k2, k0, n_exp, v_max_ms);
     }
 
     private static Double bisection(Double a, Double b, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
@@ -140,4 +117,31 @@ public class Utility {
         }
     }
 
+    private static Double secant(Double x0, Double x1, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
+        //Solve f(x) = 0 with secant method.
+        Double delta_ass = 0.001;//Max absolute error threshold
+        int kmax = 10000; //Max iterations number
+        int k = 1;
+        //Initial xk and xk+1
+        Double xk = x0;
+        Double xk1 = x1;
+        Double root = xk;
+        //Function evaluation in xk and xk+1
+        Double fxk = k3 * Math.pow(xk, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
+        Double fxk1 = k3 * Math.pow(xk1, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk1, 2) + k0;
+        //line gradient approssimation
+        Double pxk = (fxk-fxk1)/(xk-xk1);
+        //k-step correction
+        Double ck = -(fxk/pxk);
+        while( (ck > delta_ass*Math.ulp(1.0)) && (k<=kmax) ){//stop criteria
+            xk1 = xk;
+            fxk1 = fxk;
+            xk = xk + ck;
+            fxk = k3 * Math.pow(xk, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
+            pxk = (fxk-fxk1)/(xk-xk1);
+            ck = -(fxk/pxk);
+            k++;
+        }
+        return root;
+    }
 }
