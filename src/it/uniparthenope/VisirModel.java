@@ -137,8 +137,7 @@ public class VisirModel {
                 //v_Bowditch(ih)= max( 0, vel_LUT(1,1)/v0_ref* ( v0_ref - a2_ref *  (m2ft*H_array_m(ih)).^2) );
             }
         }
-        System.out.println("5");
-        this.ship.ship_resistance(0.0, this.constants);
+        this.ship.ship_resistance(0.0,this.constants);
         ArrayList<Double> v0 = this.ship.getV_out_kts();
         ArrayList<Double> Rc0 = this.ship.getR_c();
         ArrayList<Double> Raw0 = this.ship.getR_aw();
