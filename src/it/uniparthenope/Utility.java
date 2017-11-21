@@ -1,6 +1,6 @@
 package it.uniparthenope;
 
-import javax.net.ssl.SSLContext;
+
 import java.util.ArrayList;
 
 public class Utility {
@@ -119,8 +119,8 @@ public class Utility {
 
     private static Double secant(Double x0, Double x1, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
         //Solve f(x) = 0 with secant method.
-        Double delta_ass = 0.001;//Max absolute error threshold
-        int kmax = 10000; //Max iterations number
+        Double delta_ass = 0.0000001;//Max absolute error threshold
+        int kmax = 10000000; //Max iterations number
         int k = 1;
         //Initial xk and xk+1
         Double xk = x0;
