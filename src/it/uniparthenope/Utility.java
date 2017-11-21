@@ -1,5 +1,6 @@
 package it.uniparthenope;
 
+import javax.net.ssl.SSLContext;
 import java.util.ArrayList;
 
 public class Utility {
@@ -17,17 +18,16 @@ public class Utility {
 
     public static ArrayList<Double> logspace(double min, double max, long n){
         //generate an arraylist of n logaritmically spaced elements between min and max (base 10)
-        double logBase = 10;
-        double logMin = Math.log10(min);
-        double logMax = Math.log10(max);
-        double delta = (logMax - logMin) / n;
-        double accDelta = 0;
-        ArrayList<Double> v = new ArrayList<Double>();
-        for(long i = 0; i <= n; ++i){
-            v.add(Math.pow(logBase, logMin+accDelta));
-            accDelta += delta;
+        Double step = (Math.abs(max)-Math.abs(min))/(n-1);
+        Double base = 10.0;
+        Double accDelta = step;
+        ArrayList<Double> log = new ArrayList<>();
+        for(int i =0; i<n; i++){
+            Double val = Math.pow(base,accDelta);
+            log.add(val);
+            accDelta+=step;
         }
-        return v;
+        return log;
     }
 
     public static Double[][] zeros(int rows, int cols){
@@ -68,35 +68,76 @@ public class Utility {
     public static Double fzero(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
         //This function return zeros of the function defined in ship_resitance.m file
         //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
-        //The function domain is defined between -2*x0 and +2*x0 where x0 is the starting point (v_search)
+        //The function domain is defined between -10*x0 and +10*x0 where x0 is the starting point (v_search)
+        //This function uses bisection method to find function root. It was used because if initial
+        //condition are satisfied, always converge (global method)
 
-        Double deltaX = 0.001;
-        Double minD = -2.0*x0;
-        Double maxD = 2.0*x0;
-        //Domain definition
-        ArrayList<Double> domain = new ArrayList<Double>();
-        for(Double xval = minD; xval <= maxD; xval+=deltaX){
-            domain.add(xval);
-        }
-        //Function evaluation
-        ArrayList<Double> values = new ArrayList<Double>();
-        for(Double element : domain){
-            Double value = k3 * Math.pow(element, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(element, 2) + k0;
-            values.add(value);
-        }
-        //function zero
+        //Initial conditions: f(x) is a continous function in [a,b]
+        //sign(f(a)) != sign(f(b))
+        Double a = -10*x0;
+        Double b= 10*x0;
+        //Checking initial conditions:
+        //Function evaluations in a and b
+        System.out.println("Parameters:");
+        System.out.println("k3 = "+k3+", k2= "+k2+", k0= "+k0+"n_exp= "+n_exp+", v_max_ms= "+ v_max_ms+",x0= "+x0);
+        Double fa = k3 * Math.pow(a, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(a, 2) + k0;//Function evaluation in 'a'
+        Double fb = k3 * Math.pow(b, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(b, 2) + k0;//Function evaluation in 'b'
         Double zero = Double.NaN;
-        boolean found = false;
-        int i = 0;
-        while((!found) && (i<values.size()-1)){
-            if(values.get(i)==0){
-                found = true;
-                zero = domain.get(i);
-            }
-            i++;
+        if((fa*fb)<0){//if sign(fa) != sign(fb)
+            System.out.println("OK! Initial conditions satisfied! fa="+fa+", fb= "+fb);
+            zero = bisection(a,b,k3,k2,k0,n_exp,v_max_ms);
+        } else{
+            System.out.println("Initial conditions not satisfied! fa="+fa+", fb= "+fb);
+            System.exit(-1);
         }
-        System.out.println("zero="+zero);
+
         return zero;
+//        Double deltaX = 0.001;
+//        Double minD = -2.0*x0;
+//        Double maxD = 2.0*x0;
+        //System.out.println("x0 "+x0);
+        //Domain definition
+//        ArrayList<Double> domain = new ArrayList<Double>();
+//        for(Double xval = minD; xval <= maxD; xval+=deltaX){
+//            domain.add(xval);
+//        }
+//        //Function evaluation
+//        ArrayList<Double> values = new ArrayList<Double>();
+//        for(Double element : domain){
+//            Double value = k3 * Math.pow(element, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(element, 2) + k0;
+//        }
+        //function zero
+//        Double zero = Double.NaN;
+//        boolean found = false;
+//        int i = 0;
+//        while((!found) && (i<values.size()-1)){
+//            if(Math.abs(values.get(i))<=0.01){
+//                found = true;
+//                zero = domain.get(i);
+//            }
+//            i++;
+//        }
+
+//        return zero;
+
+    }
+
+    private static Double bisection(Double a, Double b, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
+        //Solve f(x) = 0 with recoursive bisection method.
+        Double delta_ass = 0.001;//Max absolute error threshold
+        if(Math.abs((b-a)) <= (delta_ass + Math.max(Math.abs(a),Math.abs(b)))){//base case
+            return (a+b)/2;//Function root is approssimated with the middle point of the range
+        }
+        else{//recoursive function calls
+            Double fa = k3 * Math.pow(a, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(a, 2) + k0;//Function evaluation in 'a'
+            Double meanPoint = (a+b)/2;//Mean point of the range [a, b]
+            Double fmean = k3 * Math.pow(meanPoint, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(meanPoint, 2) + k0; // Function evaluation in 'meanPoint'
+            if((fa*fmean)<0){//if sign(fa) != sign(fmean)
+                return bisection(a, meanPoint, k3, k2, k0, n_exp, v_max_ms);//Root is in the range [a, meanPoint]
+            }else {
+                return bisection(meanPoint, b, k3, k2, k0, n_exp, v_max_ms);//Root is in the range [meanPoint, b]
+            }
+        }
     }
 
 }
