@@ -129,7 +129,6 @@ public class Ship {
         }
         Double P_max_w = constants.getHp2W() * this.P_max_hp;
         Double v_max_ms = this.maxv / constants.getMs2kts();
-
         //COMPUTATIONS:
         //wave added resistance: P=c2ca* v^2
         Double xi = 0.5 * wHeight; //xi= wave amplitude = 1/2 wave height
@@ -151,7 +150,6 @@ public class Ship {
         if(n_exp < 0){
             System.out.println("Residual resistance decreasing with vessel speed!");
         }
-
         Double v_search = v_max_ms;
         this.v_out_kts = new ArrayList<Double>();
         this.R_c = new ArrayList<Double>();
@@ -179,7 +177,7 @@ public class Ship {
                 case "fzero":
                     break;
             }*/
-            Double v_out_ms = Utility.fzero(k3,k2,k0,n_exp,v_max_ms,v_search);
+            Double v_out_ms = Utility.fzero_secant(k3,k2,k0,n_exp,v_max_ms,v_search);
             v_search = v_out_ms;
             this.v_out_kts.add(ip,constants.getMs2kts()*v_out_ms);
 
