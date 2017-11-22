@@ -1,7 +1,11 @@
 package it.uniparthenope;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Scanner;
 
 public class VisirModel {
     //input data
@@ -23,6 +27,10 @@ public class VisirModel {
     private Double maxWind;
     private Double polar_twa;
     private Double polar_tws;
+    private ArrayList<Double> lon_ext;
+    private ArrayList<Double> lat_ext;
+    private ArrayList<Double> lon_int;
+    private ArrayList<Double> lat_int;
 
     //approssimating computation time
     private long startTime;
@@ -53,7 +61,10 @@ public class VisirModel {
         this.sGrid = new SpatialGrid();
         this.tGrid = new TemporalGrid();
         this.visualization = new Visualization();
-
+        this.lon_ext = new ArrayList<>();
+        this.lon_int = new ArrayList<>();
+        this.lat_ext = new ArrayList<>();
+        this.lat_int = new ArrayList<>();
     }
 
     public void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
@@ -156,6 +167,134 @@ public class VisirModel {
         this.minWind = Double.NaN;
         this.polar_twa = Double.NaN;
         this.polar_tws = Double.NaN;
+    }
+
+    public void Grid_definition(){//Grid_definition.m implementation
+        String freeedges_DB_filename = "freeedges_DB.dat";
+        String freenodes_DB_filename = "freeNodes_DB.dat";
+        // Bounding boxes:
+        // there are 2 grids:
+        // a reference grid (read from a DB) and an inset grid (defined by the user via a namelist)
+        // following coordinate components may refer to each of them, depending on bar_flag (s. if-loop below):
+        if(this.forcing.getAnalytic() == 1){
+            this.extreme_pts.setBbox_deltaLat_u(0.1);
+            this.extreme_pts.setBbox_deltaLon_l(0.1);
+            this.extreme_pts.setBbox_deltaLat_d(0.1);
+            this.extreme_pts.setBbox_deltaLon_r(0.1);
+        }
+        Double lat_max = this.extreme_pts.getBbox_deltaLat_u() + Math.max(this.extreme_pts.getStart_lat(), this.extreme_pts.getEnd_lat());
+        Double lon_min = this.extreme_pts.getBbox_deltaLon_l() + Math.min(this.extreme_pts.getStart_lon(), this.extreme_pts.getEnd_lon());
+        Double lat_min = this.extreme_pts.getBbox_deltaLat_d() + Math.min(this.extreme_pts.getStart_lat(), this.extreme_pts.getEnd_lat());
+        Double lon_max = this.extreme_pts.getBbox_deltaLon_r() + Math.max(this.extreme_pts.getStart_lon(), this.extreme_pts.getEnd_lon());
+
+        if(this.bar_flag == 1) {//fresh DB computation
+            //bounding box of reference grid from namelist:
+            this.sGrid.setDB_bbox__lat_max(lat_max);
+            this.sGrid.setDB_bbox__lon_min(lon_min);
+            this.sGrid.setDB_bbox__lat_min(lat_min);
+            this.sGrid.setDB_bbox__lon_max(lon_max);
+        } else if(this.bar_flag == 2){ //re-use DB information
+            //bounding box of reference grid from free-edges DB header file:
+            this.sGrid.setDB_bbox__lat_max(this.extreme_pts.getUL_lat());
+            this.sGrid.setDB_bbox__lon_min(this.extreme_pts.getUL_lon());
+            this.sGrid.setDB_bbox__lat_min(this.extreme_pts.getDR_lat());
+            this.sGrid.setDB_bbox__lon_max(this.extreme_pts.getDR_lon());
+            //bounding box of inset grid from namelist :
+            this.sGrid.setBbox__lat_max(lat_max);
+            this.sGrid.setBbox__lon_min(lon_min);
+            this.sGrid.setBbox__lat_min(lat_min);
+            this.sGrid.setBbox__lon_max(lon_max);
+        }
+
+        //Coastline:
+        this.readout_coast();
+        ArrayList<Double> y_coast = new ArrayList<>();
+        ArrayList<Double> x_coast = new ArrayList<>();
+        for(Double element : this.lat_int){//y_islands
+            y_coast.add(element);
+        }
+        y_coast.add(Double.NaN);
+        for(Double element : this.lat_ext){//y_continent
+            y_coast.add(element);
+        }
+        for(Double element : this.lon_int){//x_islands
+            x_coast.add(element);
+        }
+        x_coast.add(Double.NaN);
+        for(Double element : this.lon_ext){//x_continent
+            x_coast.add(element);
+        }
+
+        //Bathymetry:
+        //read-out database:
+        int bathy_code = 1;
+        //#GM: here add code of compare_bathys if needed
+    }
+
+    private void readout_coast(){
+        //reads out coastline (_ext) and islands (_int) database - (source:  GSHHS via MEDSLIK-II)
+        //This file contains a list of geographical coordinates of successive
+        //points on the digitised coastline in a format similar to that used for
+        //blanking files by the SURFER software. The format of each line in this
+        //file is not important as long as adjacent entries are separated by a
+        //space or comma. The first line contains the total number of closed
+        //contours, counting all islands as well as the external coastline. The
+        //second line contains the number of points on the external coastline
+        //followed by the digit "0". There follows a list of longitudes and
+        //latitudes of successive points on the external coastline, in decimal
+        //degrees. These should be specified with adequate precision and it is
+        //suggested that at least format (2f11.5) be used but for finely resolved
+        //coastline maps the format (2f12.6) would be preferred. The external
+        //coast must be described anti-clockwise and the last point must be
+        //identical with the first. After this each island is listed: on the first
+        //line the number of points on the island's coast and the digit "1", then
+        //a list of longitudes and latitudes of points, this time described
+        //clockwise. Again, for each island, the first point must be repeated as
+        //the last one.
+        try{
+            int Nexternal = 0;
+            ArrayList<Double> lat_tmp = new ArrayList<>();
+            ArrayList<Double> lon_tmp = new ArrayList<>();
+            //Opening file
+            FileReader file = new FileReader("inputFiles/coast/medf.map");
+            Scanner coastFile = new Scanner(file);
+            //first line has a single column (i don't need)
+            if(coastFile.hasNextInt()){
+                coastFile.nextInt();
+            }
+            //in the second line, i need only 1st element, the 2nd element is discharged
+            if(coastFile.hasNextInt()){
+                Nexternal = coastFile.nextInt();
+                int x = coastFile.nextInt();
+            }
+            int varType = 0;
+            int totalLines = 0;//Total file lines (starting from 3rd line)
+            while(coastFile.hasNext()){//while EOF
+                if(varType%2==0){//1st element
+                    lon_tmp.add(coastFile.nextDouble());//adding in temp longitude array
+                }
+                else{//2nd element
+                    lat_tmp.add(coastFile.nextDouble());//adding in temp latitude array
+                    totalLines++;
+                }
+                varType++;
+            }
+            for(int i=0;i<totalLines;i++){
+                if(i<Nexternal){//adding in external coastline logitude and latitude array
+                    //external coastline:  anti-clockwise and the last point is identical with the first
+                    lon_ext.add(lon_tmp.get(i));
+                    lat_ext.add(lat_tmp.get(i));
+                }else {
+                    //internal coastlines:  for each island, clockwise and the last point is identical with the first
+                    lon_int.add(lon_tmp.get(i));
+                    lat_int.add(lat_tmp.get(i));
+                }
+            }
+            //closing file
+            file.close();
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void Tic(){//Equivalent to MATLAB tic function
