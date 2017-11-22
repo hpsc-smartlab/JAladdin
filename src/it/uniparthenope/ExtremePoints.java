@@ -136,4 +136,20 @@ public class ExtremePoints {
     public void setCycType(String cycType) {
         this.cycType = cycType;
     }
+
+    public void setBbox_deltaLat_u(double bbox_deltaLat_u) {
+        this.bbox_deltaLat_u = bbox_deltaLat_u;
+    }
+
+    public void setBbox_deltaLon_l(double bbox_deltaLon_l) {
+        this.bbox_deltaLon_l = bbox_deltaLon_l;
+    }
+
+    public void setBbox_deltaLat_d(double bbox_deltaLat_d) {
+        this.bbox_deltaLat_d = bbox_deltaLat_d;
+    }
+
+    public void setBbox_deltaLon_r(double bbox_deltaLon_r) {
+        this.bbox_deltaLon_r = bbox_deltaLon_r;
+    }
 }
