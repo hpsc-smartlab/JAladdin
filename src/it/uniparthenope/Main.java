@@ -15,6 +15,7 @@ public class Main {
         v.LoadData();
         v.CalculateParameters();
         v.vessel_Response();
+        v.Grid_definition();
         System.out.println("Data loaded");
 
     }
