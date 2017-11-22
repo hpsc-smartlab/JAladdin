@@ -6,6 +6,14 @@ public class SpatialGrid {
     private double nodesLargeN;
     private long invStepFields;
     private long minNoGridPoints;
+    private double DB_bbox__lat_max;
+    private double DB_bbox__lon_min;
+    private double DB_bbox__lat_min;
+    private double DB_bbox__lon_max;
+    private double bbox__lat_max;
+    private double bbox__lon_min;
+    private double bbox__lat_min;
+    private double bbox__lon_max;
 
     public SpatialGrid(){
         this.numberOfNeighbors = 24;
@@ -19,6 +27,38 @@ public class SpatialGrid {
         if(flag == 2){
             this.invStepFields = 60; //inverse grid size [deg^{-1}]
         }
+    }
+
+    public void setDB_bbox__lat_max(double DB_bbox__lat_max) {
+        this.DB_bbox__lat_max = DB_bbox__lat_max;
+    }
+
+    public void setDB_bbox__lon_min(double DB_bbox__lon_min) {
+        this.DB_bbox__lon_min = DB_bbox__lon_min;
+    }
+
+    public void setDB_bbox__lat_min(double DB_bbox__lat_min) {
+        this.DB_bbox__lat_min = DB_bbox__lat_min;
+    }
+
+    public void setDB_bbox__lon_max(double DB_bbox__lon_max) {
+        this.DB_bbox__lon_max = DB_bbox__lon_max;
+    }
+
+    public void setBbox__lat_max(double bbox__lat_max) {
+        this.bbox__lat_max = bbox__lat_max;
+    }
+
+    public void setBbox__lon_min(double bbox__lon_min) {
+        this.bbox__lon_min = bbox__lon_min;
+    }
+
+    public void setBbox__lat_min(double bbox__lat_min) {
+        this.bbox__lat_min = bbox__lat_min;
+    }
+
+    public void setBbox__lon_max(double bbox__lon_max) {
+        this.bbox__lon_max = bbox__lon_max;
     }
 
     public double getNodesLargeN() {
@@ -41,4 +81,35 @@ public class SpatialGrid {
         return numberOfShortestPaths;
     }
 
+    public double getDB_bbox__lat_max() {
+        return DB_bbox__lat_max;
+    }
+
+    public double getDB_bbox__lon_min() {
+        return DB_bbox__lon_min;
+    }
+
+    public double getDB_bbox__lat_min() {
+        return DB_bbox__lat_min;
+    }
+
+    public double getDB_bbox__lon_max() {
+        return DB_bbox__lon_max;
+    }
+
+    public double getBbox__lat_max() {
+        return bbox__lat_max;
+    }
+
+    public double getBbox__lon_min() {
+        return bbox__lon_min;
+    }
+
+    public double getBbox__lat_min() {
+        return bbox__lat_min;
+    }
+
+    public double getBbox__lon_max() {
+        return bbox__lon_max;
+    }
 }
