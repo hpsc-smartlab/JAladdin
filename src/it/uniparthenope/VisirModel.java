@@ -242,6 +242,92 @@ public class VisirModel {
         ArrayList<Double> lon_bathy = (ArrayList<Double>) bathymetry.get(1);
         Double[][] z_bathy = (Double[][]) bathymetry.get(2);
         this.sGrid.setInv_step(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)));
+        //Target grid and reduced bathy field:
+        //grid_extreme_coors
+        ArrayList<Object> insets = this.grid_extreme_coords(lat_bathy, lon_bathy,z_bathy);
+    }
+
+    private ArrayList<Object> grid_extreme_coords(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] field_in){
+        //compute coordinates of grid extreme nodes,
+        //both for the reference grid (grid read from DB)
+        //and the inset grid
+
+        //reference grid:
+        //Finding indexes
+        ArrayList<Integer> DB_lat_row = new ArrayList<>();
+        ArrayList<Integer> DB_lon_row = new ArrayList<>();
+        for(int i=0;i<lat.size();i++){
+            if( (lat.get(i) >= this.sGrid.getDB_bbox__lat_min()) && (lat.get(i) <= this.sGrid.getDB_bbox__lat_max()) ){
+                DB_lat_row.add(i);
+            }
+        }
+        for(int i=0;i<lon.size();i++){
+            if( (lon.get(i) >= this.sGrid.getDB_bbox__lon_min()) && (lon.get(i) <= this.sGrid.getDB_bbox__lon_max()) ){
+                DB_lon_row.add(i);
+            }
+        }
+
+        this.sGrid.setDB_xi(lon.get(DB_lon_row.get(0)));
+        this.sGrid.setDB_yi(lat.get(DB_lat_row.get(0)));
+        this.sGrid.setDB_xf(lon.get(DB_lon_row.get(DB_lon_row.size()-1)));
+        this.sGrid.setDB_yf(lat.get(DB_lat_row.get(DB_lat_row.size()-1)));
+
+        this.sGrid.setDB_Nx(1 + DB_lon_row.get(DB_lon_row.size()-1) - DB_lon_row.get(0));
+        this.sGrid.setDB_Ny(1 + DB_lat_row.get(DB_lat_row.size()-1) - DB_lat_row.get(0));
+
+        //double meshRes = 1/this.sGrid.getInvStepFields();
+
+        //*****not sure of this*****
+        ArrayList<Double> lat_red = new ArrayList<>();
+        ArrayList<Double> lon_red = new ArrayList<>();
+        Double[][] field_out = null;
+        //*****not sure of this*****
+        //if barflag ==1, we are in creating graph DB mode, so we return empty lat_red, lon_red and field_out
+        if(bar_flag == 2){//reading DB mode
+            //Insert grid
+            ArrayList<Integer> lat_row = new ArrayList<>();
+            ArrayList<Integer> lon_row = new ArrayList<>();
+            for(int i=0;i<lat.size();i++){
+                if( (lat.get(i) >= this.sGrid.getBbox__lat_min()) && (lat.get(i) <= this.sGrid.getDB_bbox__lat_max())){
+                    lat_row.add(i);
+                }
+            }
+            for(int i=0;i<lon.size();i++){
+                if( (lon.get(i) >= this.sGrid.getBbox__lon_min()) && (lon.get(i) <= this.sGrid.getBbox__lon_max()) ){
+                    lon_row.add(i);
+                }
+            }
+
+            this.sGrid.setXi(lon.get(lon_row.get(0)));
+            this.sGrid.setYi(lat.get(lat_row.get(0)));
+            this.sGrid.setXf(lon.get(lon_row.get(lon_row.size()-1)));
+            this.sGrid.setYf(lat.get(lat_row.get(lat_row.size()-1)));
+            this.sGrid.setInset_area( Math.abs( (this.sGrid.getXf()-this.sGrid.getXi()) * (this.sGrid.getYf()-this.sGrid.getYi()) ) );
+
+            this.sGrid.setInset_Nx(1 + lon_row.get(lon_row.size()-1) - lon_row.get(0));
+            this.sGrid.setInset_Ny(1+ lat_row.get(lat_row.size()-1) - lat_row.get(0));
+
+            //reduced field coordinates and values:
+            for(int element : lat_row){
+                lat_red.add(lat.get(element));
+            }
+            for(int element : lon_row){
+                lon_red.add(lon.get(element));
+            }
+            field_out = new Double[lat_row.size()][lon_row.size()];
+            for(int i=0;i<lat_row.size();i++){
+                for(int j=0;j<lon_row.size();j++){
+                    field_out[i][j] = field_in[lat_row.get(i)][lon_row.get(j)];
+                }
+            }
+        }
+
+        //Downcasting and returning results:
+        ArrayList<Object> results = new ArrayList<>();
+        results.add((Object) lat_red);
+        results.add((Object) lon_red);
+        results.add((Object) field_out);
+        return results;
     }
 
     private void readout_coast(){
