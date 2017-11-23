@@ -5,6 +5,7 @@ public class SpatialGrid {
     private long numberOfShortestPaths;
     private double nodesLargeN;
     private long invStepFields;
+    private double inv_step;
     private long minNoGridPoints;
     private double DB_bbox__lat_max;
     private double DB_bbox__lon_min;
@@ -27,6 +28,10 @@ public class SpatialGrid {
         if(flag == 2){
             this.invStepFields = 60; //inverse grid size [deg^{-1}]
         }
+    }
+
+    public void setInv_step(double inv_step){
+        this.inv_step = inv_step;
     }
 
     public void setDB_bbox__lat_max(double DB_bbox__lat_max) {
@@ -111,5 +116,9 @@ public class SpatialGrid {
 
     public double getBbox__lon_max() {
         return bbox__lon_max;
+    }
+
+    public double getInv_step(){
+        return  this.inv_step;
     }
 }

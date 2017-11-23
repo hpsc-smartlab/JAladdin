@@ -241,6 +241,7 @@ public class VisirModel {
         ArrayList<Double> lat_bathy = (ArrayList<Double>) bathymetry.get(0);
         ArrayList<Double> lon_bathy = (ArrayList<Double>) bathymetry.get(1);
         Double[][] z_bathy = (Double[][]) bathymetry.get(2);
+        this.sGrid.setInv_step(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)));
     }
 
     private void readout_coast(){
