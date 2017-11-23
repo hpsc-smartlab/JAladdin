@@ -229,6 +229,15 @@ public class VisirModel {
         //read-out database:
         int bathy_code = 1;
         //#GM: here add code of compare_bathys if needed
+        String bathy_title = "bathy: MedOneMin";
+        if(bathy_code == 1){
+            bathy_title = "bathy: MedOneMin";
+        } else if(bathy_code == 2){
+            bathy_title = "bathy: GEBCO-08";//warning: so far, I just downloaded a small subset of the full DB!
+        } else if(bathy_code == 3) {
+            bathy_title = "bathy: EMODnet";
+        }//4: Adriatic 7.5 (not yet active)
+        this.readout_bathy(bathy_code);
     }
 
     private void readout_coast(){
@@ -295,6 +304,87 @@ public class VisirModel {
         } catch(Exception e){
             e.printStackTrace();
         }
+    }
+
+    private void readout_bathy(int bathy_code){
+        String filename ="";
+        String varname = "";
+        String lonname = "";
+        String latname = "";
+        switch(bathy_code){
+            case 1:
+                //MedOneMin:
+                filename = "inputFiles/bathy/MedOneMin/med_one_min_single_vs2.nc";
+                varname = "z";
+                lonname = "longitude";
+                latname = "latitude";
+                break;
+            case 2:
+                //GEBCO_08:
+                filename = "inputFiles/bathy/GEBCO/gebco_08_10_34_15_38.nc";
+                varname = "z";
+                lonname = "x_range";
+                latname = "y_range";
+                break;
+            case 3:
+                //EMODnet:
+                filename = "inputFiles/bathy/EMODnet/Adriatic_Ionian_central__MedSea_mean.nc";
+                varname = "depth_average";
+                lonname = "lon";
+                latname = "lat";
+                break;
+            default:
+                System.out.println("unknow bathy DB code!");
+                break;
+        }
+        //Parsing file:
+        MyNetCDFParser test = new MyNetCDFParser(filename);
+        ArrayList<Object> out = test.parseMedOneMin();
+        ArrayList<Double> latTmp = (ArrayList<Double>) out.get(0);
+        ArrayList<Double> lonTmp = (ArrayList<Double>) out.get(1);
+        Double[][] zTmp = (Double[][]) out.get(2);
+        //if sea depth >=0, setting as NaN
+        for(int i =0 ;i<zTmp.length;i++){
+            for(int j=0;j<zTmp[0].length;j++){
+                if(zTmp[i][j]>=0){
+                    zTmp[i][j]= Double.NaN;
+                }
+            }
+        }
+        //reduction within Med. Sea basin:
+        Double lon_min= -6.5;
+        Double lon_max= 37.0;
+        Double lat_min= 30.0;
+        Double lat_max= 46.0;
+        //Check if coords are in the med. sea area
+        ArrayList<Integer> latOkIndexes = new ArrayList<>();
+        ArrayList<Integer> lonOkIndexes = new ArrayList<>();
+        for(int i=0;i<latTmp.size();i++){
+            if(latTmp.get(i)>=lat_min && latTmp.get(i)<=lat_max){
+                latOkIndexes.add(i);
+            }
+        }
+        for(int i=0;i<lonTmp.size();i++){
+            if(lonTmp.get(i)>=lon_min && lonTmp.get(i)<=lon_max){
+                lonOkIndexes.add(i);
+            }
+        }
+
+        ArrayList<Double> lat = new ArrayList<>();
+        ArrayList<Double> lon = new ArrayList<>();
+        Double[][] z = new Double[latOkIndexes.size()][lonOkIndexes.size()];
+        for(int i=0;i<latOkIndexes.size();i++){
+            lat.add(latTmp.get(i));
+        }
+        for(int i=0;i<lonOkIndexes.size();i++){
+            lon.add(lonTmp.get(i));
+        }
+        for(int i=0;i<latOkIndexes.size();i++){
+            for(int j=0;j<lonOkIndexes.size();j++){
+                z[i][j] = zTmp[latOkIndexes.get(i)][lonOkIndexes.get(j)];
+            }
+        }
+
     }
 
     private void Tic(){//Equivalent to MATLAB tic function
