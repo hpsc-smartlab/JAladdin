@@ -237,7 +237,10 @@ public class VisirModel {
         } else if(bathy_code == 3) {
             bathy_title = "bathy: EMODnet";
         }//4: Adriatic 7.5 (not yet active)
-        this.readout_bathy(bathy_code);
+        ArrayList<Object> bathymetry = this.readout_bathy(bathy_code);
+        ArrayList<Double> lat_bathy = (ArrayList<Double>) bathymetry.get(0);
+        ArrayList<Double> lon_bathy = (ArrayList<Double>) bathymetry.get(1);
+        Double[][] z_bathy = (Double[][]) bathymetry.get(2);
     }
 
     private void readout_coast(){
@@ -306,7 +309,7 @@ public class VisirModel {
         }
     }
 
-    private void readout_bathy(int bathy_code){
+    private ArrayList<Object> readout_bathy(int bathy_code){
         String filename ="";
         String varname = "";
         String lonname = "";
@@ -340,6 +343,10 @@ public class VisirModel {
         //Parsing file:
         MyNetCDFParser test = new MyNetCDFParser(filename);
         ArrayList<Object> out = test.parseMedOneMin();
+        if(out == null){
+            System.out.println("Parsing fail!");
+            return null;
+        }
         ArrayList<Double> latTmp = (ArrayList<Double>) out.get(0);
         ArrayList<Double> lonTmp = (ArrayList<Double>) out.get(1);
         Double[][] zTmp = (Double[][]) out.get(2);
@@ -384,7 +391,11 @@ public class VisirModel {
                 z[i][j] = zTmp[latOkIndexes.get(i)][lonOkIndexes.get(j)];
             }
         }
-
+        ArrayList<Object> output = new ArrayList<>();
+        output.add((Object) lat);
+        output.add((Object) lon);
+        output.add((Object) z);
+        return output;
     }
 
     private void Tic(){//Equivalent to MATLAB tic function
