@@ -144,4 +144,26 @@ public class Utility {
         }
         return root;
     }
+
+    public static ArrayList<Object> meshgrid(ArrayList<Double> x, ArrayList<Double> y){
+        //[X, Y] =meshgrid(x,y) returns 2-D grid coordinates based on the coordinates contained
+        // in vectors x and y. X is a matrix where each row is a copy of x,
+        // and Y is a matrix where each column is a copy of y.
+        // The grid represented by the coordinates X and Y has length(y) rows and length(x) columns.
+        int nRows = y.size();
+        int nCols = x.size();
+        Double[][] X = new Double[nRows][nCols];
+        Double[][] Y = new Double[nRows][nCols];
+        for(int i =0;i<nRows;i++){
+            for(int j=0;j<nCols; j++){
+                X[i][j] = x.get(j);
+                Y[i][j] = y.get(j);
+            }
+        }
+
+        ArrayList<Object> output = new ArrayList<>();
+        output.add((Object) X);
+        output.add((Object) Y);
+        return output;
+    }
 }
