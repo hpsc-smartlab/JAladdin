@@ -242,9 +242,51 @@ public class VisirModel {
         ArrayList<Double> lon_bathy = (ArrayList<Double>) bathymetry.get(1);
         Double[][] z_bathy = (Double[][]) bathymetry.get(2);
         this.sGrid.setInv_step(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)));
+
         //Target grid and reduced bathy field:
         //grid_extreme_coors
         ArrayList<Object> insets = this.grid_extreme_coords(lat_bathy, lon_bathy,z_bathy);
+        ArrayList<Double> lat_bathy_Inset = (ArrayList<Double>) insets.get(0);
+        ArrayList<Double> lon_bathy_Inset = (ArrayList<Double>) insets.get(1);
+        Double[][] bathy_Inset = (Double[][]) insets.get(2);
+
+        ArrayList<Boolean> x_bool=new ArrayList<>();
+        ArrayList<Boolean> y_bool=new ArrayList<>();
+        ArrayList<Boolean> inset_bool=new ArrayList<>();
+        ArrayList<Double> x_coast_Inset = new ArrayList<>();
+        ArrayList<Double> y_coast_Inset = new ArrayList<>();
+        if(this.bar_flag == 2){
+            // coastline excerpt within Inset:
+            Double min_lon_bathy = Collections.min(lon_bathy_Inset);
+            Double max_lon_bathy = Collections.max(lon_bathy_Inset);
+            Double min_lat_bathy = Collections.min(lat_bathy_Inset);
+            Double max_lat_bathy = Collections.max(lat_bathy_Inset);
+            for(Double element : x_coast){
+                if((element >= min_lon_bathy) && (element <= max_lon_bathy)){
+                    x_bool.add(true);
+                } else { x_bool.add(false); }
+            }
+            for(Double element : y_coast){
+                if((element >= min_lat_bathy) && (element <= max_lat_bathy)){
+                    y_bool.add(true);
+                } else { y_bool.add(false); }
+            }
+            for(int i =0 ;i<x_bool.size();i++){
+                if(x_bool.get(i) && y_bool.get(i)){
+                    inset_bool.add(true);
+                } else { inset_bool.add(false); }
+            }
+            for(int i =0 ;i<inset_bool.size();i++){
+                if(inset_bool.get(i)){
+                    x_coast_Inset.add(x_coast.get(i));
+                    y_coast_Inset.add(y_coast.get(i));
+                }
+            }
+        }
+        //ref. grid coordinates:
+        ArrayList<Double> lat_bathy_DB = Utility.linspace(this.sGrid.getDB_yi(), this.sGrid.getDB_yf(), this.sGrid.getDB_Ny());
+        ArrayList<Double> lon_bathy_DB = Utility.linspace(this.sGrid.getDB_xi(), this.sGrid.getDB_xf(), this.sGrid.getDB_Nx());
+        //CONTINUA QUIIIIIIIIIIIIIIIIIIIIIIIII
     }
 
     private ArrayList<Object> grid_extreme_coords(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] field_in){
