@@ -145,6 +145,10 @@ public class Utility {
         return root;
     }
 
+    public static ArrayList<Object> meshgrid(ArrayList<Double> x){
+        return meshgrid(x,x);
+    }
+
     public static ArrayList<Object> meshgrid(ArrayList<Double> x, ArrayList<Double> y){
         //[X, Y] =meshgrid(x,y) returns 2-D grid coordinates based on the coordinates contained
         // in vectors x and y. X is a matrix where each row is a copy of x,
