@@ -28,6 +28,7 @@ public class SpatialGrid {
     private double inset_area;
     private long inset_Nx;
     private long inset_Ny;
+    private long freenodes;
 
 
     public SpatialGrid(){
@@ -238,5 +239,13 @@ public class SpatialGrid {
 
     public void setInset_Ny(long inset_Ny) {
         this.inset_Ny = inset_Ny;
+    }
+
+    public long getFreenodes() {
+        return freenodes;
+    }
+
+    public void setFreenodes(long freenodes) {
+        this.freenodes = freenodes;
     }
 }
