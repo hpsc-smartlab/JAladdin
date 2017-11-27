@@ -1,11 +1,11 @@
 package it.uniparthenope;
 
+import com.mchange.v1.util.ArrayUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Scanner;
+import java.util.*;
 
 public class VisirModel {
     //input data
@@ -328,9 +328,125 @@ public class VisirModel {
             //remapping free nodes:
             long lambda = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
             long mu = Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
-            //CONTINUA QUIIIIIIIIIIIIIIIIIII CHIAMARE idx_ref2inset_grid
+            ArrayList<Object> out = this.idx_ref2inset_grid(free_nodes_DB,this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(),this.sGrid.getInset_Nx(),this.sGrid.getInset_Ny(),lambda,mu);
+            long[] row = (long[]) out.get(0);
+            long[] col = (long[]) out.get(1);
+            long[] free_nodes_extended = (long[]) out.get(2);
+            ArrayList<Long> tmp = new ArrayList<>();
+            for(int i=0;i<free_nodes_extended.length;i++){
+                if(free_nodes_extended[i]>=0){
+                    tmp.add(free_nodes_extended[i]);
+                }
+            }
+            free_nodes_extended = new long[tmp.size()];
+            for(int i=0;i<tmp.size();i++){
+                free_nodes_extended[i]=tmp.get(i);
+            }
+            long[] free_nodes = free_nodes_extended;
+
+            //checks:
+            long free_nodes_Number = free_nodes.length;
+            if(free_nodes_Number==0){
+                System.out.println("no free nodes found in graph");
+                System.exit(0);
+            } else if(free_nodes_Number > this.sGrid.getNodesLargeN()){
+                System.out.println("too large graph");
+                System.exit(0);
+            }
+            this.sGrid.setFreenodes(free_nodes_Number);
+            //lsm, created using coastline DB (NaNs on landmass):
+            Double[][] lsm_mask = Utility.NaNmatrix(xg.length,xg[0].length);
+            for(int i=0;i<free_nodes.length;i++){
+                lsm_mask[0][(int) free_nodes[i]] = 1.0;
+            }
+            int[] dim = new int[2];
+            dim[0]=xg.length;
+            dim[1]=xg[1].length;
+            lsm_mask = Utility.reshape(lsm_mask,dim);
+
+            //Safe distance from coastline:
+            Double[] xg_array = Utility.reshape(xg,dim[0]*dim[1]);
+            Double[] yg_array = Utility.reshape(yg, yg.length*yg[0].length);
+            Double[][] xy_g = new Double[xg_array.length][2];
+
+            Double[][] dist_mask;
+            int nC = x_coast_Inset.size();
+            int cols = dim[0]*dim[1];
+            if(nC>0){
+                Double[][] coast_dist = Utility.zeros(nC, cols);
+                Double[][] P_b = new Double[1][2];
+                for(int i=0;i<nC;i++){
+                    P_b[0][0]=x_coast_Inset.get(i);
+                    P_b[0][1]=y_coast_Inset.get(i);
+                    Double[] hor_dist = hor_distance("s",xy_g, P_b);
+                    for(int j=0; j<cols;j++){
+                        coast_dist[i][j]= hor_dist[j];
+                    }
+                }
+            } else{
+                dist_mask = Utility.ones(dim[0],dim[1]);
+            }
+
+            // %###############################################
+            // %
+            // %  Joint safe mask:
+            // %
+            // J_mask = lsm_mask' .* UKC_mask .* dist_mask' ;
+            // %
+            // %###############################################
+
 
         }
+    }
+
+    private Double[] hor_distance(String method, Double[][] P_a, Double[][] P_b, Double... varargin){
+        // % horizontal distance between pair of points (expressed in NM)
+        // % either on the plane or the sphere
+        // % works also with arrays
+        // % optionally rescales distances by grid_step_in_NM
+        // %
+        // % P_a and P_b must be linear array of the same size
+        // % (build via meshgrid and then reshape)
+        // %
+        // % P_a: [lon, lat]
+        // % P_b: [lon, lat]
+        // %
+        // % method='p' for planar geometry
+        // % method='s' for spherical geometry
+        this.constants.setDeg2rad(Math.PI/180);
+        Double grid_step_in_NM = varargin.length > 0 ? varargin[0] : 1.0;
+        Double[] xa = new Double[P_a.length];
+        Double[] ya = new Double[P_a.length];
+        for(int i=0;i<P_a.length;i++){
+            xa[i]=P_a[i][0];
+            ya[i]=P_a[i][1];
+        }
+
+        Double[] xb = new Double[P_b.length];
+        Double[] yb = new Double[P_b.length];
+        for(int i=0;i<P_b.length;i++){
+            xb[i]=P_b[i][0];
+            yb[i]=P_b[i][1];
+        }
+
+        Double[] dd=new Double[P_a.length];
+        if(method=="plane"||method=="p"){
+            for(int i=0;i<P_a.length;i++){
+                dd[i]=grid_step_in_NM*Math.sqrt(Math.pow((xa[i]-xb[i]),2) + Math.pow((ya[i]-yb[i]),2));
+            }
+        } else if(method=="sphere" || method=="s"){
+            // % from : http://mathworld.wolfram.com/GreatCircle.html
+            // % x and y must be in degree.
+            // % output in Nautical Miles (NM)
+            Double E_radius = 3444.0; //NM
+            for(int i=0;i<P_a.length;i++){
+                dd[i]=E_radius*Math.acos(Math.cos(this.constants.getDeg2rad()*ya[i])*Math.cos(this.constants.getDeg2rad()*yb[i])*
+                Math.cos(this.constants.getDeg2rad()*(xa[i]-xb[i]))*Math.sin(this.constants.getDeg2rad()*ya[i])*
+                Math.sin(this.constants.getDeg2rad()*yb[i]));
+            }
+        }
+        return dd;
+
     }
 
     private ArrayList<Object> idx_ref2inset_grid(long[] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
