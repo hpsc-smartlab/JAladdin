@@ -88,4 +88,8 @@ public class Const {
     public long getInt_precision() {
         return int_precision;
     }
+
+    public void setDeg2rad(double deg2rad) {
+        this.deg2rad = deg2rad;
+    }
 }
