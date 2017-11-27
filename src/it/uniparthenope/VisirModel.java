@@ -286,7 +286,156 @@ public class VisirModel {
         //ref. grid coordinates:
         ArrayList<Double> lat_bathy_DB = Utility.linspace(this.sGrid.getDB_yi(), this.sGrid.getDB_yf(), this.sGrid.getDB_Ny());
         ArrayList<Double> lon_bathy_DB = Utility.linspace(this.sGrid.getDB_xi(), this.sGrid.getDB_xf(), this.sGrid.getDB_Nx());
-        //CONTINUA QUIIIIIIIIIIIIIIIIIIIIIIIII
+        ArrayList<Object> mdata_gridOut = mdata_grid(lat_bathy_DB,lon_bathy_DB);
+        Double[][] xy_DB = (Double[][]) mdata_gridOut.get(0);
+        Double[][] xg_DB = (Double[][]) mdata_gridOut.get(1);
+        Double[][] yg_DB = (Double[][]) mdata_gridOut.get(2);
+
+        //inset grid plaid coordinates:
+        mdata_gridOut = new ArrayList<>();
+        mdata_gridOut = mdata_grid(lat_bathy_Inset, lon_bathy_Inset);
+        Double[][] xy = (Double[][]) mdata_gridOut.get(0);
+        Double[][] xg = (Double[][]) mdata_gridOut.get(1);
+        Double[][] yg = (Double[][]) mdata_gridOut.get(2);
+
+        if(this.visualization.getGraphData()==1){
+            //csv_write xy
+            try{
+                MyCSVParser csv = new MyCSVParser("output/GRAPH.node_LonLat.csv");
+                csv.writeCSV(xy);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        //--------------------------------------------------------------------
+        //Joint coast-vessel safety mask:
+        System.out.println("computation of a joint coast-vessel safety mask...");
+        Double[][] UKC_mask = Utility.ones(bathy_Inset.length, bathy_Inset[0].length);
+        for(int i=0;i<UKC_mask.length;i++){
+            for(int j=0;j<UKC_mask[0].length;j++){
+                if(bathy_Inset[i][j] < this.ship.getDraught()){
+                    UKC_mask[i][j] = Double.NaN;
+                }
+            }
+        }
+
+        if(this.bar_flag == 2){
+            //readout free nodes DB:
+            MyBinaryParser datFile = new MyBinaryParser("inputFiles/graph/freeNodes_DB.dat");
+            long[] free_nodes_DB = datFile.readAsUint32();
+
+            //remapping free nodes:
+            long lambda = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
+            long mu = Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
+            //CONTINUA QUIIIIIIIIIIIIIIIIIII CHIAMARE idx_ref2inset_grid
+
+        }
+    }
+
+    private ArrayList<Object> idx_ref2inset_grid(long[] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
+        // % remap grid index
+        // % from a nx_big columns grid (reference) to a nx columns grid (inset).
+        // % (lambda, mu) are the offset coordinates of idx=1 gridpoint of the inset grid.
+        // % (row, col) are Cartesian coordinates in the inset grid.
+        // %
+        // % --> Rectangular and equally spaced grids are assumed! <--
+        // % In picture below, indexes between brackets refer to the inset grid.
+        // %
+        // % WARNING: idx outside inset grid are set to -1!
+        // %   ny_big- -------------------------------------------------
+        // %           |                                               |
+        // %           |     reference grid                            |
+        // %           |                                               |
+        // %           |                                               |
+        // %           |                                               |
+        // %           |                                               |
+        // %    (ny) - |..   .....    ......    .. |----------|        |
+        // %           |                           |          |        |
+        // %           |                           |  inset   |        |
+        // %           |                           |          |        |
+        // %(1) 1+mu - |..   .....    ......    .. |----------|        |
+        // %           |                           .          .        |
+        // %           |                           .          .        |
+        // %       1 - ------------------------------------------------|
+        // %           |                           |          .        .
+        // %
+        // %           1                      (1) 1+lambda   (nx)     nx_big
+        // %
+        //checks:
+        if(nx > nx_big || ny> ny_big || lambda+nx > nx_big || mu+ny > ny_big){
+            System.out.println("inset grid not within reference grid !");
+            System.exit(0);
+        }
+        boolean[] test = Utility.anyOr(Utility.anyUnder(idx_big,1), Utility.anyOver(idx_big,(nx_big*ny_big)));
+        for(int i=0;i<test.length;i++){
+            if(test[i]){
+                System.out.println("grid index not within reference grid !");
+                System.exit(0);
+            }
+        }
+        //col idx (ref):
+        long[] col_big = new long[idx_big.length];
+        for(int i =0; i<idx_big.length;i++){
+            col_big[i]=Math.floorMod(idx_big[i],nx_big);
+            if(col_big[i]==0){
+                col_big[i]=nx_big;
+            }
+        }
+        //row idx (ref):
+        long[] row_big = new long[idx_big.length];
+        for(int i =0;i<idx_big.length;i++){
+            row_big[i] =Math.round(1+(idx_big[i]-col_big[i])/nx_big);
+        }
+        //col idx (inset):
+        long[] col = new long[col_big.length];
+        for(int i=0;i<col.length;i++){
+            col[i]=col_big[i]-lambda;
+        }
+        //row idx (inset):
+        long[] row = new long[row_big.length];
+        for(int i=0;i<row.length;i++){
+            row[i]=row_big[i]-mu;
+        }
+        //idx (inset grid):
+        // and pad with zero indexes out of inset grid:
+        long[] idx = new long[col.length];
+        for(int i=0;i<idx.length;i++){
+            idx[i]=col[i]+nx*(row[i]-1);
+            if( col[i] < 1 || col[i] > nx || row[i] < 1 || row[i] > ny){
+                idx[i] = -1;
+            }
+        }
+        ArrayList<Object> output = new ArrayList<>();
+        output.add((Object) row);
+        output.add((Object) col);
+        output.add((Object) idx);
+        return  output;
+    }
+
+    private ArrayList<Object> mdata_grid(ArrayList<Double> lat, ArrayList<Double> lon){
+        //converts 2 lat-lon 1-dimensional arrays (Nlat,1) and (Nlon,1) into :
+        //a) a list of node coordinates (Nlat*Nlon, 2)
+        //b) a meshgrid matrix       (Nlat,   Nlon)
+        int NN = lat.size() * lon.size();
+        ArrayList<Object> out = Utility.meshgrid(lat,lon);
+        Double[][] yg = (Double[][]) out.get(0);
+        Double[][] xg = (Double[][]) out.get(1);
+        int[] aDim = new int[2];
+        aDim[0]=NN;
+        aDim[1]=1;
+        Double[][] xa = Utility.reshape(xg, aDim);
+        Double[][] ya = Utility.reshape(yg, aDim);
+        Double[][] xy = new Double[NN][2];
+        for(int i=0;i<NN;i++){
+            xy[i][0]=xa[i][0];
+            xy[i][1]=ya[i][0];
+        }
+        ArrayList<Object> output = new ArrayList<>();
+        output.add((Object) xy);
+        output.add((Object) xg);
+        output.add((Object) yg);
+        return out;
     }
 
     private ArrayList<Object> grid_extreme_coords(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] field_in){
