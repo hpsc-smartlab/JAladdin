@@ -54,6 +54,16 @@ public class Utility {
         return matrix;
     }
 
+    public static Double[][] NaNmatrix(int rows, int cols){
+        Double[][] matrix = new Double[rows][cols];
+        for(int i=0;i<rows;i++){
+            for(int j=0;j<cols;j++){
+                matrix[i][j]=Double.NaN;
+            }
+        }
+        return matrix;
+    }
+
     public static Double linfit_origin(ArrayList<Double> x, ArrayList<Double> y){//From lingit_origin.m
         // Least square fit of linear funztion through origin.
         // cp. Numerical Recipes,
@@ -182,6 +192,18 @@ public class Utility {
         ArrayList<Object> output = new ArrayList<>();
         output.add((Object) X);
         output.add((Object) Y);
+        return output;
+    }
+
+    public static Double[] reshape(Double[][] A, int dim){
+        int[] d = new int[2];
+        d[0]=dim;
+        d[1]=0;
+        Double[][] tmp =reshape(A,d);
+        Double[] output = new Double[dim];
+        for(int i=0;i<dim;i++){
+            output[i]=tmp[i][0];
+        }
         return output;
     }
 
