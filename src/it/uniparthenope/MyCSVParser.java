@@ -1,19 +1,46 @@
 package it.uniparthenope;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 
 public class MyCSVParser {
     private InputStream inputStream;
     private ArrayList<String> parsedCSV;
+    private static final char DEFAULT_SEPARATOR = ',';
+    private FileWriter writer;
 
     public MyCSVParser(InputStream inputStream){
         this.inputStream = inputStream;
         this.parsedCSV = new ArrayList<String>();
         this.Parse();
+    }
+
+    public MyCSVParser(String csvFile){
+        try {
+            this.writer = new FileWriter(csvFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void writeCSV(Double[][] toWrite) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int nRows = toWrite.length;
+        int nCols = toWrite[0].length;
+        for(int i=0; i<nRows; i++){
+            boolean first = true;
+            for(int j=0;j<nCols;j++){
+                if(!first){
+                    sb.append(DEFAULT_SEPARATOR);
+                }
+                sb.append(toWrite[i][j]);
+                first=false;
+            }
+            sb.append("\n");
+            this.writer.append(sb.toString());
+        }
+        this.writer.flush();
+        this.writer.close();
     }
 
     public ArrayList<String> getParsedCSV() {
