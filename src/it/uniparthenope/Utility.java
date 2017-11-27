@@ -40,6 +40,20 @@ public class Utility {
         return matrix;
     }
 
+    public static Double[][] ones(int size){
+        return ones(size, size);
+    }
+
+    public static Double[][] ones(int rows, int cols){
+        Double[][] matrix = new Double[rows][cols];
+        for(int i = 0; i< rows; i++){
+            for(int j = 0; j< cols; j++){
+                matrix[i][j] = 1.0;
+            }
+        }
+        return matrix;
+    }
+
     public static Double linfit_origin(ArrayList<Double> x, ArrayList<Double> y){//From lingit_origin.m
         // Least square fit of linear funztion through origin.
         // cp. Numerical Recipes,
@@ -168,6 +182,71 @@ public class Utility {
         ArrayList<Object> output = new ArrayList<>();
         output.add((Object) X);
         output.add((Object) Y);
+        return output;
+    }
+
+    public static Double[][] reshape(ArrayList<Double> A, int[] dim){
+        int nRows = dim[0];
+        int nCols = dim[1];
+        if(A.size() != nRows*nCols){
+            System.out.println("size(A) must be = to nRows*nCols!");
+            System.exit(0);
+        }
+        int n_element = 0;
+        Double[][] out = new Double[nRows][nCols];
+        for(int i=0;i<nRows;i++){
+            for(int j=0;j<nCols;j++){
+                out[i][j]=A.get(n_element);
+                n_element++;
+            }
+        }
+        return out;
+    }
+
+    public static Double[][] reshape(Double[][] A, int[] dim){
+        int nRows = A.length;
+        int nCols = A[0].length;
+        ArrayList<Double> input = new ArrayList<>();
+        for(int i = 0; i<nRows; i++){
+            for(int j=0; j<nCols; j++){
+                input.add(A[i][j]);
+            }
+        }
+        return reshape(input,dim);
+    }
+
+    public static boolean[] anyUnder(long[] A, long threshold){
+        //return true if any of A if the element of A is < threshold
+        boolean[] output = new boolean[A.length];
+        for(int i = 0; i< A.length; i++){
+            if(A[i]<threshold){
+                output[i] = true;
+            } else {
+                output[i] = false;
+            }
+        }
+        return output;
+    }
+
+    public static boolean[] anyOver(long[] A, long threshold){
+        //return true if any of A if the element of A is > threshold
+        boolean[] output = new boolean[A.length];
+        for(int i = 0; i< A.length; i++){
+            if(A[i]>threshold){
+                output[i] = true;
+            } else {
+                output[i] = false;
+            }
+        }
+        return output;
+    }
+
+    public static boolean[] anyOr(boolean[] A, boolean[] B){
+        //return true if A || B = true
+        boolean[] output = new boolean[A.length];
+        for(int i = 0; i< A.length; i++){
+            output[i] = A[i] || B[i];
+        }
         return output;
     }
 }
