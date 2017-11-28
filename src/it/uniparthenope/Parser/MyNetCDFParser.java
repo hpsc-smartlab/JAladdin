@@ -1,4 +1,4 @@
-package it.uniparthenope;
+package it.uniparthenope.Parser;
 
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayInt;

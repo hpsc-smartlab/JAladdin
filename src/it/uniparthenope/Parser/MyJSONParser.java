@@ -1,4 +1,4 @@
-package it.uniparthenope;
+package it.uniparthenope.Parser;
 
 import java.io.FileReader;
 
