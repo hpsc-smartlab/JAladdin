@@ -1,6 +1,10 @@
 package it.uniparthenope.Parser;
 
+import it.uniparthenope.Utility;
+
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 public class MyBinaryParser {
     private String fileName;
@@ -14,21 +18,32 @@ public class MyBinaryParser {
             FileInputStream fin = new FileInputStream(this.file);
             BufferedInputStream bin = new BufferedInputStream(fin);
             this.din = new DataInputStream(bin);
+
         } catch(Exception e){
             e.printStackTrace();
         }
     }
 
-    public long[] readAsUint32(){
+    private int[] readAsInt32(){
         int count = (int) file.length()/4;
-        long[] values = new long[count];
+        int[] values = new int[count];
         try{
             for(int i=0;i<count;i++) {
-                values[i] = (long) this.din.readInt();
+                values[i] = this.din.readInt();
             }
         }catch (Exception e){
             e.printStackTrace();
         }
         return values;
+    }
+
+
+    public long[] readAsUInt32(){
+        int[] values = readAsInt32();
+        long[] output = new long[values.length];
+        for(int i=0;i<values.length;i++){
+            output[i]= Utility.getUnsignedInt(Utility.BigToLittleEndian(values[i]));
+        }
+        return output;
     }
 }
