@@ -7,7 +7,7 @@ public class readout_bathyResults {
     ArrayList<Double> lon;
     Double[][] z;
 
-    public readout_bathyResults(ArrayList<Double> lan, ArrayList<Double> lon, Double[][] z){
+    public readout_bathyResults(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] z){
         this.lat = lat;
         this.lon = lon;
         this.z = z;
