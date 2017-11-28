@@ -1,5 +1,7 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Parser.MyJSONParser;
+
 public class DepartureParameters {
     private long year;
     private long month;

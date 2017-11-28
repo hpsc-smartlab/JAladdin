@@ -1,5 +1,7 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Parser.MyJSONParser;
+
 public class Visualization {
     private long resamp_factor;
     private long env_fields;

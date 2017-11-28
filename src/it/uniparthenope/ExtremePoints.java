@@ -1,5 +1,8 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Parser.MyCSVParser;
+import it.uniparthenope.Parser.MyJSONParser;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;

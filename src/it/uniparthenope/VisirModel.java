@@ -1,11 +1,17 @@
 package it.uniparthenope;
 
-import com.mchange.v1.util.ArrayUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.util.*;
+//Boxing classes
+import it.uniparthenope.Boxing.mdata_gridResults;
+import it.uniparthenope.Boxing.meshgridResults;
+import it.uniparthenope.Boxing.grid_extreme_coordsResults;
+import it.uniparthenope.Boxing.idx_ref2inset_gridResults;
+import it.uniparthenope.Boxing.readout_bathyResults;
+import it.uniparthenope.Boxing.parseMedOneMinResults;
+import it.uniparthenope.Parser.MyBinaryParser;
+import it.uniparthenope.Parser.MyCSVParser;
+import it.uniparthenope.Parser.MyNetCDFParser;
 
 public class VisirModel {
     //input data
@@ -31,6 +37,23 @@ public class VisirModel {
     private ArrayList<Double> lat_ext;
     private ArrayList<Double> lon_int;
     private ArrayList<Double> lat_int;
+    private Double[][] xy;
+    private Double[][] xg;
+    private Double[][] yg;
+    private Double[] xg_array;
+    private Double[] yg_array;
+    private Double[][] xy_DB;
+    private ArrayList<Double> lat_bathy_Inset;
+    private ArrayList<Double> lon_bathy_Inset;
+    private Double[][] bathy_Inset;
+    private Double[][] lsm_mask;
+    private Double[][] J_mask;
+    ArrayList<Double> x_islands;
+    ArrayList<Double> y_islands;
+    ArrayList<Double> x_continent;
+    ArrayList<Double> y_continent;
+    private Double[] estGdtDist;
+
 
     //approssimating computation time
     private long startTime;
@@ -237,18 +260,18 @@ public class VisirModel {
         } else if(bathy_code == 3) {
             bathy_title = "bathy: EMODnet";
         }//4: Adriatic 7.5 (not yet active)
-        ArrayList<Object> bathymetry = this.readout_bathy(bathy_code);
-        ArrayList<Double> lat_bathy = (ArrayList<Double>) bathymetry.get(0);
-        ArrayList<Double> lon_bathy = (ArrayList<Double>) bathymetry.get(1);
-        Double[][] z_bathy = (Double[][]) bathymetry.get(2);
+        readout_bathyResults bathymetry = this.readout_bathy(bathy_code);
+        ArrayList<Double> lat_bathy = bathymetry.getLat();
+        ArrayList<Double> lon_bathy = bathymetry.getLon();
+        Double[][] z_bathy = bathymetry.getZ();
         this.sGrid.setInv_step(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)));
 
         //Target grid and reduced bathy field:
-        //grid_extreme_coors
-        ArrayList<Object> insets = this.grid_extreme_coords(lat_bathy, lon_bathy,z_bathy);
-        ArrayList<Double> lat_bathy_Inset = (ArrayList<Double>) insets.get(0);
-        ArrayList<Double> lon_bathy_Inset = (ArrayList<Double>) insets.get(1);
-        Double[][] bathy_Inset = (Double[][]) insets.get(2);
+        //grid_extreme_coords
+        grid_extreme_coordsResults insets = this.grid_extreme_coords(lat_bathy, lon_bathy,z_bathy);
+        this.lat_bathy_Inset = insets.getLat_red();
+        this.lon_bathy_Inset = insets.getLon_red();
+        this.bathy_Inset = insets.getField_out();
 
         ArrayList<Boolean> x_bool=new ArrayList<>();
         ArrayList<Boolean> y_bool=new ArrayList<>();
@@ -257,10 +280,10 @@ public class VisirModel {
         ArrayList<Double> y_coast_Inset = new ArrayList<>();
         if(this.bar_flag == 2){
             // coastline excerpt within Inset:
-            Double min_lon_bathy = Collections.min(lon_bathy_Inset);
-            Double max_lon_bathy = Collections.max(lon_bathy_Inset);
-            Double min_lat_bathy = Collections.min(lat_bathy_Inset);
-            Double max_lat_bathy = Collections.max(lat_bathy_Inset);
+            Double min_lon_bathy = Collections.min(this.lon_bathy_Inset);
+            Double max_lon_bathy = Collections.max(this.lon_bathy_Inset);
+            Double min_lat_bathy = Collections.min(this.lat_bathy_Inset);
+            Double max_lat_bathy = Collections.max(this.lat_bathy_Inset);
             for(Double element : x_coast){
                 if((element >= min_lon_bathy) && (element <= max_lon_bathy)){
                     x_bool.add(true);
@@ -286,23 +309,25 @@ public class VisirModel {
         //ref. grid coordinates:
         ArrayList<Double> lat_bathy_DB = Utility.linspace(this.sGrid.getDB_yi(), this.sGrid.getDB_yf(), this.sGrid.getDB_Ny());
         ArrayList<Double> lon_bathy_DB = Utility.linspace(this.sGrid.getDB_xi(), this.sGrid.getDB_xf(), this.sGrid.getDB_Nx());
-        ArrayList<Object> mdata_gridOut = mdata_grid(lat_bathy_DB,lon_bathy_DB);
-        Double[][] xy_DB = (Double[][]) mdata_gridOut.get(0);
-        Double[][] xg_DB = (Double[][]) mdata_gridOut.get(1);
-        Double[][] yg_DB = (Double[][]) mdata_gridOut.get(2);
+
+
+        mdata_gridResults data_gridOut = mdata_grid(lat_bathy_DB,lon_bathy_DB);
+        this.xy_DB = data_gridOut.getXy();
+        Double[][] xg_DB = data_gridOut.getXg();
+        Double[][] yg_DB = data_gridOut.getYg();
 
         //inset grid plaid coordinates:
-        mdata_gridOut = new ArrayList<>();
-        mdata_gridOut = mdata_grid(lat_bathy_Inset, lon_bathy_Inset);
-        Double[][] xy = (Double[][]) mdata_gridOut.get(0);
-        Double[][] xg = (Double[][]) mdata_gridOut.get(1);
-        Double[][] yg = (Double[][]) mdata_gridOut.get(2);
+
+        mdata_gridResults data_gridOut2 = mdata_grid(this.lat_bathy_Inset, this.lon_bathy_Inset);
+        this.xy = data_gridOut2.getXy();
+        this.xg = data_gridOut2.getXg();
+        this.yg = data_gridOut2.getYg();
 
         if(this.visualization.getGraphData()==1){
             //csv_write xy
             try{
                 MyCSVParser csv = new MyCSVParser("output/GRAPH.node_LonLat.csv");
-                csv.writeCSV(xy);
+                csv.writeCSV(this.xy);
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -319,19 +344,25 @@ public class VisirModel {
                 }
             }
         }
-
+        Double[][] xg_Jmasked;
+        Double[][] yg_Jmasked;
+        Double[][] J_bathy_Inset;
+        this.xg_array = new Double[0];
+        this.yg_array = new Double[0];
+        Double[][] xy_g;
+        Double[][] dist_mask;
+        Double[][] min_coast_dist;
         if(this.bar_flag == 2){
             //readout free nodes DB:
             MyBinaryParser datFile = new MyBinaryParser("inputFiles/graph/freeNodes_DB.dat");
-            long[] free_nodes_DB = datFile.readAsUint32();
-
+            long[] free_nodes_DB = datFile.readAsUInt32();
             //remapping free nodes:
             long lambda = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
             long mu = Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
-            ArrayList<Object> out = this.idx_ref2inset_grid(free_nodes_DB,this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(),this.sGrid.getInset_Nx(),this.sGrid.getInset_Ny(),lambda,mu);
-            long[] row = (long[]) out.get(0);
-            long[] col = (long[]) out.get(1);
-            long[] free_nodes_extended = (long[]) out.get(2);
+            idx_ref2inset_gridResults out = this.idx_ref2inset_grid(free_nodes_DB,this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(),this.sGrid.getInset_Nx(),this.sGrid.getInset_Ny(),lambda,mu);
+            long[] row = out.getRow();
+            long[] col = out.getCol();
+            long[] free_nodes_extended = out.getIdx();
             ArrayList<Long> tmp = new ArrayList<>();
             for(int i=0;i<free_nodes_extended.length;i++){
                 if(free_nodes_extended[i]>=0){
@@ -355,21 +386,20 @@ public class VisirModel {
             }
             this.sGrid.setFreenodes(free_nodes_Number);
             //lsm, created using coastline DB (NaNs on landmass):
-            Double[][] lsm_mask = Utility.NaNmatrix(xg.length,xg[0].length);
+            lsm_mask = Utility.NaNmatrix(xg.length,xg[0].length);
             for(int i=0;i<free_nodes.length;i++){
                 lsm_mask[0][(int) free_nodes[i]] = 1.0;
             }
             int[] dim = new int[2];
             dim[0]=xg.length;
-            dim[1]=xg[1].length;
+            dim[1]=xg[0].length;
             lsm_mask = Utility.reshape(lsm_mask,dim);
 
             //Safe distance from coastline:
-            Double[] xg_array = Utility.reshape(xg,dim[0]*dim[1]);
-            Double[] yg_array = Utility.reshape(yg, yg.length*yg[0].length);
-            Double[][] xy_g = new Double[xg_array.length][2];
+            xg_array = Utility.reshape(xg,dim[0]*dim[1]);
+            yg_array = Utility.reshape(yg, yg.length*yg[0].length);
+            xy_g = new Double[xg_array.length][2];
 
-            Double[][] dist_mask;
             int nC = x_coast_Inset.size();
             int cols = dim[0]*dim[1];
             if(nC>0){
@@ -383,6 +413,17 @@ public class VisirModel {
                         coast_dist[i][j]= hor_dist[j];
                     }
                 }
+                Double[] min_coast_distTmp = Utility.min(coast_dist,1);
+                min_coast_dist = Utility.reshape(min_coast_distTmp, dim);
+                dist_mask = Utility.NaNmatrix(dim[0],dim[1]);
+                for(int i=0;i<dist_mask.length;i++){
+                    for(int j=0;j<dist_mask[0].length;j++){
+                        if(min_coast_dist[i][j]>=this.extreme_pts.getMinCoastDist()){
+                            dist_mask[i][j]=1.0;
+                        }
+                    }
+                }
+
             } else{
                 dist_mask = Utility.ones(dim[0],dim[1]);
             }
@@ -394,9 +435,142 @@ public class VisirModel {
             // J_mask = lsm_mask' .* UKC_mask .* dist_mask' ;
             // %
             // %###############################################
+            J_mask = Utility.MatrixComponentXcomponent(Utility.MatrixComponentXcomponent(Utility.transposeMatrix(lsm_mask),Utility.transposeMatrix(UKC_mask)),Utility.transposeMatrix(dist_mask));
 
+            xg_Jmasked = Utility.MatrixComponentXcomponent(xg,Utility.transposeMatrix(J_mask));
+            yg_Jmasked = Utility.MatrixComponentXcomponent(yg,Utility.transposeMatrix(J_mask));
+            J_bathy_Inset = Utility.MatrixComponentXcomponent(bathy_Inset,J_mask);
+            // % Note: It is not necessary to pass [xg_Jmasked,yg_Jmasked] to the MAIN.m in place of [xg,yg].
+            // % Indeed, shortest path search already accounts (s. Edges_definition.m)
+            // % for coastline (free_edges) and bathymetry/lsm/dist-from-coastline (nogo_edges)
+            // % [xg_Jmasked,yg_Jmasked] are used here just for the sake of searching departure and arrival nodes (s. below).
+            //-----------------------------------------------------------------------------------------------------
+            //Start and end nodes:
+            xg_array = Utility.reshape(xg_Jmasked,xg_Jmasked.length*xg_Jmasked[0].length);
+            yg_array = Utility.reshape(yg_Jmasked, yg_Jmasked.length*yg_Jmasked[0].length);
+            xy_g = new Double[xg_Jmasked.length*xg_Jmasked[0].length][2];
+            for(int i =0 ;i<xg_Jmasked.length*xg_Jmasked[0].length;i++){
+                xy_g[i][0]=xg_array[i];
+                xy_g[i][1]=yg_array[i];
+            }
+            //distance from start/end nodes:
+            Double[][] tmpP_b=new Double[1][2];
+            tmpP_b[0][0]=this.extreme_pts.getStart_lon();
+            tmpP_b[0][1]=this.extreme_pts.getStart_lat();
+            Double[] start_dist_matrix = hor_distance("s",xy_g,tmpP_b);
+            tmpP_b[0][0]=this.extreme_pts.getEnd_lon();
+            tmpP_b[0][1]=this.extreme_pts.getEnd_lat();
+            Double[] end_dist_matrix = hor_distance("s",xy_g,tmpP_b);
 
+            this.sGrid.setMin_start_dist(Utility.min(start_dist_matrix));
+            this.sGrid.setMin_end_dist(Utility.min(end_dist_matrix));
+
+            if(Double.isNaN(this.sGrid.getMin_start_dist()) || Double.isNaN(this.sGrid.getMin_end_dist())){
+                System.out.println("departure or arrival point not compliant with safety specifications");
+                System.exit(0);
+            }
+            ArrayList<Integer> tmpIndexes = new ArrayList<>();
+            for(int i=0;i<start_dist_matrix.length;i++){
+                if(start_dist_matrix[i]==this.sGrid.getMin_start_dist()){
+                    tmpIndexes.add(i);
+                }
+            }
+            this.sGrid.setNode_start(Collections.min(tmpIndexes));
+            tmpIndexes = new ArrayList<>();
+            for(int i=0;i<end_dist_matrix.length;i++){
+                if(end_dist_matrix[i]==this.sGrid.getMin_end_dist()){
+                    tmpIndexes.add(i);
+                }
+            }
+            this.sGrid.setNode_end(Collections.min(tmpIndexes));
+
+            this.sGrid.setNode_start_lat(yg_array[(int) this.sGrid.getNode_start()]);
+            this.sGrid.setNode_start_lon(xg_array[(int) this.sGrid.getNode_start()]);
+            this.sGrid.setNode_end_lat(yg_array[(int) this.sGrid.getNode_end()]);
+            this.sGrid.setNode_end_lon(yg_array[(int) this.sGrid.getNode_end()]);
+
+            Double[][] tmpP_a = new Double[1][2];
+            tmpP_a[0][0] = this.sGrid.getNode_start_lon();
+            tmpP_a[0][1] = this.sGrid.getNode_start_lat();
+            tmpP_b[0][0] = this.sGrid.getNode_end_lon();
+            tmpP_b[0][1] = this.sGrid.getNode_end_lat();
+            estGdtDist = hor_distance("s", tmpP_a, tmpP_b);
+
+            tmpP_a[0][0] = this.sGrid.getNode_end_lon();
+            tmpP_a[0][1] = this.sGrid.getNode_end_lat();
+            tmpP_b[0][0] = this.sGrid.getNode_end_lon();
+            tmpP_b[0][1] = this.sGrid.getNode_start_lat();
+            Double[] delta_y = hor_distance("s", tmpP_a, tmpP_b);
+            int sign = Utility.sign(this.sGrid.getNode_end_lat()-this.sGrid.getNode_start_lat());
+            for(int i=0;i<delta_y.length;i++){
+                delta_y[i]=delta_y[i]*sign;
+            }
+
+            tmpP_a[0][0] = this.sGrid.getNode_end_lon();
+            tmpP_a[0][1] = this.sGrid.getNode_start_lat();
+            tmpP_b[0][0] = this.sGrid.getNode_start_lon();
+            tmpP_b[0][1] = this.sGrid.getNode_start_lat();
+            Double[] delta_x = hor_distance("s", tmpP_a, tmpP_b);
+            sign = Utility.sign(this.sGrid.getNode_end_lon()-this.sGrid.getNode_start_lon());
+            for(int i=0;i<delta_y.length;i++){
+                delta_y[i]=delta_y[i]*sign;
+            }
+
+            //orientation of the gdt route
+            Double[] atan2 = new Double[delta_x.length];
+            for(int i=0;i<delta_x.length;i++){
+                atan2[i]=Math.atan2(delta_y[i],delta_x[i]);
+            }
+            this.sGrid.setTheta_gdt(atan2);
+            //th= Sgrid.theta_gdt/const.deg2rad
+
+        } else if(this.bar_flag==1){
+            lsm_mask = Utility.NaNmatrix(xg.length,xg[0].length);
+            Double[][] tmp = Utility.transposeMatrix(lsm_mask);
+            J_mask = Utility.NaNmatrix(tmp.length,tmp[0].length);
+            //-----------------------------------------------------------------------------------------------------
+            //Start and end nodes:
+            xg_array = new Double[0];
+            yg_array = new Double[0];
+            estGdtDist = new Double[0];
         }
+        this.x_islands = this.lon_int;
+        this.y_islands = this.lat_int;
+        this.x_continent = this.lon_ext;
+        this.y_continent = this.lat_ext;
+    }
+
+    private Double[] changeDirRule(Double[] inField){
+        // % change of wind/current directional convention:
+        // %
+        // % from atan2 output concention to WAM-like convention, i.e.:
+        // % from:  [-pi, pi] counterclockwise with 0 at  3:00 o'clock
+        // %   to:  [0, 2*pi]        clockwise with 0 at 12:00 o'clock
+        // %
+        // % (inField and outField must be in radians)
+        // %
+        //---------------------------------------------
+        Double[] inField1 = inField;
+        for(int i=0;i<inField1.length;i++){
+            if(inField1[i]<0){
+                inField1[i]+=(2*Math.PI);
+            }
+        }
+
+        //---------------------------------------------
+        Double[] inField2 = inField1;
+        for(int i=0;i<inField2.length;i++){
+            inField2[i]-=(Math.PI/2);
+            if(inField2[i]<0){
+                inField2[i]+=(2*Math.PI);
+            }
+        }
+        //---------------------------------------------
+        Double[] outFiled = new Double[inField2.length];
+        for(int i=0;i<inField2.length;i++){
+            outFiled[i] = -inField2[i]*(2*Math.PI);
+        }
+        return outFiled;
     }
 
     private Double[] hor_distance(String method, Double[][] P_a, Double[][] P_b, Double... varargin){
@@ -449,7 +623,7 @@ public class VisirModel {
 
     }
 
-    private ArrayList<Object> idx_ref2inset_grid(long[] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
+    private idx_ref2inset_gridResults idx_ref2inset_grid(long[] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
         // % remap grid index
         // % from a nx_big columns grid (reference) to a nx columns grid (inset).
         // % (lambda, mu) are the offset coordinates of idx=1 gridpoint of the inset grid.
@@ -484,6 +658,7 @@ public class VisirModel {
             System.exit(0);
         }
         boolean[] test = Utility.anyOr(Utility.anyUnder(idx_big,1), Utility.anyOver(idx_big,(nx_big*ny_big)));
+        System.out.println(""+(nx_big*ny_big));
         for(int i=0;i<test.length;i++){
             if(test[i]){
                 System.out.println("grid index not within reference grid !");
@@ -522,21 +697,18 @@ public class VisirModel {
                 idx[i] = -1;
             }
         }
-        ArrayList<Object> output = new ArrayList<>();
-        output.add((Object) row);
-        output.add((Object) col);
-        output.add((Object) idx);
-        return  output;
+
+        return  new idx_ref2inset_gridResults(row, col, idx);
     }
 
-    private ArrayList<Object> mdata_grid(ArrayList<Double> lat, ArrayList<Double> lon){
+    private mdata_gridResults mdata_grid(ArrayList<Double> lat, ArrayList<Double> lon){
         //converts 2 lat-lon 1-dimensional arrays (Nlat,1) and (Nlon,1) into :
         //a) a list of node coordinates (Nlat*Nlon, 2)
         //b) a meshgrid matrix       (Nlat,   Nlon)
         int NN = lat.size() * lon.size();
-        ArrayList<Object> out = Utility.meshgrid(lat,lon);
-        Double[][] yg = (Double[][]) out.get(0);
-        Double[][] xg = (Double[][]) out.get(1);
+        meshgridResults out = Utility.meshgrid(lat,lon);
+        Double[][] yg = out.getX();
+        Double[][] xg = out.getY();
         int[] aDim = new int[2];
         aDim[0]=NN;
         aDim[1]=1;
@@ -547,14 +719,10 @@ public class VisirModel {
             xy[i][0]=xa[i][0];
             xy[i][1]=ya[i][0];
         }
-        ArrayList<Object> output = new ArrayList<>();
-        output.add((Object) xy);
-        output.add((Object) xg);
-        output.add((Object) yg);
-        return out;
+        return new mdata_gridResults(xy,xg,yg);
     }
 
-    private ArrayList<Object> grid_extreme_coords(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] field_in){
+    private grid_extreme_coordsResults grid_extreme_coords(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] field_in){
         //compute coordinates of grid extreme nodes,
         //both for the reference grid (grid read from DB)
         //and the inset grid
@@ -629,12 +797,7 @@ public class VisirModel {
             }
         }
 
-        //Downcasting and returning results:
-        ArrayList<Object> results = new ArrayList<>();
-        results.add((Object) lat_red);
-        results.add((Object) lon_red);
-        results.add((Object) field_out);
-        return results;
+        return new grid_extreme_coordsResults(lat_red,lon_red,field_out);
     }
 
     private void readout_coast(){
@@ -703,7 +866,7 @@ public class VisirModel {
         }
     }
 
-    private ArrayList<Object> readout_bathy(int bathy_code){
+    private readout_bathyResults readout_bathy(int bathy_code){
         String filename ="";
         String varname = "";
         String lonname = "";
@@ -736,14 +899,14 @@ public class VisirModel {
         }
         //Parsing file:
         MyNetCDFParser test = new MyNetCDFParser(filename);
-        ArrayList<Object> out = test.parseMedOneMin();
+        parseMedOneMinResults out = test.parseMedOneMin();
         if(out == null){
             System.out.println("Parsing fail!");
             return null;
         }
-        ArrayList<Double> latTmp = (ArrayList<Double>) out.get(0);
-        ArrayList<Double> lonTmp = (ArrayList<Double>) out.get(1);
-        Double[][] zTmp = (Double[][]) out.get(2);
+        ArrayList<Double> latTmp = out.getLat();
+        ArrayList<Double> lonTmp = out.getLon();
+        Double[][] zTmp = (Double[][]) out.getDepth();
         //if sea depth >=0, setting as NaN
         for(int i =0 ;i<zTmp.length;i++){
             for(int j=0;j<zTmp[0].length;j++){
@@ -785,11 +948,7 @@ public class VisirModel {
                 z[i][j] = zTmp[latOkIndexes.get(i)][lonOkIndexes.get(j)];
             }
         }
-        ArrayList<Object> output = new ArrayList<>();
-        output.add((Object) lat);
-        output.add((Object) lon);
-        output.add((Object) z);
-        return output;
+        return new readout_bathyResults(lat, lon, z);
     }
 
     private void Tic(){//Equivalent to MATLAB tic function

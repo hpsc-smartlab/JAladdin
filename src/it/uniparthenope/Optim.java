@@ -1,5 +1,7 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Parser.MyJSONParser;
+
 public class Optim {
     //from settings.m
     private long relocAnlsCode;//code of the "analysis" of the  relocatable wave model

@@ -1,5 +1,7 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Parser.MyJSONParser;
+
 import java.util.ArrayList;
 
 public class SafetyParameters {

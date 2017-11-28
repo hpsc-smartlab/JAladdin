@@ -29,6 +29,15 @@ public class SpatialGrid {
     private long inset_Nx;
     private long inset_Ny;
     private long freenodes;
+    private double min_start_dist;
+    private double min_end_dist;
+    private long node_start;
+    private long node_end;
+    private double node_start_lat;
+    private double node_start_lon;
+    private double node_end_lat;
+    private double node_end_lon;
+    private Double[] theta_gdt;
 
 
     public SpatialGrid(){
@@ -247,5 +256,77 @@ public class SpatialGrid {
 
     public void setFreenodes(long freenodes) {
         this.freenodes = freenodes;
+    }
+
+    public double getMin_start_dist() {
+        return min_start_dist;
+    }
+
+    public void setMin_start_dist(double min_start_dist) {
+        this.min_start_dist = min_start_dist;
+    }
+
+    public double getMin_end_dist() {
+        return min_end_dist;
+    }
+
+    public void setMin_end_dist(double min_end_dist) {
+        this.min_end_dist = min_end_dist;
+    }
+
+    public long getNode_start() {
+        return node_start;
+    }
+
+    public void setNode_start(long node_start) {
+        this.node_start = node_start;
+    }
+
+    public long getNode_end() {
+        return node_end;
+    }
+
+    public void setNode_end(long node_end) {
+        this.node_end = node_end;
+    }
+
+    public double getNode_start_lat() {
+        return node_start_lat;
+    }
+
+    public void setNode_start_lat(double node_start_lat) {
+        this.node_start_lat = node_start_lat;
+    }
+
+    public double getNode_start_lon() {
+        return node_start_lon;
+    }
+
+    public void setNode_start_lon(double node_start_lon) {
+        this.node_start_lon = node_start_lon;
+    }
+
+    public Double[] getTheta_gdt() {
+        return theta_gdt;
+    }
+
+    public void setTheta_gdt(Double[] theta_gdt) {
+        this.theta_gdt = theta_gdt;
+    }
+
+    public double getNode_end_lat() {
+        return node_end_lat;
+    }
+
+    public void setNode_end_lat(double node_end_lat) {
+        this.node_end_lat = node_end_lat;
+    }
+
+    public double getNode_end_lon() {
+        return node_end_lon;
+    }
+
+    public void setNode_end_lon(double node_end_lon) {
+        this.node_end_lon = node_end_lon;
     }
 }
