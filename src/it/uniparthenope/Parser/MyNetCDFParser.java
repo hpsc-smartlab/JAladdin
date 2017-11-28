@@ -9,6 +9,8 @@ import ucar.nc2.Variable;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import it.uniparthenope.Boxing.parseMedOneMinResults;
+
 public class MyNetCDFParser {
     private String filePath;
     private NetcdfFile dataFile = null;
@@ -22,7 +24,7 @@ public class MyNetCDFParser {
         }
     }
 
-    public ArrayList<Object> parseMedOneMin(){
+    public parseMedOneMinResults parseMedOneMin(){
         //Retrive the variable named "latitude"
         Variable latitude = dataFile.findVariable("latitude");
         if(latitude == null){
@@ -71,12 +73,7 @@ public class MyNetCDFParser {
                 }
             }
 
-            //Downcasting and returning output
-            ArrayList<Object> out = new ArrayList<>();
-            out.add((Object) lat);
-            out.add((Object) lon);
-            out.add((Object) depth);
-            return out;
+            return new parseMedOneMinResults(lat, lon, depth);
 
         } catch(Exception e){
             e.printStackTrace();
