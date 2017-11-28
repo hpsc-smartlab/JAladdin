@@ -1,7 +1,10 @@
 package it.uniparthenope;
 
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
+import it.uniparthenope.Boxing.meshgridResults;
 
 public class Utility {
 
@@ -169,11 +172,20 @@ public class Utility {
         return root;
     }
 
-    public static ArrayList<Object> meshgrid(ArrayList<Double> x){
+    public static long getUnsignedInt(int x) {
+        return x & 0x00000000ffffffffL;
+    }
+
+    public static int BigToLittleEndian(int x){
+       return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(x).order(ByteOrder.LITTLE_ENDIAN).getInt(0);
+    }
+
+
+    public static meshgridResults meshgrid(ArrayList<Double> x){
         return meshgrid(x,x);
     }
 
-    public static ArrayList<Object> meshgrid(ArrayList<Double> x, ArrayList<Double> y){
+    public static meshgridResults meshgrid(ArrayList<Double> x, ArrayList<Double> y){
         //[X, Y] =meshgrid(x,y) returns 2-D grid coordinates based on the coordinates contained
         // in vectors x and y. X is a matrix where each row is a copy of x,
         // and Y is a matrix where each column is a copy of y.
@@ -185,15 +197,12 @@ public class Utility {
         for(int i =0;i<nRows;i++){
             for(int j=0;j<nCols; j++){
                 X[i][j] = x.get(j);
-                Y[i][j] = y.get(j);
+                Y[i][j] = y.get(i);
             }
         }
-
-        ArrayList<Object> output = new ArrayList<>();
-        output.add((Object) X);
-        output.add((Object) Y);
-        return output;
+        return new meshgridResults(X,Y);
     }
+
 
     public static Double[] reshape(Double[][] A, int dim){
         int[] d = new int[2];
@@ -219,6 +228,24 @@ public class Utility {
         for(int i=0;i<nRows;i++){
             for(int j=0;j<nCols;j++){
                 out[i][j]=A.get(n_element);
+                n_element++;
+            }
+        }
+        return out;
+    }
+
+    public static Double[][] reshape(Double[] A, int[] dim){
+        int nRows = dim[0];
+        int nCols = dim[1];
+        if(A.length != nRows*nCols){
+            System.out.println("A.length must be = to nRows*nCols!");
+            System.exit(0);
+        }
+        int n_element = 0;
+        Double[][] out = new Double[nRows][nCols];
+        for(int i=0;i<nRows;i++){
+            for(int j=0;j<nCols;j++){
+                out[i][j]=A[n_element];
                 n_element++;
             }
         }
@@ -271,4 +298,96 @@ public class Utility {
         }
         return output;
     }
+
+    public static Double[][] transposeMatrix(Double[][] matrix){
+        Double[][] output = new Double[matrix[0].length][matrix.length];
+        for(int i=0;i< matrix.length;i++){
+            for(int j=0;j<matrix[0].length;j++){
+                output[j][i]=matrix[i][j];
+            }
+        }
+        return output;
+    }
+
+    public static Double[][] MatrixComponentXcomponent(Double[][] a, Double[][] b){
+        int nRows = a.length;
+        int nCols = a[0].length;
+        if(a.length!=b.length){
+            System.out.println("a.length != b.length");
+            System.exit(0);
+        }
+        if(a[0].length!=b[0].length){
+            System.out.println("a[0].length != b[0].length");
+            System.exit(0);
+        }
+        Double[][] output = new Double[nRows][nCols];
+        for(int i=0;i<nRows;i++){
+            for(int j=0;j<nCols;j++){
+                output[i][j]=a[i][j]*b[i][j];
+            }
+        }
+        return  output;
+    }
+
+    public static Double min(Double[] array){
+        Double min = array[0];
+        for(int i=1;i<array.length;i++){
+            if(array[i]<min){
+                min = array[i];
+            }
+        }
+        return min;
+    }
+
+    public static Double[] min(Double[][] matrix, int flag){
+        //MATLAB min(x,[],y) implementation
+        if(flag==1){
+            //min(matrix,[],1) (min cols)
+            Double[] out = new Double[matrix[0].length];
+            for(int i=0;i<matrix[0].length;i++){
+                Double minTmp = matrix[0][i];
+                for(int j=1;j<matrix.length;j++){
+                    if(matrix[j][i]<minTmp){
+                        minTmp = matrix[j][i];
+                    }
+                }
+                out[i]=minTmp;
+            }
+            return  out;
+        } else {
+            //min(matrix,[],2) (min rows)
+            Double[] out = new Double[matrix.length];
+            for(int i=0;i<matrix.length;i++){
+                Double minTmp = matrix[i][0];
+                for(int j=1;j<matrix[0].length;j++){
+                    if(matrix[i][j]<minTmp){
+                        minTmp=matrix[i][j];
+                    }
+                }
+                out[i]=minTmp;
+            }
+            return out;
+        }
+    }
+
+    public static int sign(long x){
+        if(x>0){
+            return 1;
+        } else if(x==0){
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    public static int sign(double x){
+        if(x>0){
+            return 1;
+        } else if(x==0){
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
 }
