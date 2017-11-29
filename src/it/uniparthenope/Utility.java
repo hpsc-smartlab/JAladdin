@@ -255,16 +255,32 @@ public class Utility {
         return out;
     }
 
-    public static Double[][] reshape(Double[][] A, int[] dim){//Reshape 4, Richiamo reshape 2
-        int nRows = A.length;
-        int nCols = A[0].length;
-        ArrayList<Double> input = new ArrayList<>();
-        for(int i = 0; i<nRows; i++){
-            for(int j=0; j<nCols; j++){
-                input.add(A[i][j]);
+    public static Double[][] reshape(Double[][] A, int[] dim){//Reshape 4
+        int nRows = dim[0];
+        int nCols = dim[1];
+        if(A.length*A[0].length != nRows*nCols){
+            System.out.println("size(A) must be = to nRows*nCols!");
+            System.exit(0);
+        }
+        Double[][] out = new Double[nRows][nCols];
+        int i=0;
+        int j=0;
+        int k=0;
+        int l=0;
+        for(int u=0;u<nRows*nCols;u++){
+            out[k][l]=A[i][j];
+            i++;
+            k++;
+            if(i==A.length){
+                i=0;
+                j++;
+            }
+            if(k==nRows){
+                k=0;
+                l++;
             }
         }
-        return reshape(input,dim);
+        return out;
     }
 
     public static boolean any(long[] A, String condition, long threshold){
