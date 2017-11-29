@@ -10,7 +10,7 @@ public class Utility {
 
     public static ArrayList<Double> linspace(double min, double max, long n){
         ArrayList<Double> v = new ArrayList<Double>();
-        double delta = (max - min) / 2;
+        double delta = (max - min) / (n-1);
         double accDelta = 0.0;
         for(long i = 0; i<n; i++){
             v.add(min+accDelta);
@@ -21,14 +21,11 @@ public class Utility {
 
     public static ArrayList<Double> logspace(double min, double max, long n){
         //generate an arraylist of n logaritmically spaced elements between min and max (base 10)
-        Double step = (Math.abs(max)-Math.abs(min))/(n-1);
-        Double base = 10.0;
-        Double accDelta = step;
         ArrayList<Double> log = new ArrayList<>();
-        for(int i =0; i<n; i++){
-            Double val = Math.pow(base,accDelta);
-            log.add(val);
-            accDelta+=step;
+        ArrayList<Double> exps = linspace(min, max, n);
+        Double base = 10.0;
+        for(Double exp: exps){
+            log.add(Math.pow(base,exp));
         }
         return log;
     }
@@ -204,7 +201,7 @@ public class Utility {
     }
 
 
-    public static Double[] reshape(Double[][] A, int dim){
+    public static Double[] reshape(Double[][] A, int dim){// Reshape 1, richiamo reshape 4
         int[] d = new int[2];
         d[0]=dim;
         d[1]=0;
@@ -216,43 +213,53 @@ public class Utility {
         return output;
     }
 
-    public static Double[][] reshape(ArrayList<Double> A, int[] dim){
+    public static Double[][] reshape(ArrayList<Double> A, int[] dim){//reshape 2
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.size() != nRows*nCols){
             System.out.println("size(A) must be = to nRows*nCols!");
             System.exit(0);
         }
-        int n_element = 0;
         Double[][] out = new Double[nRows][nCols];
-        for(int i=0;i<nRows;i++){
-            for(int j=0;j<nCols;j++){
-                out[i][j]=A.get(n_element);
-                n_element++;
+        int i=0;
+        int j=0;
+        for(int k=0;k<A.size();k++){
+            out[i][j]=A.get(k);
+            i++;
+            if(i==nRows){
+                i=0;
+                j++;
             }
+
         }
         return out;
     }
 
-    public static Double[][] reshape(Double[] A, int[] dim){
+    public static Double[][] reshape(Double[] A, int[] dim){//reshape 3
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.length != nRows*nCols){
             System.out.println("A.length must be = to nRows*nCols!");
             System.exit(0);
         }
-        int n_element = 0;
         Double[][] out = new Double[nRows][nCols];
-        for(int i=0;i<nRows;i++){
-            for(int j=0;j<nCols;j++){
-                out[i][j]=A[n_element];
-                n_element++;
+        int i=0;
+        int j=0;
+        int n_element = 0;
+        for(int k=0;k<A.length;k++){
+            out[i][j]=A[n_element];
+            n_element++;
+            i++;
+            if(i==nRows){
+                i=0;
+                j++;
             }
+
         }
         return out;
     }
 
-    public static Double[][] reshape(Double[][] A, int[] dim){
+    public static Double[][] reshape(Double[][] A, int[] dim){//Reshape 4, Richiamo reshape 2
         int nRows = A.length;
         int nCols = A[0].length;
         ArrayList<Double> input = new ArrayList<>();
