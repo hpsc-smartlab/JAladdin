@@ -1,5 +1,7 @@
 package it.uniparthenope.Debug;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -59,6 +61,13 @@ public class MyFileWriter {
         }
     }
 
+    public void WriteBooleanArray(String varName, ArrayList<Boolean> array){
+        WriteLine(varName+":");
+        for(Boolean element: array){
+            WriteLine(element.toString());
+        }
+    }
+
     public void WriteDoubleArray(String varName, Double[] array){
         WriteLine(varName+":");
         for(int i=0;i<array.length;i++){
@@ -88,6 +97,7 @@ public class MyFileWriter {
                 row+=matrix[i][j]+" ";
             }
             WriteLine(row);
+            WriteLine("");
         }
     }
 
