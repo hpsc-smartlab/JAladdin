@@ -9,6 +9,7 @@ import it.uniparthenope.Boxing.grid_extreme_coordsResults;
 import it.uniparthenope.Boxing.idx_ref2inset_gridResults;
 import it.uniparthenope.Boxing.readout_bathyResults;
 import it.uniparthenope.Boxing.parseMedOneMinResults;
+import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.MyBinaryParser;
 import it.uniparthenope.Parser.MyCSVParser;
 import it.uniparthenope.Parser.MyNetCDFParser;
@@ -127,10 +128,7 @@ public class VisirModel {
         }
     }
 
-    private class Output{
-        public ArrayList<Double> H_array_m;
-        public Double[][] vel_LUT;
-    }
+
 
     private void ship_Model(){//called from vessel_Response.m, ship_model.m implementation
         //Look-up table for involuntary ship speed reduction in waves.
@@ -144,8 +142,9 @@ public class VisirModel {
 
         //Significant wave height
         //Adding to H_array_m (Nh-1) elements between 10^-1 and 10^log10(Hmax)
-        ArrayList<Double> H_array_m = Utility.logspace(-1.0, Hmax, Nh-1);
+        ArrayList<Double> H_array_m = Utility.logspace(-1.0, Math.log10(Hmax), Nh-1);
         H_array_m.add(0, 0.0);//adding 0 at first element of H_array_m
+
         //preallocations:
         Double[][] vel_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
         Double[][] Rc_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
@@ -155,6 +154,7 @@ public class VisirModel {
         for(Double element : this.ship.getP_level_hp()){
             P_level_thro.add((100*element) / max);
         }
+
         //pars for v_Bowditch:
         Double m2ft = 3.2808399;
         Double a3_ref = 0.0248; //[kts/ ft^2]
@@ -162,7 +162,7 @@ public class VisirModel {
         Double a1_ref = 0.0083; //[kts/ ft^2]
         Double v0_ref = 18.0; //kts
         //LUT computation
-        for(int ih = 1; ih< Nh; ih++){
+        for(int ih = 0; ih< Nh; ih++){
             this.ship.ship_resistance(H_array_m.get(ih), this.constants);
             for(int j = 1; j<this.ship.getP_level_hp().size(); j++){
                 vel_LUT[ih][j] = this.ship.getV_out_kts().get(j);
