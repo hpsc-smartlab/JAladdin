@@ -304,7 +304,7 @@ public class VisirModel {
                 }
             }
         }
-        //CONTINUA QUIIIIIIIIIIIIIIIIIIIIIIIII
+
         //ref. grid coordinates:
         ArrayList<Double> lat_bathy_DB = Utility.linspace(this.sGrid.getDB_yi(), this.sGrid.getDB_yf(), this.sGrid.getDB_Ny());
         ArrayList<Double> lon_bathy_DB = Utility.linspace(this.sGrid.getDB_xi(), this.sGrid.getDB_xf(), this.sGrid.getDB_Nx());
@@ -321,7 +321,6 @@ public class VisirModel {
         this.xy = data_gridOut2.getXy();
         this.xg = data_gridOut2.getXg();
         this.yg = data_gridOut2.getYg();
-
         if(this.visualization.getGraphData()==1){
             //csv_write xy
             try{
