@@ -16,6 +16,14 @@ public class MyFileWriter {
             e.printStackTrace();
         }
     }
+    public MyFileWriter(String fileName, int flag){
+        this.fileName = fileName;
+        try {
+            this.bw = new BufferedWriter(new FileWriter("DebugFiles/"+this.fileName+".txt",true));
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
     public void WriteLine(String line){
         try {
