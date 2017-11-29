@@ -204,10 +204,10 @@ public class VisirModel {
             this.extreme_pts.setBbox_deltaLon_r(0.1);
         }
         Double lat_max = this.extreme_pts.getBbox_deltaLat_u() + Math.max(this.extreme_pts.getStart_lat(), this.extreme_pts.getEnd_lat());
-        Double lon_min = this.extreme_pts.getBbox_deltaLon_l() + Math.min(this.extreme_pts.getStart_lon(), this.extreme_pts.getEnd_lon());
-        Double lat_min = this.extreme_pts.getBbox_deltaLat_d() + Math.min(this.extreme_pts.getStart_lat(), this.extreme_pts.getEnd_lat());
-        Double lon_max = this.extreme_pts.getBbox_deltaLon_r() + Math.max(this.extreme_pts.getStart_lon(), this.extreme_pts.getEnd_lon());
+        Double lon_min = -this.extreme_pts.getBbox_deltaLon_l() + Math.min(this.extreme_pts.getStart_lon(), this.extreme_pts.getEnd_lon());
 
+        Double lat_min = -this.extreme_pts.getBbox_deltaLat_d() + Math.min(this.extreme_pts.getStart_lat(), this.extreme_pts.getEnd_lat());
+        Double lon_max = this.extreme_pts.getBbox_deltaLon_r() + Math.max(this.extreme_pts.getStart_lon(), this.extreme_pts.getEnd_lon());
         if(this.bar_flag == 1) {//fresh DB computation
             //bounding box of reference grid from namelist:
             this.sGrid.setDB_bbox__lat_max(lat_max);
@@ -262,14 +262,8 @@ public class VisirModel {
         ArrayList<Double> lat_bathy = bathymetry.getLat();
         ArrayList<Double> lon_bathy = bathymetry.getLon();
         Double[][] z_bathy = bathymetry.getZ();
-        this.sGrid.setInv_step(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)));
-        //Debug:
-//        MyFileWriter file = new MyFileWriter("gridDefinition.txt");
-//        file.WriteLine("lat_bathy:");
-//        for(Double element: lat_bathy){
-//            file.WriteLine(""+element);
-//        }
-//        file.CloseFile();
+        this.sGrid.setInv_step( Math.round(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)))+0.0 );
+
         //Target grid and reduced bathy field:
         //grid_extreme_coords
         grid_extreme_coordsResults insets = this.grid_extreme_coords(lat_bathy, lon_bathy,z_bathy);
@@ -310,6 +304,7 @@ public class VisirModel {
                 }
             }
         }
+        //CONTINUA QUIIIIIIIIIIIIIIIIIIIIIIIII
         //ref. grid coordinates:
         ArrayList<Double> lat_bathy_DB = Utility.linspace(this.sGrid.getDB_yi(), this.sGrid.getDB_yf(), this.sGrid.getDB_Ny());
         ArrayList<Double> lon_bathy_DB = Utility.linspace(this.sGrid.getDB_xi(), this.sGrid.getDB_xf(), this.sGrid.getDB_Nx());
@@ -736,6 +731,7 @@ public class VisirModel {
                 DB_lat_row.add(i);
             }
         }
+
         for(int i=0;i<lon.size();i++){
             if( (lon.get(i) >= this.sGrid.getDB_bbox__lon_min()) && (lon.get(i) <= this.sGrid.getDB_bbox__lon_max()) ){
                 DB_lon_row.add(i);
@@ -763,16 +759,15 @@ public class VisirModel {
             ArrayList<Integer> lat_row = new ArrayList<>();
             ArrayList<Integer> lon_row = new ArrayList<>();
             for(int i=0;i<lat.size();i++){
-                if( (lat.get(i) >= this.sGrid.getBbox__lat_min()) && (lat.get(i) <= this.sGrid.getDB_bbox__lat_max())){
+                if( (this.sGrid.getBbox__lat_min() <= lat.get(i)) && (lat.get(i) <= this.sGrid.getBbox__lat_max()) ){
                     lat_row.add(i);
                 }
             }
             for(int i=0;i<lon.size();i++){
-                if( (lon.get(i) >= this.sGrid.getBbox__lon_min()) && (lon.get(i) <= this.sGrid.getBbox__lon_max()) ){
+                if((this.sGrid.getBbox__lon_min() <= lon.get(i)) && (lon.get(i) <= this.sGrid.getBbox__lon_max())){
                     lon_row.add(i);
                 }
             }
-
             this.sGrid.setXi(lon.get(lon_row.get(0)));
             this.sGrid.setYi(lat.get(lat_row.get(0)));
             this.sGrid.setXf(lon.get(lon_row.get(lon_row.size()-1)));
@@ -937,15 +932,9 @@ public class VisirModel {
         ArrayList<Double> lat = new ArrayList<>();
         ArrayList<Double> lon = new ArrayList<>();
         Double[][] z = new Double[latOkIndexes.size()][lonOkIndexes.size()];
-        for(int i=0;i<latOkIndexes.size();i++){
+        for(int i=0;i<latOkIndexes.size();i++) {
             lat.add(latTmp.get(latOkIndexes.get(i)));
         }
-        MyFileWriter file = new MyFileWriter("readoutBathy");
-        file.WriteLine("lat");
-        for(Double element: lat){
-            file.WriteLine(""+element);
-        }
-        file.CloseFile();
         for(int i=0;i<lonOkIndexes.size();i++){
             lon.add(lonTmp.get(lonOkIndexes.get(i)));
         }
