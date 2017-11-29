@@ -128,8 +128,6 @@ public class VisirModel {
         }
     }
 
-
-
     private void ship_Model(){//called from vessel_Response.m, ship_model.m implementation
         //Look-up table for involuntary ship speed reduction in waves.
         this.ship.setFn_max(this.constants.getMs2kts(), this.constants.getG0());
@@ -265,7 +263,13 @@ public class VisirModel {
         ArrayList<Double> lon_bathy = bathymetry.getLon();
         Double[][] z_bathy = bathymetry.getZ();
         this.sGrid.setInv_step(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)));
-
+        //Debug:
+//        MyFileWriter file = new MyFileWriter("gridDefinition.txt");
+//        file.WriteLine("lat_bathy:");
+//        for(Double element: lat_bathy){
+//            file.WriteLine(""+element);
+//        }
+//        file.CloseFile();
         //Target grid and reduced bathy field:
         //grid_extreme_coords
         grid_extreme_coordsResults insets = this.grid_extreme_coords(lat_bathy, lon_bathy,z_bathy);
@@ -903,10 +907,10 @@ public class VisirModel {
         ArrayList<Double> latTmp = out.getLat();
         ArrayList<Double> lonTmp = out.getLon();
         Double[][] zTmp = (Double[][]) out.getDepth();
-        //if sea depth >=0, setting as NaN
+        //if sea depth <=0, setting as NaN
         for(int i =0 ;i<zTmp.length;i++){
             for(int j=0;j<zTmp[0].length;j++){
-                if(zTmp[i][j]>=0){
+                if(zTmp[i][j]<=0){
                     zTmp[i][j]= Double.NaN;
                 }
             }
@@ -934,10 +938,16 @@ public class VisirModel {
         ArrayList<Double> lon = new ArrayList<>();
         Double[][] z = new Double[latOkIndexes.size()][lonOkIndexes.size()];
         for(int i=0;i<latOkIndexes.size();i++){
-            lat.add(latTmp.get(i));
+            lat.add(latTmp.get(latOkIndexes.get(i)));
         }
+        MyFileWriter file = new MyFileWriter("readoutBathy");
+        file.WriteLine("lat");
+        for(Double element: lat){
+            file.WriteLine(""+element);
+        }
+        file.CloseFile();
         for(int i=0;i<lonOkIndexes.size();i++){
-            lon.add(lonTmp.get(i));
+            lon.add(lonTmp.get(lonOkIndexes.get(i)));
         }
         for(int i=0;i<latOkIndexes.size();i++){
             for(int j=0;j<lonOkIndexes.size();j++){
