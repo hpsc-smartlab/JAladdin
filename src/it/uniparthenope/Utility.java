@@ -264,40 +264,48 @@ public class Utility {
         return reshape(input,dim);
     }
 
-    public static boolean[] anyUnder(long[] A, long threshold){
-        //return true if any of A if the element of A is < threshold
-        boolean[] output = new boolean[A.length];
-        for(int i = 0; i< A.length; i++){
-            if(A[i]<threshold){
-                output[i] = true;
-            } else {
-                output[i] = false;
-            }
+    public static boolean any(long[] A, String condition, long threshold){
+        boolean output = false;
+        switch(condition){
+            case(">"):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]>threshold){
+                        output = true;
+                    }
+                }
+                break;
+            case("<"):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]<threshold){
+                        output = true;
+                    }
+                }
+                break;
+            case("=="):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]==threshold){
+                        output = true;
+                    }
+                }
+                break;
+            case(">="):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]>=threshold){
+                        output = true;
+                    }
+                }
+                break;
+            case("<="):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]<=threshold){
+                        output = true;
+                    }
+                }
+                break;
         }
         return output;
     }
 
-    public static boolean[] anyOver(long[] A, long threshold){
-        //return true if any of A if the element of A is > threshold
-        boolean[] output = new boolean[A.length];
-        for(int i = 0; i< A.length; i++){
-            if(A[i]>threshold){
-                output[i] = true;
-            } else {
-                output[i] = false;
-            }
-        }
-        return output;
-    }
-
-    public static boolean[] anyOr(boolean[] A, boolean[] B){
-        //return true if A || B = true
-        boolean[] output = new boolean[A.length];
-        for(int i = 0; i< A.length; i++){
-            output[i] = A[i] || B[i];
-        }
-        return output;
-    }
 
     public static Double[][] transposeMatrix(Double[][] matrix){
         Double[][] output = new Double[matrix[0].length][matrix.length];
