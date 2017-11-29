@@ -1,8 +1,10 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.MyJSONParser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Ship {
     /*defined in settings.m*/
@@ -85,13 +87,15 @@ public class Ship {
     }
 
     public void shipPowerLevels(){
-        if(this.Nvel == 1){
+        if(this.Nvel ==1){
             //constant power level:
-            this.P_level_hp.add((1.0 * this.P_max_hp));
-        } else {
-            for(Double i=1.0; i<=this.Nvel; i=i+0.1){
-                this.P_level_hp.add((i * this.P_max_hp));
-            }
+            this.P_level_hp.add(1.0);
+        } else{
+            this.P_level_hp = Utility.linspace(0.1, 1.0, (long) this.Nvel);
+            Collections.reverse(this.P_level_hp);
+        }
+        for(int i=0;i<this.P_level_hp.size();i++){
+            this.P_level_hp.set(i,this.P_level_hp.get(i)*this.P_max_hp);
         }
     }
 
