@@ -197,15 +197,23 @@ public class Utility {
     }
 
 
-    public static Double[] reshape(Double[][] A, int dim){// Reshape 1, richiamo reshape 4
-        int[] d = new int[2];
-        d[0]=dim;
-        d[1]=0;
-        Double[][] tmp =reshape(A,d);
-        Double[] output = new Double[dim];
-        for(int i=0;i<dim;i++){
-            output[i]=tmp[i][0];
+    public static Double[] reshape(Double[][] A, int dim){// Reshape 1
+        if(A.length*A[0].length != dim){
+            System.out.println("size(A) must be = dim!");
+            System.exit(0);
         }
+        Double[] output = new Double[dim];
+        int i=0;
+        int j=0;
+        for(int k=0;k<dim;k++){
+            output[k]=A[i][j];
+            i++;
+            if(i==A.length){
+                i=0;
+                j++;
+            }
+        }
+
         return output;
     }
 
