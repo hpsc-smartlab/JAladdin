@@ -89,38 +89,26 @@ public class Utility {
         return (S*Sxx*Sy/Sx - Sx*Sy)/Delta;
     }
 
-    public static Double fzero(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
-        //This function return zeros of the function defined in ship_resitance.m file
-        //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
-        //The function domain is defined between -10*x0 and +10*x0 where x0 is the starting point (v_search)
-        //This function uses bisection method to find function root. It was used because if initial
-        //condition are satisfied, always converge (global method)
 
-        //Initial conditions: f(x) is a continous function in [a,b]
-        //sign(f(a)) != sign(f(b))
-        Double a = -10*x0;
-        Double b= 10*x0;
-        //Checking initial conditions:
-        //Function evaluations in a and b
-        Double fa = k3 * Math.pow(a, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(a, 2) + k0;//Function evaluation in 'a'
-        Double fb = k3 * Math.pow(b, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(b, 2) + k0;//Function evaluation in 'b'
-        Double zero = Double.NaN;
-        if((fa*fb)<0){//if sign(fa) != sign(fb)
-            System.out.println("OK! Initial conditions satisfied! fa="+fa+", fb= "+fb);
-            zero = bisection(a,b,k3,k2,k0,n_exp,v_max_ms);
-        } else{
-            System.out.println("Initial conditions not satisfied! fa="+fa+", fb= "+fb);
-            System.exit(-1);
+    //This function return zero of the function defined in ship_resitance.m file
+    //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
+    //it's an approssimation of fzero matlab function.
+    public static Double Newton(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
+        Double xk = x0;
+        int k=0;
+        Double delta_ass = 0.0000001;//Max absolute error threshold
+        int kmax = 1000000; //Max iterations number
+        Double fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
+        Double fprimoxk = k3*(3+n_exp)*Math.pow(xk,(3+n_exp)-1)/Math.pow(v_max_ms, n_exp) + k2*2*xk;
+        Double ck= -fxk/fprimoxk;
+        while( (Math.abs(ck) > delta_ass*Math.ulp(1.0)) && (k<kmax) ){
+            xk+=ck;
+            fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
+            fprimoxk = k3*(3+n_exp)*Math.pow(xk,(3+n_exp)-1)/Math.pow(v_max_ms, n_exp) + k2*2*xk;
+            ck=-fxk/fprimoxk;
+            k++;
         }
-
-        return zero;
-    }
-
-    public static Double fzero_secant(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
-        //This function return zeros of the function defined in ship_resitance.m file
-        //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
-        //This function uses secant method to find function root.
-        return secant(x0, (x0+ 0.5), k3, k2, k0, n_exp, v_max_ms);
+        return xk;
     }
 
     private static Double bisection(Double a, Double b, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
@@ -141,6 +129,13 @@ public class Utility {
         }
     }
 
+    public static Double fzero_secant(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
+        //This function return zeros of the function defined in ship_resitance.m file
+        //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
+        //This function uses secant method to find function root.
+        return secant(x0, (x0+ 0.5), k3, k2, k0, n_exp, v_max_ms);
+    }
+
     private static Double secant(Double x0, Double x1, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
         //Solve f(x) = 0 with secant method.
         Double delta_ass = 0.0000001;//Max absolute error threshold
@@ -151,13 +146,13 @@ public class Utility {
         Double xk1 = x1;
         Double root = xk;
         //Function evaluation in xk and xk+1
-        Double fxk = k3 * Math.pow(xk, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
-        Double fxk1 = k3 * Math.pow(xk1, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk1, 2) + k0;
+        Double fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
+        Double fxk1 = k3 * Math.pow(xk1, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk1, 2) + k0;
         //line gradient approssimation
         Double pxk = (fxk-fxk1)/(xk-xk1);
         //k-step correction
         Double ck = -(fxk/pxk);
-        while( (ck > delta_ass*Math.ulp(1.0)) && (k<=kmax) ){//stop criteria
+        while( (Math.abs(ck) > delta_ass*Math.ulp(1.0)) && (k<=kmax) ){//stop criteria
             xk1 = xk;
             fxk1 = fxk;
             xk = xk + ck;
@@ -166,6 +161,7 @@ public class Utility {
             ck = -(fxk/pxk);
             k++;
         }
+        root=xk;
         return root;
     }
 
