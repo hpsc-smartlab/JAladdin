@@ -144,13 +144,13 @@ public class Ship {
 //         Double sigma_aw_tilde = cos(cost.deg2rad*alpha/2) .* sigma_aw_tilde
         Double sigma_aw_tilde = this.ship_Raw_alexandersson(Lwl,BB,TT);
         Double Fn_tilde = this.ship_Fn_tilde(constants);
-        Double k2 = sigma_aw_tilde * constants.getRho_water() * Math.sqrt( constants.getG0()/Math.pow(Lwl,3) ) * Math.pow(xi,2) * Math.pow(BB,2) / ( 2* this.etaEngine * Fn_tilde);
+        Double k2 = sigma_aw_tilde * constants.getRho_water() * Math.sqrt( constants.getG0()/Math.pow(Lwl,3) ) * Math.pow(xi,2) * Math.pow(BB,2) /
+                ( 2* this.etaEngine * Fn_tilde);
         // Double alpha = 0.0; //angle of encounter in deg from North
         // k2ca = k2 * cos(constants.deg2rad * alpha);
 
         //Calm water resistance: P = k3 * v^3
         Double k3 = P_max_w / Math.pow(v_max_ms,3); //W*s^3/m^3
-
         long Rr_exp = 2; // default is = 2; Referee #1 cp. also Harvald Eq.4.3.27
         long n_exp = Rr_exp - 2;
         if(n_exp < 0){
@@ -163,27 +163,9 @@ public class Ship {
         this.v_out_kts.add(0,Double.NaN);
         this.R_c.add(0,Double.NaN);
         this.R_aw.add(0,Double.NaN);
-        for(int ip=1; ip<=P_w.size()-1; ip++){
+        for(int ip=0; ip<P_w.size(); ip++){
             Double k0 = -P_w.get(ip);
-            // zeros of  R(v)*v - P  = 0:
-            //num_method = 'analytic'
-            String num_method = "fzero";
-
-            if( Rr_exp!=0 && !num_method.equals("fzero") ){
-                System.out.println("This case must be solved using the fzero method!");
-            }
-            //Don't need to be implemented. fzero implemented method is an approssimation
-            /*switch (num_method){
-                case "roots":
-                    //to be implemented
-                    break;
-                case "analytic":
-                    //to be implemented
-                    break;
-                case "fzero":
-                    break;
-            }*/
-            Double v_out_ms = Utility.fzero_secant(k3,k2,k0,n_exp,v_max_ms,v_search);
+            Double v_out_ms = Utility.Newton(k3,k2,k0,n_exp,v_max_ms,v_search);
             v_search = v_out_ms;
             this.v_out_kts.add(ip,constants.getMs2kts()*v_out_ms);
 
