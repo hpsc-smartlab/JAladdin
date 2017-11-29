@@ -657,13 +657,9 @@ public class VisirModel {
             System.out.println("inset grid not within reference grid !");
             System.exit(0);
         }
-        boolean[] test = Utility.anyOr(Utility.anyUnder(idx_big,1), Utility.anyOver(idx_big,(nx_big*ny_big)));
-        System.out.println(""+(nx_big*ny_big));
-        for(int i=0;i<test.length;i++){
-            if(test[i]){
-                System.out.println("grid index not within reference grid !");
-                System.exit(0);
-            }
+        if((Utility.any(idx_big,"<",1)) || Utility.any(idx_big,">",(nx_big*ny_big))){
+            System.out.println("grid index not within reference grid !");
+            System.exit(0);
         }
         //col idx (ref):
         long[] col_big = new long[idx_big.length];
