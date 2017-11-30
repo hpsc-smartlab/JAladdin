@@ -64,6 +64,14 @@ public class Utility {
         return matrix;
     }
 
+    public static Double[] NaNarray(int dim){
+        Double[] array = new Double[dim];
+        for(int i=0;i<dim;i++){
+            array[i]=Double.NaN;
+        }
+        return array;
+    }
+
     public static Double linfit_origin(ArrayList<Double> x, ArrayList<Double> y){//From lingit_origin.m
         // Least square fit of linear funztion through origin.
         // cp. Numerical Recipes,
