@@ -82,6 +82,13 @@ public class MyFileWriter {
         }
     }
 
+    public void WriteLongArray(String varName, long[] array){
+        WriteLine(varName+":");
+        for(int i=0;i<array.length;i++){
+            WriteLine(""+array[i]);
+        }
+    }
+
     public void WriteIntegerArray(String varName, Integer[] array){
         WriteLine(varName+":");
         for(int i=0;i<array.length;i++){
