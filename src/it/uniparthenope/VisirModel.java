@@ -334,11 +334,11 @@ public class VisirModel {
         //--------------------------------------------------------------------
         //Joint coast-vessel safety mask:
         System.out.println("computation of a joint coast-vessel safety mask...");
-        Double[][] UKC_mask = Utility.ones(bathy_Inset.length, bathy_Inset[0].length);
+        Double[][] UKC_mask = Utility.NaNmatrix(bathy_Inset.length, bathy_Inset[0].length);
         for(int i=0;i<UKC_mask.length;i++){
             for(int j=0;j<UKC_mask[0].length;j++){
-                if(bathy_Inset[i][j] < this.ship.getDraught()){
-                    UKC_mask[i][j] = Double.NaN;
+                if(bathy_Inset[i][j]>this.ship.getDraught()){
+                    UKC_mask[i][j] = 1.0;
                 }
             }
         }
@@ -385,23 +385,32 @@ public class VisirModel {
             this.sGrid.setFreenodes(free_nodes_Number);
             //lsm, created using coastline DB (NaNs on landmass):
             lsm_mask = Utility.NaNmatrix(xg.length,xg[0].length);
-            for(int i=0;i<free_nodes.length;i++){
-                lsm_mask[0][(int) free_nodes[i]] = 1.0;
+            int nRows = xg.length;
+            int ii=0;
+            int jj=0;
+            for(int k=0;k<free_nodes.length;k++){
+                int index =(int) free_nodes[k]-1;
+                jj=index/nRows;
+                ii=(index%nRows);
+                lsm_mask[ii][jj]=1.0;
             }
             int[] dim = new int[2];
             dim[0]=xg.length;
             dim[1]=xg[0].length;
-            lsm_mask = Utility.reshape(lsm_mask,dim);
 
             //Safe distance from coastline:
             xg_array = Utility.reshape(xg,dim[0]*dim[1]);
             yg_array = Utility.reshape(yg, yg.length*yg[0].length);
             xy_g = new Double[xg_array.length][2];
-
+            for(int i=0;i<xg_array.length;i++){
+                xy_g[i][0] = xg_array[i];
+                xy_g[i][1] = yg_array[i];
+            }
             int nC = x_coast_Inset.size();
             int cols = dim[0]*dim[1];
             if(nC>0){
-                Double[][] coast_dist = Utility.zeros(nC, cols);
+                //Double[][] coast_dist = Utility.zeros(nC, cols);
+                Double[][] coast_dist = new Double[nC][cols];
                 Double[][] P_b = new Double[1][2];
                 for(int i=0;i<nC;i++){
                     P_b[0][0]=x_coast_Inset.get(i);
@@ -411,6 +420,7 @@ public class VisirModel {
                         coast_dist[i][j]= hor_dist[j];
                     }
                 }
+
                 Double[] min_coast_distTmp = Utility.min(coast_dist,1);
                 min_coast_dist = Utility.reshape(min_coast_distTmp, dim);
                 dist_mask = Utility.NaNmatrix(dim[0],dim[1]);
@@ -425,7 +435,6 @@ public class VisirModel {
             } else{
                 dist_mask = Utility.ones(dim[0],dim[1]);
             }
-
             // %###############################################
             // %
             // %  Joint safe mask:
@@ -433,7 +442,7 @@ public class VisirModel {
             // J_mask = lsm_mask' .* UKC_mask .* dist_mask' ;
             // %
             // %###############################################
-            J_mask = Utility.MatrixComponentXcomponent(Utility.MatrixComponentXcomponent(Utility.transposeMatrix(lsm_mask),Utility.transposeMatrix(UKC_mask)),Utility.transposeMatrix(dist_mask));
+            J_mask = Utility.MatrixComponentXcomponent(Utility.MatrixComponentXcomponent(Utility.transposeMatrix(lsm_mask),UKC_mask),Utility.transposeMatrix(dist_mask));
 
             xg_Jmasked = Utility.MatrixComponentXcomponent(xg,Utility.transposeMatrix(J_mask));
             yg_Jmasked = Utility.MatrixComponentXcomponent(yg,Utility.transposeMatrix(J_mask));
@@ -536,6 +545,7 @@ public class VisirModel {
         this.y_islands = this.lat_int;
         this.x_continent = this.lon_ext;
         this.y_continent = this.lat_ext;
+
     }
 
     private Double[] changeDirRule(Double[] inField){
@@ -587,6 +597,7 @@ public class VisirModel {
         // % method='s' for spherical geometry
         this.constants.setDeg2rad(Math.PI/180);
         Double grid_step_in_NM = varargin.length > 0 ? varargin[0] : 1.0;
+
         Double[] xa = new Double[P_a.length];
         Double[] ya = new Double[P_a.length];
         for(int i=0;i<P_a.length;i++){
@@ -601,10 +612,11 @@ public class VisirModel {
             yb[i]=P_b[i][1];
         }
 
+
         Double[] dd=new Double[P_a.length];
         if(method=="plane"||method=="p"){
             for(int i=0;i<P_a.length;i++){
-                dd[i]=grid_step_in_NM*Math.sqrt(Math.pow((xa[i]-xb[i]),2) + Math.pow((ya[i]-yb[i]),2));
+                dd[i]=grid_step_in_NM*Math.sqrt(Math.pow((xa[i]-xb[0]),2) + Math.pow((ya[i]-yb[0]),2));
             }
         } else if(method=="sphere" || method=="s"){
             // % from : http://mathworld.wolfram.com/GreatCircle.html
@@ -612,13 +624,13 @@ public class VisirModel {
             // % output in Nautical Miles (NM)
             Double E_radius = 3444.0; //NM
             for(int i=0;i<P_a.length;i++){
-                dd[i]=E_radius*Math.acos(Math.cos(this.constants.getDeg2rad()*ya[i])*Math.cos(this.constants.getDeg2rad()*yb[i])*
-                Math.cos(this.constants.getDeg2rad()*(xa[i]-xb[i]))*Math.sin(this.constants.getDeg2rad()*ya[i])*
-                Math.sin(this.constants.getDeg2rad()*yb[i]));
+                dd[i]=E_radius * Math.acos(Math.cos(this.constants.getDeg2rad()*ya[i])*Math.cos(this.constants.getDeg2rad()*yb[0])*
+                        Math.cos(this.constants.getDeg2rad()*(xa[i]-xb[0]))+Math.sin(this.constants.getDeg2rad()*ya[i])*
+                        Math.sin(this.constants.getDeg2rad()*yb[0]));
             }
         }
-        return dd;
 
+        return dd;
     }
 
     private idx_ref2inset_gridResults idx_ref2inset_grid(long[] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
