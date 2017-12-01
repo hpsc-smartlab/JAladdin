@@ -8,6 +8,14 @@ import it.uniparthenope.Boxing.meshgridResults;
 
 public class Utility {
 
+    public static long Tic(){
+        return System.nanoTime();
+    }
+
+    public static long Toc(long startTime){
+        return  System.nanoTime() - startTime;
+    }
+
     public static ArrayList<Double> linspace(double min, double max, long n){
         ArrayList<Double> v = new ArrayList<Double>();
         double delta = (max - min) / (n-1);
@@ -107,7 +115,8 @@ public class Utility {
         Double delta_ass = 0.0000001;//Max absolute error threshold
         int kmax = 1000000; //Max iterations number
         Double fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
-        Double fprimoxk = k3*(3+n_exp)*Math.pow(xk,(3+n_exp)-1)/Math.pow(v_max_ms, n_exp) + k2*2*xk;
+        //Double fprimoxk = k3*(3+n_exp)*Math.pow(xk,(3+n_exp)-1)/Math.pow(v_max_ms, n_exp) + k2*2*xk;
+        Double fprimoxk=2*k2*xk+(3+n_exp)*(1/Math.pow(v_max_ms,n_exp))*k3*Math.pow(xk,(2+n_exp));
         Double ck= -fxk/fprimoxk;
         while( (Math.abs(ck) > delta_ass*Math.ulp(1.0)) && (k<kmax) ){
             xk+=ck;
