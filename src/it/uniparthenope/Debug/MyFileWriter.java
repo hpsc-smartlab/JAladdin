@@ -5,11 +5,15 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MyFileWriter {
     private String fileName;
     private BufferedWriter bw;
+    private static final DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     public MyFileWriter(String fileName){
         this.fileName = fileName;
@@ -19,13 +23,33 @@ public class MyFileWriter {
             e.printStackTrace();
         }
     }
-    public MyFileWriter(String fileName, int flag){
-        this.fileName = fileName;
+    public MyFileWriter(String fileName,String mode, boolean append){
+        //this.fileName = fileName;
         try {
-            this.bw = new BufferedWriter(new FileWriter("DebugFiles/"+this.fileName+".txt",true));
+            if(mode =="debug"){
+                this.bw = new BufferedWriter(new FileWriter("DebugFiles/errors.log",append));
+                this.fileName="errors";
+            }
+            else{
+                this.bw = new BufferedWriter(new FileWriter("Output/exec.log",append));
+                this.fileName="exec";
+            }
+            if(!append){
+                WriteLine("Current timestamp: "+this.sdf.format(new Date()));
+            }
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    private String dateTime(){
+        return this.sdf.format(new Date());
+    }
+
+    public void WriteLog(String message){
+        WriteLine("************************");
+        WriteLine(this.dateTime()+":\t"+message);
+        WriteLine("************************");
     }
 
     public void WriteValue(String varName, Double value){
