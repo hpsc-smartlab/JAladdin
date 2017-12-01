@@ -476,7 +476,6 @@ public class VisirModel {
                         coast_dist[i][j]= hor_dist[j];
                     }
                 }
-
                 Double[] min_coast_distTmp = Utility.min(coast_dist,1);
                 min_coast_dist = Utility.reshape(min_coast_distTmp, dim);
                 dist_mask = Utility.NaNmatrix(dim[0],dim[1]);
@@ -617,7 +616,6 @@ public class VisirModel {
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Done.");
         this.logFile.CloseFile();
-
     }
 
     private Double[] changeDirRule(Double[] inField){
