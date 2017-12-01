@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import it.uniparthenope.Boxing.meshgridResults;
+import it.uniparthenope.Debug.MyFileWriter;
 
 public class Utility {
 
@@ -38,8 +39,9 @@ public class Utility {
         return log;
     }
 
-    public static Double[][] zeros(int rows, int cols){
-        Double[][] matrix = new Double[rows][cols];
+
+    public static double[][] zeros(int rows, int cols){
+        double[][] matrix = new double[rows][cols];
         for(int i = 0; i< rows; i++){
             for(int j = 0; j< cols; j++){
                 matrix[i][j] = 0.0;
@@ -48,12 +50,14 @@ public class Utility {
         return matrix;
     }
 
-    public static Double[][] ones(int size){
-        return ones(size, size);
+
+
+    public static double[][] ones(int size){
+        return ones(size,size);
     }
 
-    public static Double[][] ones(int rows, int cols){
-        Double[][] matrix = new Double[rows][cols];
+    public static double[][] ones(int rows, int cols){
+        double[][] matrix = new double[rows][cols];
         for(int i = 0; i< rows; i++){
             for(int j = 0; j< cols; j++){
                 matrix[i][j] = 1.0;
@@ -62,8 +66,9 @@ public class Utility {
         return matrix;
     }
 
-    public static Double[][] NaNmatrix(int rows, int cols){
-        Double[][] matrix = new Double[rows][cols];
+
+    public static double[][] NaNmatrix(int rows, int cols){
+        double[][] matrix = new double[rows][cols];
         for(int i=0;i<rows;i++){
             for(int j=0;j<cols;j++){
                 matrix[i][j]=Double.NaN;
@@ -72,52 +77,26 @@ public class Utility {
         return matrix;
     }
 
-    public static Double[] NaNarray(int dim){
-        Double[] array = new Double[dim];
+    public static double[] NaNarray(int dim){
+        double[] array = new double[dim];
         for(int i=0;i<dim;i++){
             array[i]=Double.NaN;
         }
         return array;
     }
 
-    public static Double linfit_origin(ArrayList<Double> x, ArrayList<Double> y){//From lingit_origin.m
-        // Least square fit of linear funztion through origin.
-        // cp. Numerical Recipes,
-        // http://hebb.mit.edu/courses/9.29/2002/readings/c15-2.pdf
-        // set a=0 in Eq.(15.2.6), with sigma=1 in definitions Eq.(15.2.4)
-        // and post-processing after setting a=0
-        int S = x.size();
-        Double Sx = 0.0;
-        ArrayList<Double> Sx2 = new ArrayList<Double>();
-        for(Double element : x){
-            Sx += element;
-            Sx2.add(Math.pow(element,2));
-        }
-        Double Sy = 0.0;
-        for(Double element : y){
-            Sy += element;
-        }
-        Double Sxx = 0.0;
-        for(Double element : Sx2){
-            Sxx += element;
-        }
-        Double Delta = S*Sxx - Math.pow(Sx,2);
-        return (S*Sxx*Sy/Sx - Sx*Sy)/Delta;
-    }
-
-
     //This function return zero of the function defined in ship_resitance.m file
     //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
     //it's an approssimation of fzero matlab function.
-    public static Double Newton(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
-        Double xk = x0;
+    public static double Newton(double k3, double k2, double k0, long n_exp, double v_max_ms, double x0){
+        double xk = x0;
         int k=0;
-        Double delta_ass = 0.0000001;//Max absolute error threshold
+        double delta_ass = 0.0000001;//Max absolute error threshold
         int kmax = 1000000; //Max iterations number
-        Double fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
+        double fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
         //Double fprimoxk = k3*(3+n_exp)*Math.pow(xk,(3+n_exp)-1)/Math.pow(v_max_ms, n_exp) + k2*2*xk;
-        Double fprimoxk=2*k2*xk+(3+n_exp)*(1/Math.pow(v_max_ms,n_exp))*k3*Math.pow(xk,(2+n_exp));
-        Double ck= -fxk/fprimoxk;
+        double fprimoxk=2*k2*xk+(3+n_exp)*(1/Math.pow(v_max_ms,n_exp))*k3*Math.pow(xk,(2+n_exp));
+        double ck= -fxk/fprimoxk;
         while( (Math.abs(ck) > delta_ass*Math.ulp(1.0)) && (k<kmax) ){
             xk+=ck;
             fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
@@ -128,16 +107,17 @@ public class Utility {
         return xk;
     }
 
-    private static Double bisection(Double a, Double b, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
+
+    private static double bisection(double a, double b, double k3, double k2, double k0, long n_exp, double v_max_ms){
         //Solve f(x) = 0 with recoursive bisection method.
-        Double delta_ass = 0.001;//Max absolute error threshold
+        double delta_ass = 0.001;//Max absolute error threshold
         if(Math.abs((b-a)) <= (delta_ass + Math.max(Math.abs(a),Math.abs(b)))){//base case
             return (a+b)/2;//Function root is approssimated with the middle point of the range
         }
         else{//recoursive function calls
-            Double fa = k3 * Math.pow(a, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(a, 2) + k0;//Function evaluation in 'a'
-            Double meanPoint = (a+b)/2;//Mean point of the range [a, b]
-            Double fmean = k3 * Math.pow(meanPoint, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(meanPoint, 2) + k0; // Function evaluation in 'meanPoint'
+            double fa = k3 * Math.pow(a, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(a, 2) + k0;//Function evaluation in 'a'
+            double meanPoint = (a+b)/2;//Mean point of the range [a, b]
+            double fmean = k3 * Math.pow(meanPoint, n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(meanPoint, 2) + k0; // Function evaluation in 'meanPoint'
             if((fa*fmean)<0){//if sign(fa) != sign(fmean)
                 return bisection(a, meanPoint, k3, k2, k0, n_exp, v_max_ms);//Root is in the range [a, meanPoint]
             }else {
@@ -146,29 +126,29 @@ public class Utility {
         }
     }
 
-    public static Double fzero_secant(Double k3, Double k2, Double k0, long n_exp, Double v_max_ms, Double x0){
+    public static double fzero_secant(double k3, double k2, double k0, long n_exp, double v_max_ms, double x0){
         //This function return zeros of the function defined in ship_resitance.m file
         //k3*x^(3+n_exp)/v_max_ms^n_exp + k2 * x^2 +k0
         //This function uses secant method to find function root.
         return secant(x0, (x0+ 0.5), k3, k2, k0, n_exp, v_max_ms);
     }
 
-    private static Double secant(Double x0, Double x1, Double k3, Double k2, Double k0, long n_exp, Double v_max_ms){
+    private static double secant(double x0, double x1, double k3, double k2, double k0, long n_exp, double v_max_ms){
         //Solve f(x) = 0 with secant method.
-        Double delta_ass = 0.0000001;//Max absolute error threshold
+        double delta_ass = 0.0000001;//Max absolute error threshold
         int kmax = 10000000; //Max iterations number
         int k = 1;
         //Initial xk and xk+1
-        Double xk = x0;
-        Double xk1 = x1;
-        Double root = xk;
+        double xk = x0;
+        double xk1 = x1;
+        double root = xk;
         //Function evaluation in xk and xk+1
-        Double fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
-        Double fxk1 = k3 * Math.pow(xk1, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk1, 2) + k0;
+        double fxk = k3 * Math.pow(xk, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk, 2) + k0;
+        double fxk1 = k3 * Math.pow(xk1, 3+n_exp)/Math.pow(v_max_ms, n_exp) + k2 * Math.pow(xk1, 2) + k0;
         //line gradient approssimation
-        Double pxk = (fxk-fxk1)/(xk-xk1);
+        double pxk = (fxk-fxk1)/(xk-xk1);
         //k-step correction
-        Double ck = -(fxk/pxk);
+        double ck = -(fxk/pxk);
         while( (Math.abs(ck) > delta_ass*Math.ulp(1.0)) && (k<=kmax) ){//stop criteria
             xk1 = xk;
             fxk1 = fxk;
@@ -202,8 +182,8 @@ public class Utility {
         // The grid represented by the coordinates X and Y has length(y) rows and length(x) columns.
         int nRows = y.size();
         int nCols = x.size();
-        Double[][] X = new Double[nRows][nCols];
-        Double[][] Y = new Double[nRows][nCols];
+        double[][] X = new double[nRows][nCols];
+        double[][] Y = new double[nRows][nCols];
         for(int i =0;i<nRows;i++){
             for(int j=0;j<nCols; j++){
                 X[i][j] = x.get(j);
@@ -214,12 +194,15 @@ public class Utility {
     }
 
 
-    public static Double[] reshape(Double[][] A, int dim){// Reshape 1
+    public static double[] reshape(double[][] A, int dim){// Reshape 1
         if(A.length*A[0].length != dim){
             System.out.println("size(A) must be = dim!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("reshape: size(A) must be = dim!");
+            debug.CloseFile();
             System.exit(0);
         }
-        Double[] output = new Double[dim];
+        double[] output = new double[dim];
         int i=0;
         int j=0;
         for(int k=0;k<dim;k++){
@@ -234,14 +217,17 @@ public class Utility {
         return output;
     }
 
-    public static Double[][] reshape(ArrayList<Double> A, int[] dim){//reshape 2
+    public static double[][] reshape(ArrayList<Double> A, int[] dim){//reshape 2
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.size() != nRows*nCols){
             System.out.println("size(A) must be = to nRows*nCols!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("reshape: size(A) must be = to nRows*nCols!");
+            debug.CloseFile();
             System.exit(0);
         }
-        Double[][] out = new Double[nRows][nCols];
+        double[][] out = new double[nRows][nCols];
         int i=0;
         int j=0;
         for(int k=0;k<A.size();k++){
@@ -256,14 +242,17 @@ public class Utility {
         return out;
     }
 
-    public static Double[][] reshape(Double[] A, int[] dim){//reshape 3
+    public static double[][] reshape(double[] A, int[] dim){//reshape 3
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.length != nRows*nCols){
             System.out.println("A.length must be = to nRows*nCols!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("reshape: A.length must be = to nRows*nCols!");
+            debug.CloseFile();
             System.exit(0);
         }
-        Double[][] out = new Double[nRows][nCols];
+        double[][] out = new double[nRows][nCols];
         int i=0;
         int j=0;
         int n_element = 0;
@@ -280,14 +269,17 @@ public class Utility {
         return out;
     }
 
-    public static Double[][] reshape(Double[][] A, int[] dim){//Reshape 4
+    public static double[][] reshape(double[][] A, int[] dim){//Reshape 4
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.length*A[0].length != nRows*nCols){
             System.out.println("size(A) must be = to nRows*nCols!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("reshape: size(A) must be = to nRows*nCols!");
+            debug.CloseFile();
             System.exit(0);
         }
-        Double[][] out = new Double[nRows][nCols];
+        double[][] out = new double[nRows][nCols];
         int i=0;
         int j=0;
         int k=0;
@@ -351,8 +343,8 @@ public class Utility {
     }
 
 
-    public static Double[][] transposeMatrix(Double[][] matrix){
-        Double[][] output = new Double[matrix[0].length][matrix.length];
+    public static double[][] transposeMatrix(double[][] matrix){
+        double[][] output = new double[matrix[0].length][matrix.length];
         for(int i=0;i< matrix.length;i++){
             for(int j=0;j<matrix[0].length;j++){
                 output[j][i]=matrix[i][j];
@@ -361,18 +353,24 @@ public class Utility {
         return output;
     }
 
-    public static Double[][] MatrixComponentXcomponent(Double[][] a, Double[][] b){
+    public static double[][] MatrixComponentXcomponent(double[][] a, double[][] b){
         int nRows = a.length;
         int nCols = a[0].length;
         if(a.length!=b.length){
             System.out.println("a.length != b.length");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("MatrixComponentXcomponent: a.length != b.length");
+            debug.CloseFile();
             System.exit(0);
         }
         if(a[0].length!=b[0].length){
             System.out.println("a[0].length != b[0].length");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("MatrixComponentXcomponent: a[0].length != b[0].length");
+            debug.CloseFile();
             System.exit(0);
         }
-        Double[][] output = new Double[nRows][nCols];
+        double[][] output = new double[nRows][nCols];
         for(int i=0;i<nRows;i++){
             for(int j=0;j<nCols;j++){
                 output[i][j]=a[i][j]*b[i][j];
@@ -381,7 +379,7 @@ public class Utility {
         return  output;
     }
 
-    public static Double min(Double[] array){
+    public static double min(double[] array){
         Double min = array[0];
         for(int i=1;i<array.length;i++){
             if(array[i]<min){
@@ -391,13 +389,13 @@ public class Utility {
         return min;
     }
 
-    public static Double[] min(Double[][] matrix, int flag){
+    public static double[] min(double[][] matrix, int flag){
         //MATLAB min(x,[],y) implementation
         if(flag==1){
             //min(matrix,[],1) (min cols)
-            Double[] out = new Double[matrix[0].length];
+            double[] out = new double[matrix[0].length];
             for(int i=0;i<matrix[0].length;i++){
-                Double minTmp = matrix[0][i];
+                double minTmp = matrix[0][i];
                 for(int j=1;j<matrix.length;j++){
                     if(matrix[j][i]<minTmp){
                         minTmp = matrix[j][i];
@@ -408,9 +406,9 @@ public class Utility {
             return  out;
         } else {
             //min(matrix,[],2) (min rows)
-            Double[] out = new Double[matrix.length];
+            double[] out = new double[matrix.length];
             for(int i=0;i<matrix.length;i++){
-                Double minTmp = matrix[i][0];
+                double minTmp = matrix[i][0];
                 for(int j=1;j<matrix[0].length;j++){
                     if(matrix[i][j]<minTmp){
                         minTmp=matrix[i][j];

@@ -52,15 +52,15 @@ public class MyFileWriter {
         WriteLine("************************");
     }
 
-    public void WriteValue(String varName, Double value){
+    public void WriteValue(String varName, double value){
         WriteLine(varName+": "+value);
     }
 
-    public void WriteValue(String varName, Long value){
+    public void WriteValue(String varName, long value){
         WriteLine(varName+": "+value);
     }
 
-    public void WriteValue(String varName, Integer value){
+    public void WriteValue(String varName, int value){
         WriteLine(varName+": "+value);
     }
 
@@ -92,10 +92,10 @@ public class MyFileWriter {
         }
     }
 
-    public void WriteDoubleArray(String varName, Double[] array){
+    public void WriteDoubleArray(String varName, double[] array){
         WriteLine(varName+":");
         for(int i=0;i<array.length;i++){
-            WriteLine(array[i].toString());
+            WriteLine(""+array[i]);
         }
     }
 
@@ -113,14 +113,14 @@ public class MyFileWriter {
         }
     }
 
-    public void WriteIntegerArray(String varName, Integer[] array){
+    public void WriteIntegerArray(String varName, int[] array){
         WriteLine(varName+":");
         for(int i=0;i<array.length;i++){
-            WriteLine(array[i].toString());
+            WriteLine(""+array[i]);
         }
     }
 
-    public void WriteDoubleMatrix(String varName, Double[][] matrix){
+    public void WriteDoubleMatrix(String varName, double[][] matrix){
         WriteLine(varName+":");
         for(int i=0;i<matrix.length;i++){
             String row="";
@@ -132,7 +132,7 @@ public class MyFileWriter {
         }
     }
 
-    public void WriteIntMatrix(String varName, Integer[][] matrix){
+    public void WriteIntMatrix(String varName, int[][] matrix){
         WriteLine(varName+":");
         for(int i=0;i<matrix.length;i++){
             String row="";
@@ -143,7 +143,7 @@ public class MyFileWriter {
         }
     }
 
-    public void WriteLongMatrix(String varName, Long[][] matrix){
+    public void WriteLongMatrix(String varName, long[][] matrix){
         WriteLine(varName+":");
         for(int i=0;i<matrix.length;i++){
             String row="";

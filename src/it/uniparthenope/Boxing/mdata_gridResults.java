@@ -1,25 +1,25 @@
 package it.uniparthenope.Boxing;
 
 public class mdata_gridResults {
-    private Double[][] xy;
-    private Double[][] xg;
-    private Double[][] yg;
+    private double[][] xy;
+    private double[][] xg;
+    private double[][] yg;
 
-    public mdata_gridResults(Double[][] xy, Double[][] xg, Double[][] yg){
+    public mdata_gridResults(double[][] xy, double[][] xg, double[][] yg){
         this.xy = xy;
         this.xg = xg;
         this.yg = yg;
     }
 
-    public Double[][] getXy() {
+    public double[][] getXy() {
         return xy;
     }
 
-    public Double[][] getXg() {
+    public double[][] getXg() {
         return xg;
     }
 
-    public Double[][] getYg() {
+    public double[][] getYg() {
         return yg;
     }
 }

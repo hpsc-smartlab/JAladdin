@@ -23,7 +23,7 @@ public class MyCSVParser {
         }
     }
 
-    public void writeCSV(Double[][] toWrite) throws IOException {
+    public void writeCSV(double[][] toWrite) throws IOException {
         StringBuilder sb = new StringBuilder();
         int nRows = toWrite.length;
         int nCols = toWrite[0].length;

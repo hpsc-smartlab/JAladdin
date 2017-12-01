@@ -5,9 +5,9 @@ import java.util.ArrayList;
 public class readout_bathyResults {
     ArrayList<Double> lat;
     ArrayList<Double> lon;
-    Double[][] z;
+    double[][] z;
 
-    public readout_bathyResults(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] z){
+    public readout_bathyResults(ArrayList<Double> lat, ArrayList<Double> lon, double[][] z){
         this.lat = lat;
         this.lon = lon;
         this.z = z;
@@ -21,7 +21,7 @@ public class readout_bathyResults {
         return lon;
     }
 
-    public Double[][] getZ() {
+    public double[][] getZ() {
         return z;
     }
 }

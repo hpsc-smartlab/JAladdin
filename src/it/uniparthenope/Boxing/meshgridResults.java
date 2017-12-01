@@ -1,19 +1,19 @@
 package it.uniparthenope.Boxing;
 
 public class meshgridResults {
-    Double[][] X;
-    Double[][] Y;
+    double[][] X;
+    double[][] Y;
 
-    public meshgridResults(Double[][] X, Double[][] Y){
+    public meshgridResults(double[][] X, double[][] Y){
         this.X = X;
         this.Y = Y;
     }
 
-    public Double[][] getX() {
+    public double[][] getX() {
         return X;
     }
 
-    public Double[][] getY() {
+    public double[][] getY() {
         return Y;
     }
 }

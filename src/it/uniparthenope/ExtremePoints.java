@@ -1,5 +1,6 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.MyCSVParser;
 import it.uniparthenope.Parser.MyJSONParser;
 
@@ -39,7 +40,10 @@ public class ExtremePoints {
         this.minCoastDist = parser.getValueAsLong("minCoastDist");
         if(!RegionCheck()){
             System.out.println("Extreme points integrity check violated.");
-            System.exit(-1);
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("ExtremePoints constructor: Extreme points integrity check violated.");
+            debug.CloseFile();
+            System.exit(0);
         }
         this.cycType = "dd"; //cycloid type: 'id' % 'inverted_descent'; 'dd' % 'direct_descent'
     }

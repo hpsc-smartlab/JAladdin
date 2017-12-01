@@ -5,9 +5,9 @@ import java.util.ArrayList;
 public class parseMedOneMinResults {
     ArrayList<Double> lat;
     ArrayList<Double> lon;
-    Double[][] depth;
+    double[][] depth;
 
-    public parseMedOneMinResults(ArrayList<Double> lat, ArrayList<Double> lon, Double[][] depth){
+    public parseMedOneMinResults(ArrayList<Double> lat, ArrayList<Double> lon, double[][] depth){
         this.lat = lat;
         this.lon = lon;
         this.depth = depth;
@@ -21,7 +21,7 @@ public class parseMedOneMinResults {
         return lon;
     }
 
-    public Double[][] getDepth() {
+    public double[][] getDepth() {
         return depth;
     }
 }

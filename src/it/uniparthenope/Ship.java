@@ -48,7 +48,10 @@ public class Ship {
         this.obs_roll_period = parser.getValueAsDouble("obs_roll_period(s)");
         if(!IntegrityCheck()){
             System.out.println("Ship integrity check violated.");
-            System.exit(-1);
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("LoadVesselParameters: Ship integrity check violated.");
+            debug.CloseFile();
+            System.exit(0);
         }
         if( this.vessType != this.sailType){
             this.roll_period = this.obs_roll_period;
@@ -99,7 +102,7 @@ public class Ship {
         }
     }
 
-    public void ship_resistance(Double wHeight, Const constants){//from ship_resistance.m
+    public void ship_resistance(double wHeight, Const constants){//from ship_resistance.m
         //ship speed computation out of wave height, wavelenght and towing Power.
         //results are nearly linear in power for not too large w.height
 
@@ -122,41 +125,41 @@ public class Ship {
         //Double v_max_kts = 13.0; //kts
         //this.P_max_hp = 1872;
 
-        Double Lwl = this.length;
-        Double BB = this.beam;
-        Double TT = this.draught;
-        Double Swet = 2*BB*TT + BB*Lwl + 2*TT*Lwl; //parallelepiped hull
+        double Lwl = this.length;
+        double BB = this.beam;
+        double TT = this.draught;
+        double Swet = 2*BB*TT + BB*Lwl + 2*TT*Lwl; //parallelepiped hull
 
         //Conversions:
-        Double twopi = 2* Math.PI;
+        double twopi = 2* Math.PI;
         ArrayList<Double> P_w = new ArrayList<Double>();
-        for (Double element : this.P_level_hp){
+        for (double element : this.P_level_hp){
             P_w.add(constants.getHp2W() * element);
         }
-        Double P_max_w = constants.getHp2W() * this.P_max_hp;
-        Double v_max_ms = this.maxv / constants.getMs2kts();
+        double P_max_w = constants.getHp2W() * this.P_max_hp;
+        double v_max_ms = this.maxv / constants.getMs2kts();
         //COMPUTATIONS:
         //wave added resistance: P=c2ca* v^2
-        Double xi = 0.5 * wHeight; //xi= wave amplitude = 1/2 wave height
+        double xi = 0.5 * wHeight; //xi= wave amplitude = 1/2 wave height
 //         Double sigma_aw_tilde = 1.0;
 //         Double sigma_aw_tilde = 3.5; //VISIR fishing vessel
 //         Double sigma_aw_tilde = 2.2; //VISIR ferry
 //         Double sigma_aw_tilde = cos(cost.deg2rad*alpha/2) .* sigma_aw_tilde
-        Double sigma_aw_tilde = this.ship_Raw_alexandersson(Lwl,BB,TT);
-        Double Fn_tilde = this.ship_Fn_tilde(constants);
-        Double k2 = sigma_aw_tilde * constants.getRho_water() * Math.sqrt( constants.getG0()/Math.pow(Lwl,3) ) * Math.pow(xi,2) * Math.pow(BB,2) /
+        double sigma_aw_tilde = this.ship_Raw_alexandersson(Lwl,BB,TT);
+        double Fn_tilde = this.ship_Fn_tilde(constants);
+        double k2 = sigma_aw_tilde * constants.getRho_water() * Math.sqrt( constants.getG0()/Math.pow(Lwl,3) ) * Math.pow(xi,2) * Math.pow(BB,2) /
                 ( 2* this.etaEngine * Fn_tilde);
         // Double alpha = 0.0; //angle of encounter in deg from North
         // k2ca = k2 * cos(constants.deg2rad * alpha);
 
         //Calm water resistance: P = k3 * v^3
-        Double k3 = P_max_w / Math.pow(v_max_ms,3); //W*s^3/m^3
+        double k3 = P_max_w / Math.pow(v_max_ms,3); //W*s^3/m^3
         long Rr_exp = 2; // default is = 2; Referee #1 cp. also Harvald Eq.4.3.27
         long n_exp = Rr_exp - 2;
         if(n_exp < 0){
             System.out.println("Residual resistance decreasing with vessel speed!");
         }
-        Double v_search = v_max_ms;
+        double v_search = v_max_ms;
         this.v_out_kts = new ArrayList<Double>();
         this.R_c = new ArrayList<Double>();
         this.R_aw = new ArrayList<Double>();
@@ -165,19 +168,19 @@ public class Ship {
         this.R_aw.add(0,Double.NaN);
         for(int ip=0; ip<P_w.size(); ip++){
             Double k0 = -P_w.get(ip);
-            Double v_out_ms = Utility.Newton(k3,k2,k0,n_exp,v_max_ms,v_search);
+            Double v_out_ms = Utility.Newton(k3,k2,k0,n_exp,v_max_ms,v_search);//fzero matlab approssimation
             v_search = v_out_ms;
             this.v_out_kts.add(ip,constants.getMs2kts()*v_out_ms);
 
             //Resistances:
-            Double val = constants.getN2kN() * this.etaEngine * k3 * Math.pow(v_out_ms,2+n_exp) / Math.pow(v_max_ms, n_exp); //kN = P_c/v
+            double val = constants.getN2kN() * this.etaEngine * k3 * Math.pow(v_out_ms,2+n_exp) / Math.pow(v_max_ms, n_exp); //kN = P_c/v
             R_c.add(ip, val);
-            Double val2 = constants.getN2kN() * this.etaEngine * k2 * Math.pow(v_max_ms, 1); //kN = P_aw/v
+            double val2 = constants.getN2kN() * this.etaEngine * k2 * Math.pow(v_max_ms, 1); //kN = P_aw/v
             R_aw.add(ip, val2);
         }
     }
 
-    private Double ship_Raw_alexandersson(Double L, Double B, Double T){//from ship_Raw_alexandersson.m file
+    private double ship_Raw_alexandersson(double L, double B, double T){//from ship_Raw_alexandersson.m file
         // Peak value of added wave resistance according to
         // nonlinear regression of model simulations
         // by Alexandersson 2009, Master Thesis, KTH Centre for Naval Architecture
@@ -212,8 +215,8 @@ public class Ship {
         // % Fn=.21;
         // % % Raw_peak= 8
 
-        Double Bn = B/L;
-        Double Tn = T/L;
+        double Bn = B/L;
+        double Tn = T/L;
 
         //Original formulation by Alexandersson 2009:
         // % Raw_peak= 206.6 *  L_CG^0.6376 * Bn^(-1.2121) * Tn^ 0.6247 * kyy^1.3611 * Fn^aexp;
@@ -227,11 +230,11 @@ public class Ship {
         // % kyy^1.3611   = 0.1515;
         //
         // % Resulting expression:
-        Double Raw_peak = 20.0 * Math.pow(Bn,-1.21) * Math.pow(Tn,0.62);
+        double Raw_peak = 20.0 * Math.pow(Bn,-1.21) * Math.pow(Tn,0.62);
         return Raw_peak;
     }
 
-    private Double ship_Fn_tilde(Const constant){//from ship_Fn_tilde.m
+    private double ship_Fn_tilde(Const constant){//from ship_Fn_tilde.m
         //identification of linear slope fitting the Alexandersson dependence on Fn in the region
         //of values defined by [Fn_max/speedRedFact, Fn_max]
         // L_test is ship length in m
@@ -242,23 +245,48 @@ public class Ship {
         // lop
         // v_test =  22 ; % kts
         // L_test =  86 ; % m
-        Double L_test = this.length;
-        Double v_test = this.maxv;
-        Double Fn_max = v_test / (constant.getMs2kts()*Math.sqrt(constant.getG0()*L_test));
+        double L_test = this.length;
+        double v_test = this.maxv;
+        double Fn_max = v_test / (constant.getMs2kts()*Math.sqrt(constant.getG0()*L_test));
         long Ndots = 100;
         long speedRedFact = 1000;
 
         ArrayList<Double> fn = Utility.linspace(Fn_max/speedRedFact, Fn_max, Ndots);
 
         ArrayList<Double> alex = new ArrayList<Double>();
-        for(Double element : fn){
+        for(double element : fn){
             alex.add(Math.pow(element,0.6377)); //Alexandersson
         }
 
-        Double slope = Utility.linfit_origin(fn,alex);
-        Double fn_tilde = 1/slope;
+        double slope = linfit_origin(fn,alex);
+        double fn_tilde = 1/slope;
         return fn_tilde;
 
+    }
+
+    private double linfit_origin(ArrayList<Double> x, ArrayList<Double> y){
+        // Least square fit of linear funztion through origin.
+        // cp. Numerical Recipes,
+        // http://hebb.mit.edu/courses/9.29/2002/readings/c15-2.pdf
+        // set a=0 in Eq.(15.2.6), with sigma=1 in definitions Eq.(15.2.4)
+        // and post-processing after setting a=0
+        int S = x.size();
+        double Sx = 0.0;
+        ArrayList<Double> Sx2 = new ArrayList<Double>();
+        for(double element : x){
+            Sx += element;
+            Sx2.add(Math.pow(element,2));
+        }
+        double Sy = 0.0;
+        for(Double element : y){
+            Sy += element;
+        }
+        double Sxx = 0.0;
+        for(Double element : Sx2){
+            Sxx += element;
+        }
+        double Delta = S*Sxx - Math.pow(Sx,2);
+        return (S*Sxx*Sy/Sx - Sx*Sy)/Delta;
     }
 
     public double getFn_max(){

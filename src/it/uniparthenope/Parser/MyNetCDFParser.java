@@ -1,5 +1,6 @@
 package it.uniparthenope.Parser;
 
+import it.uniparthenope.Debug.MyFileWriter;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.InvalidRangeException;
@@ -29,7 +30,10 @@ public class MyNetCDFParser {
         Variable latitude = dataFile.findVariable("latitude");
         if(latitude == null){
             System.out.println("Can't find the variable named latitude");
-            return null;
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("parseMedOneMinResults: Can't find the variable named latitude");
+            debug.CloseFile();
+            System.exit(0);
         }
         int[] latitudeShape = latitude.getShape();
         int[] latitudeOrigin = new int[1];
@@ -37,7 +41,10 @@ public class MyNetCDFParser {
         Variable longitude = dataFile.findVariable("longitude");
         if(longitude == null){
             System.out.println("Can't find the variable named longitude");
-            return null;
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("parseMedOneMinResults: Can't find the variable named longitude");
+            debug.CloseFile();
+            System.exit(0);
         }
         int[] longitudeShape = longitude.getShape();
         int[] longitudeOrigin = new int[1];
@@ -45,7 +52,10 @@ public class MyNetCDFParser {
         Variable z = dataFile.findVariable("z");
         if(z == null){
             System.out.println("Can't find the variable named z");
-            return null;
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("parseMedOneMinResults: Can't find the variable named z");
+            debug.CloseFile();
+            System.exit(0);
         }
         int[] zShape = z.getShape();
         int[] zOrigin = new int[2];
@@ -59,7 +69,7 @@ public class MyNetCDFParser {
             //Passing from ArrayDouble to ArrayList<Double> and Double[][]
             ArrayList<Double> lat = new ArrayList<>();
             ArrayList<Double> lon = new ArrayList<>();
-            Double[][] depth = new Double[zShape[0]][zShape[1]];
+            double[][] depth = new double[zShape[0]][zShape[1]];
 
             for(int i=0; i<latitudeShape[0]; i++){
                 lat.add(latitudeArray.get(i));
@@ -77,15 +87,23 @@ public class MyNetCDFParser {
 
         } catch(Exception e){
             e.printStackTrace();
-            return null;
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("parseMedOneMinResults: "+e.getMessage());
+            debug.CloseFile();
+            System.exit(0);
         } finally {
             try {
                 this.dataFile.close();
             } catch (Exception e){
                 e.printStackTrace();
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("parseMedOneMinResults: "+e.getMessage());
+                debug.CloseFile();
+                System.exit(0);
+
             }
         }
-
+        return null;
     }
 
 }
