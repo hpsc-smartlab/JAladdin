@@ -54,7 +54,7 @@ public class VisirModel {
     ArrayList<Double> x_continent;
     ArrayList<Double> y_continent;
     private Double[] estGdtDist;
-
+    private MyFileWriter logFile;
 
     //approssimating computation time
     private long startTime;
@@ -63,7 +63,10 @@ public class VisirModel {
 
     //Constructor
     public VisirModel(long bar_flag, long timedep_flag){//Initialize with standard values defined in settings.m
-        this.Tic();//Start the "timer"
+        this.logFile = new MyFileWriter("","",false);
+        this.logFile.WriteLine("");
+        this.logFile.WriteLog("System initialization...");
+        this.startTime = Utility.Tic();//Start the "timer"
 
         //bar_flag = 1: fresh compution of edges not crossing coastline (mode 1 of GMD-D paper)
         //bar_flag = 2: edges not crossing coastline read out from DB   (mode 2 of GMD-D paper)
@@ -89,18 +92,24 @@ public class VisirModel {
         this.lon_int = new ArrayList<>();
         this.lat_ext = new ArrayList<>();
         this.lat_int = new ArrayList<>();
+        this.logFile.CloseFile();
     }
 
     public void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Loading data...");
         this.extreme_pts = new ExtremePoints();
         this.dep_datetime = new DepartureParameters();
         this.ship.LoadVesselParameters();
         this.safety = new SafetyParameters();
         this.optim.OptimizationParameters();
         this.visualization.VisualizationParameters();
+        this.logFile.CloseFile();
     }
 
     public void CalculateParameters(){//Set some parameters based on other parameters
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Calculating parameters...");
         this.ship.setStepsInPowerReduction(this.optim.getIntentional_speed_red());
         this.sGrid.setInvStepFields(this.optim.getWaveModel());
         this.forcing = new EnvironmentalFields(this.ship.getVessType(), this.ship.getSailType(),this.optim.getWindModel());
@@ -126,10 +135,13 @@ public class VisirModel {
             this.ship.setVessType(1);
             this.timedep_flag = 0;
         }
+        this.logFile.CloseFile();
     }
 
     private void ship_Model(){//called from vessel_Response.m, ship_model.m implementation
         //Look-up table for involuntary ship speed reduction in waves.
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Calculating ship model...");
         this.ship.setFn_max(this.constants.getMs2kts(), this.constants.getG0());
         //LUT independent variables:
         long Nh = 25; //40
@@ -179,10 +191,14 @@ public class VisirModel {
         //graphical output not implemented.
         this.H_array_m = H_array_m;
         this.vel_LUT = vel_LUT;
+        this.logFile.CloseFile();
     }
 
     public void vessel_Response(){//vessel_Response.m implementation
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Calculating ship power levels...");
         this.ship.shipPowerLevels();
+        this.logFile.CloseFile();
         this.ship_Model();
         this.maxWind = Double.NaN;
         this.minWind = Double.NaN;
@@ -191,6 +207,9 @@ public class VisirModel {
     }
 
     public void Grid_definition(){//Grid_definition.m implementation
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Grid definition: ");
+        this.logFile.CloseFile();
         String freeedges_DB_filename = "freeedges_DB.dat";
         String freenodes_DB_filename = "freeNodes_DB.dat";
         // Bounding boxes:
@@ -226,7 +245,9 @@ public class VisirModel {
             this.sGrid.setBbox__lat_min(lat_min);
             this.sGrid.setBbox__lon_max(lon_max);
         }
-
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tLoading coastline data...");
+        this.logFile.CloseFile();
         //Coastline:
         this.readout_coast();
         ArrayList<Double> y_coast = new ArrayList<>();
@@ -245,7 +266,9 @@ public class VisirModel {
         for(Double element : this.lon_ext){//x_continent
             x_coast.add(element);
         }
-
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tLoading bathymetry data...");
+        this.logFile.CloseFile();
         //Bathymetry:
         //read-out database:
         int bathy_code = 1;
@@ -263,7 +286,9 @@ public class VisirModel {
         ArrayList<Double> lon_bathy = bathymetry.getLon();
         Double[][] z_bathy = bathymetry.getZ();
         this.sGrid.setInv_step( Math.round(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)))+0.0 );
-
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tCalculating target grid and reduced bathy field...");
+        this.logFile.CloseFile();
         //Target grid and reduced bathy field:
         //grid_extreme_coords
         grid_extreme_coordsResults insets = this.grid_extreme_coords(lat_bathy, lon_bathy,z_bathy);
@@ -278,6 +303,9 @@ public class VisirModel {
         ArrayList<Double> y_coast_Inset = new ArrayList<>();
         if(this.bar_flag == 2){
             // coastline excerpt within Inset:
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tCalculating coastline excerpt within inset...");
+            this.logFile.CloseFile();
             Double min_lon_bathy = Collections.min(this.lon_bathy_Inset);
             Double max_lon_bathy = Collections.max(this.lon_bathy_Inset);
             Double min_lat_bathy = Collections.min(this.lat_bathy_Inset);
@@ -316,24 +344,34 @@ public class VisirModel {
         Double[][] yg_DB = data_gridOut.getYg();
 
         //inset grid plaid coordinates:
-
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tinset grid plaid coordinates...");
+        this.logFile.CloseFile();
         mdata_gridResults data_gridOut2 = mdata_grid(this.lat_bathy_Inset, this.lon_bathy_Inset);
         this.xy = data_gridOut2.getXy();
         this.xg = data_gridOut2.getXg();
         this.yg = data_gridOut2.getYg();
         if(this.visualization.getGraphData()==1){
             //csv_write xy
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tWriting graph coords in GRAPH.node_LonLat.csv...");
+            this.logFile.CloseFile();
             try{
-                MyCSVParser csv = new MyCSVParser("output/GRAPH.node_LonLat.csv");
+                MyCSVParser csv = new MyCSVParser("Output/GRAPH.node_LonLat.csv");
                 csv.writeCSV(this.xy);
             } catch (Exception e){
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("grid_definition, csv parser: "+e.getMessage());
+                debug.CloseFile();
                 e.printStackTrace();
             }
         }
 
         //--------------------------------------------------------------------
         //Joint coast-vessel safety mask:
-        System.out.println("computation of a joint coast-vessel safety mask...");
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tcomputation of a joint coast-vessel safety mask...");
+        this.logFile.CloseFile();
         Double[][] UKC_mask = Utility.NaNmatrix(bathy_Inset.length, bathy_Inset[0].length);
         for(int i=0;i<UKC_mask.length;i++){
             for(int j=0;j<UKC_mask[0].length;j++){
@@ -352,9 +390,15 @@ public class VisirModel {
         Double[][] min_coast_dist;
         if(this.bar_flag == 2){
             //readout free nodes DB:
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\treadout freenodes DB...");
+            this.logFile.CloseFile();
             MyBinaryParser datFile = new MyBinaryParser("inputFiles/graph/freeNodes_DB.dat");
             long[] free_nodes_DB = datFile.readAsUInt32();
             //remapping free nodes:
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tremapping free nodes...");
+            this.logFile.CloseFile();
             long lambda = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
             long mu = Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
             idx_ref2inset_gridResults out = this.idx_ref2inset_grid(free_nodes_DB,this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(),this.sGrid.getInset_Nx(),this.sGrid.getInset_Ny(),lambda,mu);
@@ -377,13 +421,22 @@ public class VisirModel {
             long free_nodes_Number = free_nodes.length;
             if(free_nodes_Number==0){
                 System.out.println("no free nodes found in graph");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("no free nodes found in graph");
+                debug.CloseFile();
                 System.exit(0);
             } else if(free_nodes_Number > this.sGrid.getNodesLargeN()){
                 System.out.println("too large graph");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("too large graph");
+                debug.CloseFile();
                 System.exit(0);
             }
             this.sGrid.setFreenodes(free_nodes_Number);
             //lsm, created using coastline DB (NaNs on landmass):
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tCreating lsm_mask using coastline DB...");
+            this.logFile.CloseFile();
             lsm_mask = Utility.NaNmatrix(xg.length,xg[0].length);
             int nRows = xg.length;
             int ii=0;
@@ -399,6 +452,9 @@ public class VisirModel {
             dim[1]=xg[0].length;
 
             //Safe distance from coastline:
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tCalculating safe distance from coastline...");
+            this.logFile.CloseFile();
             xg_array = Utility.reshape(xg,dim[0]*dim[1]);
             yg_array = Utility.reshape(yg, yg.length*yg[0].length);
             xy_g = new Double[xg_array.length][2];
@@ -435,6 +491,9 @@ public class VisirModel {
             } else{
                 dist_mask = Utility.ones(dim[0],dim[1]);
             }
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tCalculating Joint safe mask...");
+            this.logFile.CloseFile();
             // %###############################################
             // %
             // %  Joint safe mask:
@@ -460,6 +519,10 @@ public class VisirModel {
                 xy_g[i][0]=xg_array[i];
                 xy_g[i][1]=yg_array[i];
             }
+            //FIN QUI DEBUGGATO!!!!!
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tCalculating distances from start/end nodes...");
+            this.logFile.CloseFile();
             //distance from start/end nodes:
             Double[][] tmpP_b=new Double[1][2];
             tmpP_b[0][0]=this.extreme_pts.getStart_lon();
@@ -474,6 +537,9 @@ public class VisirModel {
 
             if(Double.isNaN(this.sGrid.getMin_start_dist()) || Double.isNaN(this.sGrid.getMin_end_dist())){
                 System.out.println("departure or arrival point not compliant with safety specifications");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("departure or arrival point not compliant with safety specifications");
+                debug.CloseFile();
                 System.exit(0);
             }
             ArrayList<Integer> tmpIndexes = new ArrayList<>();
@@ -524,6 +590,9 @@ public class VisirModel {
             }
 
             //orientation of the gdt route
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tCalculating orientation of the geodetic route...");
+            this.logFile.CloseFile();
             Double[] atan2 = new Double[delta_x.length];
             for(int i=0;i<delta_x.length;i++){
                 atan2[i]=Math.atan2(delta_y[i],delta_x[i]);
@@ -545,6 +614,9 @@ public class VisirModel {
         this.y_islands = this.lat_int;
         this.x_continent = this.lon_ext;
         this.y_continent = this.lat_ext;
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Done.");
+        this.logFile.CloseFile();
 
     }
 
@@ -868,6 +940,9 @@ public class VisirModel {
             //closing file
             file.close();
         } catch(Exception e){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("readout_coast: "+e.getMessage());
+            debug.CloseFile();
             e.printStackTrace();
         }
     }
@@ -957,13 +1032,6 @@ public class VisirModel {
         return new readout_bathyResults(lat, lon, z);
     }
 
-    private void Tic(){//Equivalent to MATLAB tic function
-        this.startTime = System.nanoTime();
-    }
-
-    private void Toc(){
-        this.estimatedTime = System.nanoTime() - this.startTime;
-    }
 
     /*****************Getter methods*********************/
     public Const getConstants() {
