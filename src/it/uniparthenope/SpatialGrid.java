@@ -37,7 +37,7 @@ public class SpatialGrid {
     private double node_start_lon;
     private double node_end_lat;
     private double node_end_lon;
-    private double[] theta_gdt;
+    private double theta_gdt;
 
 
     public SpatialGrid(){
@@ -306,11 +306,11 @@ public class SpatialGrid {
         this.node_start_lon = node_start_lon;
     }
 
-    public double[] getTheta_gdt() {
+    public double getTheta_gdt() {
         return theta_gdt;
     }
 
-    public void setTheta_gdt(double[] theta_gdt) {
+    public void setTheta_gdt(double theta_gdt) {
         this.theta_gdt = theta_gdt;
     }
 
