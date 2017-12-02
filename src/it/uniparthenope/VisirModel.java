@@ -53,7 +53,7 @@ public class VisirModel {
     ArrayList<Double> y_islands;
     ArrayList<Double> x_continent;
     ArrayList<Double> y_continent;
-    private double[] estGdtDist;
+    private double estGdtDist;
     private MyFileWriter logFile;
 
     //approssimating computation time
@@ -558,43 +558,38 @@ public class VisirModel {
             this.sGrid.setNode_start_lat(yg_array[(int) this.sGrid.getNode_start()]);
             this.sGrid.setNode_start_lon(xg_array[(int) this.sGrid.getNode_start()]);
             this.sGrid.setNode_end_lat(yg_array[(int) this.sGrid.getNode_end()]);
-            this.sGrid.setNode_end_lon(yg_array[(int) this.sGrid.getNode_end()]);
+            this.sGrid.setNode_end_lon(xg_array[(int) this.sGrid.getNode_end()]);
 
-            double[][] tmpP_a = new double[1][2];
-            tmpP_a[0][0] = this.sGrid.getNode_start_lon();
-            tmpP_a[0][1] = this.sGrid.getNode_start_lat();
-            tmpP_b[0][0] = this.sGrid.getNode_end_lon();
-            tmpP_b[0][1] = this.sGrid.getNode_end_lat();
-            estGdtDist = hor_distance("s", tmpP_a, tmpP_b);
+            double[] p_a = new double[2];
+            double[] p_b = new double[2];
+            p_a[0] = this.sGrid.getNode_start_lon();
+            p_a[1] = this.sGrid.getNode_start_lat();
+            p_b[0] = this.sGrid.getNode_end_lon();
+            p_b[1] = this.sGrid.getNode_end_lat();
+            estGdtDist = hor_distance("s", p_a, p_b);
 
-            tmpP_a[0][0] = this.sGrid.getNode_end_lon();
-            tmpP_a[0][1] = this.sGrid.getNode_end_lat();
-            tmpP_b[0][0] = this.sGrid.getNode_end_lon();
-            tmpP_b[0][1] = this.sGrid.getNode_start_lat();
-            double[] delta_y = hor_distance("s", tmpP_a, tmpP_b);
+            p_a[0] = this.sGrid.getNode_end_lon();
+            p_a[1] = this.sGrid.getNode_end_lat();
+            p_b[0] = this.sGrid.getNode_end_lon();
+            p_b[1] = this.sGrid.getNode_start_lat();
+            double delta_y = hor_distance("s", p_a, p_b);
             int sign = Utility.sign(this.sGrid.getNode_end_lat()-this.sGrid.getNode_start_lat());
-            for(int i=0;i<delta_y.length;i++){
-                delta_y[i]=delta_y[i]*sign;
-            }
+            delta_y=delta_y*sign;
 
-            tmpP_a[0][0] = this.sGrid.getNode_end_lon();
-            tmpP_a[0][1] = this.sGrid.getNode_start_lat();
-            tmpP_b[0][0] = this.sGrid.getNode_start_lon();
-            tmpP_b[0][1] = this.sGrid.getNode_start_lat();
-            double[] delta_x = hor_distance("s", tmpP_a, tmpP_b);
+            p_a[0] = this.sGrid.getNode_end_lon();
+            p_a[1] = this.sGrid.getNode_start_lat();
+            p_b[0] = this.sGrid.getNode_start_lon();
+            p_b[1] = this.sGrid.getNode_start_lat();
+            double delta_x = hor_distance("s", p_a, p_b);
             sign = Utility.sign(this.sGrid.getNode_end_lon()-this.sGrid.getNode_start_lon());
-            for(int i=0;i<delta_y.length;i++){
-                delta_y[i]=delta_y[i]*sign;
-            }
+            delta_x=delta_x*sign;
 
             //orientation of the gdt route
             this.logFile = new MyFileWriter("","",true);
             this.logFile.WriteLog("\tCalculating orientation of the geodetic route...");
             this.logFile.CloseFile();
-            double[] atan2 = new double[delta_x.length];
-            for(int i=0;i<delta_x.length;i++){
-                atan2[i]=Math.atan2(delta_y[i],delta_x[i]);
-            }
+            double atan2 = Double.NaN;
+            atan2=Math.atan2(delta_x,delta_y);
             this.sGrid.setTheta_gdt(atan2);
             //th= Sgrid.theta_gdt/const.deg2rad
 
@@ -606,7 +601,7 @@ public class VisirModel {
             //Start and end nodes:
             xg_array = new double[0];
             yg_array = new double[0];
-            estGdtDist = new double[0];
+            estGdtDist = Double.NaN;
         }
         this.x_islands = this.lon_int;
         this.y_islands = this.lat_int;
@@ -697,6 +692,46 @@ public class VisirModel {
                         Math.cos(this.constants.getDeg2rad()*(xa[i]-xb[0]))+Math.sin(this.constants.getDeg2rad()*ya[i])*
                         Math.sin(this.constants.getDeg2rad()*yb[0]));
             }
+        }
+
+        return dd;
+    }
+
+    private double hor_distance(String method, double[] P_a, double[] P_b, double... varargin){
+        // % horizontal distance between pair of points (expressed in NM)
+        // % either on the plane or the sphere
+        // % works also with arrays
+        // % optionally rescales distances by grid_step_in_NM
+        // %
+        // % P_a and P_b must be linear array of the same size
+        // % (build via meshgrid and then reshape)
+        // %
+        // % P_a: [lon, lat]
+        // % P_b: [lon, lat]
+        // %
+        // % method='p' for planar geometry
+        // % method='s' for spherical geometry
+        this.constants.setDeg2rad(Math.PI/180);
+        double grid_step_in_NM = varargin.length > 0 ? varargin[0] : 1.0;
+
+        double xa = P_a[0];
+        double ya = P_a[1];
+
+        double xb = P_b[0];
+        double yb = P_b[1];
+
+
+        double dd=0;
+        if(method=="plane"||method=="p"){
+            dd=grid_step_in_NM*Math.sqrt(Math.pow((xa-xb),2) + Math.pow((ya-yb),2));
+        } else if(method=="sphere" || method=="s"){
+            // % from : http://mathworld.wolfram.com/GreatCircle.html
+            // % x and y must be in degree.
+            // % output in Nautical Miles (NM)
+            double E_radius = 3444.0; //NM
+            dd=E_radius * Math.acos(Math.cos(this.constants.getDeg2rad()*ya)*Math.cos(this.constants.getDeg2rad()*yb)*
+                    Math.cos(this.constants.getDeg2rad()*(xa-xb))+Math.sin(this.constants.getDeg2rad()*ya)*
+                    Math.sin(this.constants.getDeg2rad()*yb));
         }
 
         return dd;
