@@ -166,7 +166,7 @@ public class Ship {
         this.v_out_kts.add(0,Double.NaN);
         this.R_c.add(0,Double.NaN);
         this.R_aw.add(0,Double.NaN);
-        for(int ip=0; ip<P_w.size(); ip++){
+        for(int ip=1; ip<P_w.size(); ip++){
             Double k0 = -P_w.get(ip);
             Double v_out_ms = Utility.Newton(k3,k2,k0,n_exp,v_max_ms,v_search);//fzero matlab approssimation
             v_search = v_out_ms;
