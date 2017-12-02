@@ -380,13 +380,33 @@ public class Utility {
     }
 
     public static double min(double[] array){
-        Double min = array[0];
-        for(int i=1;i<array.length;i++){
-            if(array[i]<min){
-                min = array[i];
+        double[] notNaNs = removeNaNs(array);
+        if(notNaNs.length == 0){
+            return Double.NaN;
+        }
+        else{
+            double min=notNaNs[0];
+            for(int i=1;i<notNaNs.length-1;i++){
+                if(notNaNs[i]<min){
+                    min = notNaNs[i];
+                }
+            }
+            return min;
+        }
+    }
+
+    private static double[] removeNaNs(double[] in){
+        ArrayList<Double> notNaNs = new ArrayList<>();
+        for(int i=0;i<in.length;i++){
+            if(!Double.isNaN(in[i])){
+                notNaNs.add(in[i]);
             }
         }
-        return min;
+        double[] out = new double[notNaNs.size()];
+        for(int i=0;i<notNaNs.size();i++){
+            out[i] = notNaNs.get(i);
+        }
+        return out;
     }
 
     public static double[] min(double[][] matrix, int flag){
