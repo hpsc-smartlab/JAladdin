@@ -166,9 +166,15 @@ public class Ship {
         this.v_out_kts.add(0,Double.NaN);
         this.R_c.add(0,Double.NaN);
         this.R_aw.add(0,Double.NaN);
+        String num_method ="Newton";
         for(int ip=1; ip<P_w.size(); ip++){
-            Double k0 = -P_w.get(ip);
-            Double v_out_ms = Utility.Newton(k3,k2,k0,n_exp,v_max_ms,v_search);//fzero matlab approssimation
+            double k0 = -P_w.get(ip);
+            double v_out_ms=0;
+            if(num_method == "Newton") {
+                v_out_ms = Utility.Newton(k3, k2, k0, n_exp, v_max_ms, v_search);//used as fzero matlab approssimation
+            } else {
+                v_out_ms = Utility.nr_cubic(k2/k3, 0 , k0/k3); //nr_cubic generic method
+            }
             v_search = v_out_ms;
             this.v_out_kts.add(ip,constants.getMs2kts()*v_out_ms);
 
