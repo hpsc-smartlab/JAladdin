@@ -4,8 +4,11 @@ package it.uniparthenope;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Collections;
+
 import it.uniparthenope.Boxing.meshgridResults;
 import it.uniparthenope.Debug.MyFileWriter;
+import org.apache.commons.math3.complex.Complex;
 
 public class Utility {
 
@@ -83,6 +86,44 @@ public class Utility {
             array[i]=Double.NaN;
         }
         return array;
+    }
+
+    public static double nr_cubic(double a, double b, double c){
+        //analytical search of roots: return max root only
+        //http://en.wikipedia.org/wiki/Cubic_function#General_formula_for_roots
+        double QQ = (Math.pow(a,2) -3*b)/9;
+        double RR = (2*Math.pow(a,3) -9*a*b + 27*c)/54;
+        double DD = Math.pow(RR,2) - Math.pow(QQ,3);
+
+        if(DD<0){//3 real solution (large wave height) ;
+            double theta = Math.acos( RR/Math.sqrt(Math.pow(QQ,3)) );
+
+            double x1 = -2*Math.sqrt(QQ)* Math.cos(theta/3) - a/3;
+            double x2 = -2*Math.sqrt(QQ)* Math.cos((theta+2*Math.PI)/3) - a/3;
+            double x3 = -2*Math.sqrt(QQ)* Math.cos((theta-2*Math.PI)/3) - a/3;
+            ArrayList<Double> roots = new ArrayList<>();
+            roots.add(x1);
+            roots.add(x2);
+            roots.add(x3);
+            return Collections.max(roots);
+
+        } else {//1 real solution (small wave height)
+            double AA = -1*sign(RR)*Math.pow((Math.abs(RR) + Math.sqrt(DD)),(1/3.0));
+            double BB = 0;
+            if(AA != 0){
+                BB = QQ/AA;
+            }
+
+            double x1 = AA+BB - a/3;
+            Complex tmp = new Complex(0,1).multiply(Math.sqrt(3)).divide(2).multiply((AA-BB));
+            Complex x2 = new Complex(-1*(AA+BB)/2 -a/3,0).add(tmp);
+            Complex x3 = x2.conjugate();
+            ArrayList<Double> roots = new ArrayList<>();
+            roots.add(x1);
+            roots.add(x2.getReal());
+            roots.add(x3.getReal());
+            return Collections.max(roots);
+        }
     }
 
     //This function return zero of the function defined in ship_resitance.m file
