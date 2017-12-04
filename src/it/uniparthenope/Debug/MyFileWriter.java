@@ -42,6 +42,15 @@ public class MyFileWriter {
         }
     }
 
+    public MyFileWriter(boolean out, String fileName){
+        this.fileName = fileName;
+        try{
+            this.bw = new BufferedWriter(new FileWriter("Output/"+fileName));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     private String dateTime(){
         return this.sdf.format(new Date());
     }
