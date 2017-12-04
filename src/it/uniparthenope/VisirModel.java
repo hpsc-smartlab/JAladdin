@@ -3,6 +3,7 @@ package it.uniparthenope;
 import java.io.FileReader;
 import java.util.*;
 //Boxing classes
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import it.uniparthenope.Boxing.mdata_gridResults;
 import it.uniparthenope.Boxing.meshgridResults;
 import it.uniparthenope.Boxing.grid_extreme_coordsResults;
@@ -13,6 +14,8 @@ import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.MyBinaryParser;
 import it.uniparthenope.Parser.MyCSVParser;
 import it.uniparthenope.Parser.MyNetCDFParser;
+import it.uniparthenope.Boxing.inpolygonResults;
+import it.uniparthenope.Boxing.nodes_free_form_barrierResults;
 
 public class VisirModel {
     //input data
@@ -94,6 +97,7 @@ public class VisirModel {
         this.lat_ext = new ArrayList<>();
         this.lat_int = new ArrayList<>();
     }
+
 
     public void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
         this.logFile = new MyFileWriter("","",true);
@@ -1069,6 +1073,111 @@ public class VisirModel {
         }
         return new readout_bathyResults(lat, lon, z);
     }
+
+    private nodes_free_form_barrierResults nodes_free_from_barrier(int[] nodes){
+        // % finds nodes not on the landmass (both continent and islands)
+        // %
+        // % removal of islands outside of bbox:
+        // % computation of nodes not on the landmasses:
+        int Nn = nodes.length;
+
+        //removal of islands outside of bbox:
+        int n_prima = this.y_islands.size();
+
+        boolean[] bool_in = new boolean[this.y_islands.size()];
+        for(int i=0;i<this.y_islands.size();i++){
+            if((this.sGrid.getDB_xi()<= this.x_islands.get(i)) && (this.x_islands.get(i)<=this.sGrid.getDB_xf())
+                    && (this.sGrid.getDB_yi()<=this.y_islands.get(i) && (this.y_islands.get(i)<=this.sGrid.getDB_yf())) ){
+                bool_in[i]=true;
+            }else{
+                bool_in[i]=false;
+            }
+        }
+        boolean[] bool_nan = new boolean[this.y_islands.size()];
+        for(int i=0;i<this.y_islands.size();i++){
+            if(Double.isNaN(this.x_islands.get(i)) && Double.isNaN(this.y_islands.get(i))){
+                bool_nan[i] = true;
+            } else {
+                bool_nan[i] = false;
+            }
+        }
+        ArrayList<Integer> isl_in_bb = new ArrayList<>();
+        for(int i=0;i<this.y_islands.size();i++){
+            if(bool_in[i] || bool_nan[i]){
+                isl_in_bb.add(i);
+            }
+        }
+        ArrayList<Double> x_islands_tmp = new ArrayList<>();
+        ArrayList<Double> y_islands_tmp = new ArrayList<>();
+        for(Integer element : isl_in_bb){
+            x_islands_tmp.add(this.x_islands.get(element));
+            y_islands_tmp.add(this.y_islands.get(element));
+        }
+        this.x_islands = x_islands_tmp;
+        this.y_islands = y_islands_tmp;
+
+        int n_dopo = this.y_islands.size();//includes NaNs separators between islands (i.e., 5608 elements)
+        int red_fact = Math.round((1 - n_dopo/n_prima)*100);
+
+        ArrayList<Double> y_coast = new ArrayList<>();
+        ArrayList<Double> x_coast = new ArrayList<>();
+        for(int i=0; i<this.y_islands.size();i++){
+            y_coast.add(this.y_islands.get(i));
+            x_coast.add(this.x_islands.get(i));
+        }
+        y_coast.add(Double.NaN);
+        x_coast.add(Double.NaN);
+
+        for(int i=0;i<this.y_continent.size();i++){
+            y_coast.add(this.y_continent.get(i));
+            x_coast.add(this.x_continent.get(i));
+        }
+
+        //--------------------------------------------------------------------------------------------
+        //computation of nodes not on the landmasses:
+        ArrayList<Integer> free_nodes = new ArrayList<>();
+        MyFileWriter fid = new MyFileWriter(true,"freeNodes_DB.dat.permil");
+        for(int ie=0;ie<Nn;ie++){
+            int frac_done = new Double(Math.floor(1000*ie/Nn)).intValue();
+            fid.WriteLine(""+frac_done);
+
+            double xP = this.xy[ie][0];
+            double yP = this.xy[ie][1];
+
+            inpolygonResults tmp = Utility.inpolygon(xP, yP, this.x_islands, this.y_islands);
+            boolean IN_i = tmp.getIn();
+            boolean ON_i = tmp.getOn();
+            tmp = Utility.inpolygon(xP, yP, this.x_continent, this.y_continent);
+            boolean IN_c = tmp.getIn();
+            boolean ON_c = tmp.getOn();
+
+            boolean canAdd = (IN_i == false) && (ON_i == false) && (IN_c == true) && (ON_c == false);
+
+            if(canAdd){
+                free_nodes.add(nodes[ie]);
+            }
+        }
+        if(free_nodes.size() == 0){
+            System.out.println("no free nodes found in graph");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("nodes_free_from_barrier: no free nodes found in graph");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        fid.CloseFile();
+        return new nodes_free_form_barrierResults(free_nodes.size(),free_nodes,red_fact);
+    }
+
+    public void Fields_regridding(){
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tprocessing environmental fields...");
+        this.logFile.CloseFile();
+        //Spatial and temporal Grid:
+        //CONTINUARE QUI
+
+    }
+
+
 
 
     /*****************Getter methods*********************/
