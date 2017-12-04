@@ -8,6 +8,8 @@ import java.util.Collections;
 
 import it.uniparthenope.Boxing.meshgridResults;
 import it.uniparthenope.Debug.MyFileWriter;
+import it.uniparthenope.Boxing.Point;
+import it.uniparthenope.Boxing.inpolygonResults;
 import org.apache.commons.math3.complex.Complex;
 
 public class Utility {
@@ -384,6 +386,7 @@ public class Utility {
     }
 
 
+
     public static double[][] transposeMatrix(double[][] matrix){
         double[][] output = new double[matrix[0].length][matrix.length];
         for(int i=0;i< matrix.length;i++){
@@ -501,4 +504,106 @@ public class Utility {
         }
     }
 
+    //MATLAB inpolygon implementation
+    // Given three colinear points p, q, r, the function checks if
+    // point q lies on line segment 'pr'
+    private static boolean onSegment(Point p, Point q, Point r)
+    {
+        if (q.getX() <= Math.max(p.getX(), r.getX()) && q.getX() >= Math.min(p.getX(), r.getX()) &&
+                q.getY() <= Math.max(p.getY(), r.getY()) && q.getY() >= Math.min(p.getY(), r.getY()))
+            return true;
+        return false;
+    }
+
+    // To find orientation of ordered triplet (p, q, r).
+    // The function returns following values
+    // 0 --> p, q and r are colinear
+    // 1 --> Clockwise
+    // 2 --> Counterclockwise
+    private static int orientation(Point p, Point q, Point r)
+    {
+        int val = new Double(Math.floor((q.getY() - p.getY()) * (r.getX() - q.getX()) - (q.getX() - p.getX()) * (r.getY() - q.getY()))).intValue();
+
+        if (val == 0) return 0;  // colinear
+        return (val > 0)? 1: 2; // clock or counterclock wise
+    }
+
+    // The function that returns true if line segment 'p1q1'
+    // and 'p2q2' intersect.
+    private static boolean doIntersect(Point p1, Point q1, Point p2, Point q2)
+    {
+        // Find the four orientations needed for general and
+        // special cases
+        int o1 = orientation(p1, q1, p2);
+        int o2 = orientation(p1, q1, q2);
+        int o3 = orientation(p2, q2, p1);
+        int o4 = orientation(p2, q2, q1);
+
+        // General case
+        if (o1 != o2 && o3 != o4)
+            return true;
+
+        // Special Cases
+        // p1, q1 and p2 are colinear and p2 lies on segment p1q1
+        if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+
+        // p1, q1 and p2 are colinear and q2 lies on segment p1q1
+        if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+
+        // p2, q2 and p1 are colinear and p1 lies on segment p2q2
+        if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+
+        // p2, q2 and q1 are colinear and q1 lies on segment p2q2
+        if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+
+        return false; // Doesn't fall in any of the above cases
+    }
+
+    public static inpolygonResults inpolygon(double xP, double yP, ArrayList<Double> xPolygon, ArrayList<Double> yPolygon){
+        inpolygonResults result = new inpolygonResults();
+        if(xPolygon.size() != yPolygon.size()){
+            System.out.println("xPolygon.size != yPolygon.size");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("xPolygon.size != yPolygon.size");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        if(xPolygon.size() < 3){
+            System.out.println("there must be at least 3 vertices in a polygon!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("there must be at least 3 vertices in a polygon!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        Point p = new Point(xP,yP);
+        Point extreme = new Point(10000000000.0, p.getY());
+        Point[] polygon = new Point[xPolygon.size()];
+        for(int i=0;i<polygon.length;i++){
+            polygon[i] = new Point(xPolygon.get(i),yPolygon.get(i));
+        }
+        int count = 0;
+        int i = 0;
+        do{
+            int next = (i+1)%xPolygon.size();
+            if(doIntersect(polygon[i], polygon[next], p, extreme)){
+                if (orientation(polygon[i], p, polygon[next]) == 0){
+                    if(onSegment(polygon[i], p, polygon[next])){
+                        result.setOn(true);
+                        i=0;
+                    }
+                }
+                count++;
+            }
+            i = next;
+        }while(i !=0 );
+        if(!result.getOn()){
+            if((count & 1)==1){
+                result.setIn(true);
+            }
+        }
+        return  result;
+    }
+
+
 }
+
