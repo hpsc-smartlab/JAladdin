@@ -1,6 +1,9 @@
 package it.uniparthenope;
 
 import java.io.FileReader;
+import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 //Boxing classes
 import com.sun.org.apache.xpath.internal.operations.Bool;
@@ -16,6 +19,8 @@ import it.uniparthenope.Parser.MyCSVParser;
 import it.uniparthenope.Parser.MyNetCDFParser;
 import it.uniparthenope.Boxing.inpolygonResults;
 import it.uniparthenope.Boxing.nodes_free_form_barrierResults;
+import it.uniparthenope.Parser.MyTxtParser;
+import it.uniparthenope.Boxing.deg2utmResults;
 
 public class VisirModel {
     //input data
@@ -1025,6 +1030,9 @@ public class VisirModel {
         parseMedOneMinResults out = test.parseMedOneMin();
         if(out == null){
             System.out.println("Parsing fail!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("readout_bathy: Parsing fail!");
+            debug.CloseFile();
             return null;
         }
         ArrayList<Double> latTmp = out.getLat();
@@ -1173,11 +1181,240 @@ public class VisirModel {
         this.logFile.WriteLog("\tprocessing environmental fields...");
         this.logFile.CloseFile();
         //Spatial and temporal Grid:
-        //CONTINUARE QUI
+        //Time parameters preprocessing:
+        // % Fields reading:
+        // % Spatial subsetting:
+        // % Time processing:
+        // % seaOverLand:
 
+        //Time parameters preprocessing:
+        double wave_t1= 12.5; // wave file start time is 1230 UTC (WW3 4e)
+        double wind_t1 = Double.NaN;
+        if (this.optim.getWindModel()==11 || this.optim.getWindModel()==12){//EXMWF
+            wind_t1 = 12.0;//ECMWF wind file (analysis) start time is 1200 UTC
+        } else if (this.optim.getWindModel() == 2){
+            wind_t1 = 15.0; //COSMO-ME wind file (forecast) start time is 1500 UTC  *** use also analysis in the future!
+        } else {
+            System.out.println("unknown wind model code!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("Fields_regridding: unknown wind model code!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        String dateListFile = "inputFiles/fields/an_dates_DB.txt";
+        MyTxtParser file = new MyTxtParser(dateListFile);
+        this.tGrid.setLatest_date(file.tail(1).get(0));
+
+        String l_date_str = this.tGrid.getLatest_date()+"1200";
+        long l_num = Utility.datenum(l_date_str,"yyyyMMddHHmm"); // taken at 1200 UTC (analysis time)
+
+        this.tGrid.setDepDateTime(Utility.datenum(2000+this.dep_datetime.getYear(),this.dep_datetime.getMonth(),
+                this.dep_datetime.getDay(),this.dep_datetime.getHour(),this.dep_datetime.getMin()));
+
+        //hrs elapsed between latest analysis and departure time
+        int cento = 100;
+        long deltaHr_anls=0;
+        if(this.forcing.getAnalytic()==1){
+            deltaHr_anls = 1;
+        } else{
+            deltaHr_anls = Math.round(cento*this.constants.getTwentyfour()*(this.tGrid.getDepDateTime() - l_num)/cento);
+        }
+
+        this.tGrid.setWave_dep_TS(Math.round(1+ deltaHr_anls - (wave_t1 - this.constants.getTwelve())));
+
+        this.tGrid.setWind_dep_TS(Math.round(1+ deltaHr_anls - (wave_t1 - this.constants.getTwelve())));
+
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tlatest analysis date and time :"+Utility.datestr(l_num));
+        this.logFile.WriteLog("\tdeparture date and time :"+Utility.datestr(this.tGrid.getDepDateTime()));
+        this.logFile.CloseFile();
+
+        //-----------------------------------------------------------------------------------------------------
+        //Fields reading:
+        if(this.forcing.getAnalytic()==1){
+            this.tGrid.setNt(this.tGrid.getMinNt());
+            //CONTINUA QUIIIIIIIIIIII
+        } else {
+
+        }
     }
 
+    private void prepare_sqrtY_field(){
+        // % preparation of a pseudo- waveheight field
+        // % depending on sqrt of Y coordinate
+        // % to be used for testing of analytical solution (=cycloid)
 
+        //x, y
+        double[] tmpLat = new double[1];
+        tmpLat[0]=this.extreme_pts.getStart_lat();
+        double[] tmpLon = new double[1];
+        tmpLon[0]=this.extreme_pts.getStart_lon();
+
+        deg2utmResults tmp = deg2utm(tmpLat, tmpLon);
+        double x_start = tmp.getX()[0];
+        double y_start = tmp.getY()[0];
+        String utmzone_start = tmp.getUtmzone()[0];
+
+        tmpLat[0]=this.extreme_pts.getEnd_lat();
+        tmpLon[0]=this.extreme_pts.getEnd_lon();
+
+        tmp = deg2utm(tmpLat,tmpLon);
+        double x_end = tmp.getX()[0];
+        double y_end = tmp.getY()[0];
+        String utm_zone_end = tmp.getUtmzone()[0];
+
+        //CONTINUA QUI!!!!
+    }
+
+    private deg2utmResults deg2utm(double[] Lat, double[] Lon){
+        // % Description: Function to convert lat/lon vectors into UTM coordinates (WGS84).
+    // % Some code has been extracted from UTM.m function by Gabriel Ruiz Martinez.
+    // %
+    // % Inputs:
+    // %    Lat: Latitude vector.   Degrees.  +ddd.ddddd  WGS84
+    // %    Lon: Longitude vector.  Degrees.  +ddd.ddddd  WGS84
+    // %
+    // % Outputs:
+    // %    x, y , utmzone.   See example
+    // %
+    // % Example 1:
+    // %    Lat=[40.3154333; 46.283900; 37.577833; 28.645650; 38.855550; 25.061783];
+    // %    Lon=[-3.4857166; 7.8012333; -119.95525; -17.759533; -94.7990166; 121.640266];
+    // %    [x,y,utmzone] = deg2utm(Lat,Lon);
+    // %    fprintf('%7.0f ',x)
+    // %       458731  407653  239027  230253  343898  362850
+    // %    fprintf('%7.0f ',y)
+    // %      4462881 5126290 4163083 3171843 4302285 2772478
+    // %    utmzone =
+    // %       30 T
+    // %       32 T
+    // %       11 S
+    // %       28 R
+    // %       15 S
+    // %       51 R
+    // %
+    // % Example 2: If you have Lat/Lon coordinates in Degrees, Minutes and Seconds
+    // %    LatDMS=[40 18 55.56; 46 17 2.04];
+    // %    LonDMS=[-3 29  8.58;  7 48 4.44];
+    // %    Lat=dms2deg(mat2dms(LatDMS)); %convert into degrees
+    // %    Lon=dms2deg(mat2dms(LonDMS)); %convert into degrees
+    // %    [x,y,utmzone] = deg2utm(Lat,Lon)
+    // %
+    // % Author:
+    // %   Rafael Palacios
+    // %   Universidad Pontificia Comillas
+    // %   Madrid, Spain
+    // % Version: Apr/06, Jun/06, Aug/06, Aug/06
+    // % Aug/06: fixed a problem (found by Rodolphe Dewarrat) related to southern
+    // %    hemisphere coordinates.
+    // % Aug/06: corrected m-Lint warnings
+    // %-------------------------------------------------------------------------
+
+        //Argument checking
+        int n1 = Lat.length;
+        int n2 = Lon.length;
+
+        if(n1!=n2){
+            System.out.println("Lat and Lon vectors should have the same length");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("deg2utm: Lat and Lon vectors should have the same length");
+            debug.CloseFile();
+            System.exit(0);
+        }
+
+        //Memory pre-allocation
+        double[] x = new double[n1];
+        double[] y = new double[n1];
+        String[] utmzone = new String[n1];
+
+        for(int i=0;i<n1;i++){
+            double la = Lat[i];
+            double lo = Lon[i];
+
+            double sa = 6378137.000000;
+            double sb = 6356752.314245;
+
+            double e2 = ( Math.pow((Math.pow(sa,2) - Math.pow(sb,2)),0.5) )/sb;
+            double e2cuadrada = Math.pow(e2,2);
+            double c = Math.pow(sa,2)/sb;
+
+            double lat = la * (Math.PI/180);
+            double lon = lo * (Math.PI/180);
+
+            int Huso = Utility.fix( (lo/6) + 31);
+            int S =( (Huso * 6) - 183);
+            double deltaS = lon - ( S* (Math.PI/180));
+
+            String Letra = "X";
+
+            if(la<-72)
+                Letra = "C";
+            else if(la<-64)
+                Letra = "D";
+            else if(la<-56)
+                Letra = "E";
+            else if(la<-48)
+                Letra = "F";
+            else if(la<-40)
+                Letra = "G";
+            else if(la<-32)
+                Letra = "H";
+            else if(la<-24)
+                Letra = "J";
+            else if(la<-16)
+                Letra = "K";
+            else if(la<-8)
+                Letra = "L";
+            else if(la<0)
+                Letra = "M";
+            else if(la<8)
+                Letra = "N";
+            else if(la<16)
+                Letra = "P";
+            else if(la<24)
+                Letra = "Q";
+            else if(la<32)
+                Letra = "R";
+            else if(la<40)
+                Letra = "S";
+            else if(la<48)
+                Letra = "T";
+            else if(la<56)
+                Letra = "U";
+            else if(la<64)
+                Letra = "V";
+            else if(la<72)
+                Letra = "W";
+            else
+                Letra ="X";
+
+            double a = Math.cos(lat) * Math.sin(deltaS);
+            double epsilon = 0.5 * Math.log((1+a)/(1-a));
+            double nu = Math.atan(Math.tan(lat)/Math.cos(deltaS))-lat;
+            double v = (c/(Math.pow((Math.pow((e2cuadrada*Math.cos(lat)),2)),0.5)))*0.9996;
+            double ta = (e2cuadrada/2) * Math.pow(epsilon,2) + Math.pow(Math.cos(lat),2);
+            double a1 = Math.sin(2*lat);
+            double a2 = a1 * Math.pow(Math.cos(lat),2);
+            double j2 = lat + (a1/2);
+            double j4 = ((3*j2) + a2)/4;
+            double j6 = (5*j4) + (a2*Math.pow(Math.cos(lat),2)) /3;
+            double alfa = (3/4)*e2cuadrada;
+            double beta = (5/3)*Math.pow(alfa,2);
+            double gama = (35/27)*Math.pow(alfa,3);
+            double Bm = 0.9996 * c * (lat - alfa * j2 + beta * j4 - gama * j6);
+            double xx = epsilon * v * (1+(ta/3))+500000;
+            double yy = nu*v*(1+ta)+Bm;
+
+            if(yy<0)
+                yy+=9999999;
+
+            x[i] = xx;
+            y[i] = yy;
+            utmzone[i] = ""+Huso+" "+Letra;
+        }
+
+        return new deg2utmResults(x,y,utmzone);
+    }
 
 
     /*****************Getter methods*********************/
