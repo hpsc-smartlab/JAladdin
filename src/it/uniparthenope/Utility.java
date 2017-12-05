@@ -3,14 +3,20 @@ package it.uniparthenope;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 
 import it.uniparthenope.Boxing.meshgridResults;
 import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Boxing.Point;
 import it.uniparthenope.Boxing.inpolygonResults;
 import org.apache.commons.math3.complex.Complex;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 public class Utility {
 
@@ -604,6 +610,62 @@ public class Utility {
         return  result;
     }
 
+    public static long datenum(String dateString, String format){
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        try {
+            Date data = sdf.parse("000000000000");
+            DateTime from = new DateTime(data.getTime());
+            data = sdf.parse(dateString);
+            DateTime to = new DateTime(data.getTime());
+            return Days.daysBetween(from,to).getDays();
+        } catch (Exception ex){
+            ex.printStackTrace();
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("datenum: "+ex.getMessage());
+            debug.CloseFile();
+            return 0;
+        }
+    }
 
+    public static long datenum(long year, long month, long day, long hour, long min){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+        try {
+            Date data = sdf.parse("000000000000");
+            DateTime from = new DateTime(data.getTime());
+            String toString = ""+year+""+month+""+day+""+hour+""+min;
+            data = sdf.parse(toString);
+            DateTime to = new DateTime(data.getTime());
+            return Days.daysBetween(from,to).getDays();
+        } catch (Exception ex){
+            ex.printStackTrace();
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("datenum: "+ex.getMessage());
+            debug.CloseFile();
+            return 0;
+        }
+    }
+
+    public static String datestr(long datenum){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+        try {
+            Date data = sdf.parse("000000000000");
+            Calendar c = Calendar.getInstance();
+            c.setTime(data);
+            c.add(Calendar.DATE, (int) datenum);
+
+            SimpleDateFormat outDate = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+            return outDate.format(c.getTime());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("datestr: "+ex.getMessage());
+            debug.CloseFile();
+            return "";
+        }
+    }
+
+    public static int fix(double a){
+        return (int) a;
+    }
 }
 
