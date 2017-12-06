@@ -65,4 +65,8 @@ public class TemporalGrid {
     public void setNt(long nt) {
         Nt = nt;
     }
+
+    public long getNt() {
+        return Nt;
+    }
 }
