@@ -24,6 +24,7 @@ public class ExtremePoints {
     private double DR_lat;
     private double DR_lon;
     private String cycType;
+    private double pseudoG;
 
 
     public ExtremePoints(){
@@ -158,5 +159,17 @@ public class ExtremePoints {
 
     public void setBbox_deltaLon_r(double bbox_deltaLon_r) {
         this.bbox_deltaLon_r = bbox_deltaLon_r;
+    }
+
+    public String getCycType() {
+        return cycType;
+    }
+
+    public double getPseudoG() {
+        return pseudoG;
+    }
+
+    public void setPseudoG(double pseudoG) {
+        this.pseudoG = pseudoG;
     }
 }
