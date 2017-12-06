@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import it.uniparthenope.Boxing.meshgridResults;
+import it.uniparthenope.Boxing.minResults;
 import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Boxing.Point;
 import it.uniparthenope.Boxing.inpolygonResults;
@@ -75,6 +76,30 @@ public class Utility {
             }
         }
         return matrix;
+    }
+
+    public static double[][][] NaN3Dmatrix(int x, int y, int z){
+        double[][][] matrix3d = new double[x][y][z];
+        for(int i=0;i<x;i++){
+            for(int j=0;j<y;j++){
+                for(int k=0; k<z; k++){
+                    matrix3d[i][j][k] = Double.NaN;
+                }
+            }
+        }
+        return matrix3d;
+    }
+
+    public static double[][][] ones3Dmatrix(int x, int y, int z){
+        double[][][] matrix3d = new double[x][y][z];
+        for(int i=0;i<x;i++){
+            for(int j=0;j<y;j++){
+                for(int k=0; k<z; k++){
+                    matrix3d[i][j][k] = 1.0;
+                }
+            }
+        }
+        return matrix3d;
     }
 
 
@@ -429,6 +454,25 @@ public class Utility {
         return  output;
     }
 
+    public static minResults minWithIndex(double[] array){
+        //check for NaNs
+        for(int i=0;i<array.length; i++){
+            if(Double.isNaN(array[i])){
+                array[i] = Double.MAX_VALUE;
+            }
+        }
+        //found min and indexMin
+        int index = 0;
+        double min = array[0];
+        for(int i=1;i<array.length-1;i++){
+            if(array[i]<array[i+1]){
+                index = i;
+                min = array[i];
+            }
+        }
+        return new minResults(min, index);
+    }
+
     public static double min(double[] array){
         double[] notNaNs = removeNaNs(array);
         if(notNaNs.length == 0){
@@ -443,6 +487,34 @@ public class Utility {
             }
             return min;
         }
+    }
+
+    public static double min3d(double[][][] mat3d){
+        double min = mat3d[0][0][0];
+        for(int i=0;i<mat3d.length;i++){
+            for(int j=0;j<mat3d[0].length;j++){
+                for(int k=0; k<mat3d[0][0].length-1;k++){
+                    if(mat3d[i][j][k]<min){
+                        min = mat3d[i][j][k];
+                    }
+                }
+            }
+        }
+        return min;
+    }
+
+    public static double max3d(double[][][] mat3d){
+        double max = mat3d[0][0][0];
+        for(int i=0;i<mat3d.length;i++){
+            for(int j=0;j<mat3d[0].length;j++){
+                for(int k=0; k<mat3d[0][0].length-1;k++){
+                    if(mat3d[i][j][k]>max){
+                        max = mat3d[i][j][k];
+                    }
+                }
+            }
+        }
+        return max;
     }
 
     private static double[] removeNaNs(double[] in){
