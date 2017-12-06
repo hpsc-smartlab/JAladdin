@@ -7,25 +7,20 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 //Boxing classes
 import com.sun.org.apache.xpath.internal.operations.Bool;
-import it.uniparthenope.Boxing.mdata_gridResults;
-import it.uniparthenope.Boxing.meshgridResults;
-import it.uniparthenope.Boxing.grid_extreme_coordsResults;
-import it.uniparthenope.Boxing.idx_ref2inset_gridResults;
-import it.uniparthenope.Boxing.readout_bathyResults;
-import it.uniparthenope.Boxing.parseMedOneMinResults;
+import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.MyBinaryParser;
 import it.uniparthenope.Parser.MyCSVParser;
 import it.uniparthenope.Parser.MyNetCDFParser;
-import it.uniparthenope.Boxing.inpolygonResults;
-import it.uniparthenope.Boxing.nodes_free_form_barrierResults;
 import it.uniparthenope.Parser.MyTxtParser;
-import it.uniparthenope.Boxing.deg2utmResults;
+
+import javax.rmi.CORBA.Util;
 
 public class VisirModel {
     //input data
     private long bar_flag;
     private long timedep_flag;
+    private Fstats fstats;
     private Const constants;
     private Optim optim;
     private Ship ship;
@@ -91,6 +86,7 @@ public class VisirModel {
         } else {
             this.timedep_flag = timedep_flag;
         }
+        this.fstats = new Fstats();
         this.constants = new Const();
         this.optim = new Optim();
         this.ship = new Ship();
@@ -1023,6 +1019,9 @@ public class VisirModel {
                 break;
             default:
                 System.out.println("unknow bathy DB code!");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("readout_bathy: unknow bathy DB code!");
+                debug.CloseFile();
                 break;
         }
         //Parsing file:
@@ -1233,13 +1232,217 @@ public class VisirModel {
         //Fields reading:
         if(this.forcing.getAnalytic()==1){
             this.tGrid.setNt(this.tGrid.getMinNt());
-            //CONTINUA QUIIIIIIIIIIII
+            prepare_sqrtY_fieldResults out = prepare_sqrtY_field();
+            double[][][] VTDH_out = out.getVTDH_b();
+            double[][][] VDIR_out = out.getVDIR_b();
+            double[][][] windMAGN_out = Utility.NaN3Dmatrix(VTDH_out.length,VTDH_out[0].length,VTDH_out[0][0].length);
+            double[][][] windDIR_out = Utility.NaN3Dmatrix(VTDH_out.length,VTDH_out[0].length,VTDH_out[0][0].length);
+            double time_steps = Double.NaN;
+        } else { //Reading of environmental Fields:
+            //CONTINUA DA
+//                [lat_wave, lon_wave, ecmwf_lat_wind,ecmwf_lon_wind, cosmo_lat_wind,cosmo_lon_wind,...
+//            VTDH,VTPK,VDIR, ecmwf_U10m,ecmwf_V10m, cosmo_U10m,cosmo_V10m, ...
+//            wave_origTimes, ecmwf_wind_origTimes, cosmo_wind_origTimes]= ...
+//            readout_envFields;
+        }
+    }
+
+    private void readout_envFields(){
+        //reads wave and wind model forecast and (when relevant) analysis fields
+        double[][][] VTDH;
+        double[][][] VTPK;
+        double[][][] VDIR;
+        double[] lat_wave;
+        double[] lon_wave;
+        int[] wave_origtimes;
+        if(this.forcing.getWave() == 1){
+            //------------------------------------------------------------------------
+            //wave model
+            String model_str = "";
+            if(this.optim.getWaveModel() < this.optim.getRelocAnlsCode()){
+                model_str = "WW3";
+            } else {
+                if(this.optim.getWaveModel() >= this.optim.getRelocAnlsCode()){
+                    model_str = "SWAN (reloc)";
+                } else {
+                    System.out.println("readout_envFields: unknown waveModel!");
+                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    debug.WriteLog("readout_envFields: unknown waveModel!");
+                    debug.CloseFile();
+                    System.exit(0);
+                }
+            }
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tattempt reading "+model_str+" wave forecast data...");
+            this.logFile.CloseFile();
+
+            readout_mWaveResults readout_mWave = readout_mWave();
+            if(!readout_mWave.isWave_status()){
+                System.out.println("readout_envFields: "+ readout_mWave.getWave_filename() + "wave forecast not found!");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("readout_envFields: "+ readout_mWave.getWave_filename() + "wave forecast not found!");
+                debug.CloseFile();
+                System.exit(0);
+            }
+            lat_wave = readout_mWave.getLat();
+            lon_wave = readout_mWave.getLon();
+            VTDH = readout_mWave.getVTHD();
+            VTPK = readout_mWave.getVTPK();
+            VDIR = readout_mWave.getVDIR();
+            int wave_maxNt = VTDH.length;
+            wave_origtimes = new int[wave_maxNt];
+            for(int i=0;i<wave_maxNt;i++)
+                wave_origtimes[i]=(i+1);
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tdeparture at time step # "+this.tGrid.getWave_dep_TS()+" of hourly interpolated file");
+            this.logFile.CloseFile();
+        } else{
+            //fake wave fields in case of sailboat:
+            fake_waveFieldsResults waveFields = fake_waveFields(192,192, 10, 30);
+            wave_origtimes = waveFields.getWave_origtimes();
+            lon_wave = waveFields.getLon_wave();
+            lat_wave = waveFields.getLat_wave();
+            VTDH = waveFields.getVTDH();
+            VTPK = waveFields.getVTPK();
+            VDIR = waveFields.getVDIR();
+        }
+        if(this.forcing.getWind() == 1){
+            String star_str = " (**using this one**)";
+            String read_str1 = " attempt reading ";
+            String read_str2 = " wind forecast data ";
+            String ecmwf_str = "";
+            String cosmo_str = "";
+            if(this.optim.getWindModel() == 11){ //ecmwf
+                ecmwf_str = read_str1 + "ECMWF_1/4" + read_str2+ star_str;
+                cosmo_str = read_str1 + "COSMO-ME" + read_str2;
+            } else {
+                if(this.optim.getWindModel() == 12){ //ecmwf
+                    ecmwf_str = read_str1 + "ECMWF_1/8" + read_str2+ star_str;
+                    cosmo_str = read_str1 + "COSMO-ME" + read_str2;
+                } else {
+                    if(this.optim.getWindModel() == 2){ //cosmo-me
+                        ecmwf_str = read_str1 + "ECMWF " + read_str2+ star_str;
+                        cosmo_str = read_str1 + "COSMO-ME_1/16" + read_str2;
+                    } else {
+                        System.out.println("readout_envFields: unknown windModel!");
+                        MyFileWriter debug = new MyFileWriter("","debug",false);
+                        debug.WriteLog("readout_envFields: unknown windModel!");
+                        debug.CloseFile();
+                        System.exit(0);
+                    }
+                }
+            }
+            //------------------------------------------------------------------------
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\t"+ecmwf_str);
+            this.logFile.CloseFile();
         } else {
 
         }
     }
 
-    private void prepare_sqrtY_field(){
+    private fake_waveFieldsResults fake_waveFields(int mtwave, int nsteps, int nlat, int nlon){
+        ArrayList<Double> lat_waveTmp = Utility.linspace(this.sGrid.getBbox__lat_min(), this.sGrid.getBbox__lat_max(), nlat);
+        double[] lat_wave = new double[lat_waveTmp.size()];
+        for(int i=0;i<lat_waveTmp.size();i++){
+            lat_wave[i]=lat_waveTmp.get(i);
+        }
+        ArrayList<Double> lon_waveTmp = Utility.linspace(this.sGrid.getBbox__lon_min(), this.sGrid.getBbox__lon_max(), nlon);
+        double[] lon_wave = new double[lon_waveTmp.size()];
+        for(int i=0;i<lon_waveTmp.size();i++){
+            lon_wave[i]=lon_waveTmp.get(i);
+        }
+        double[][][] VTDH = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        double[][][] VTPK = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        double[][][] VDIR = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        int[] wave_origtimes = new int[mtwave];
+        for(int i=0;i<mtwave; i++)
+            wave_origtimes[i]=(i+1);
+        return new fake_waveFieldsResults(wave_origtimes, lon_wave, lat_wave, VTDH, VTPK, VDIR);
+    }
+
+    private readout_mWaveResults readout_mWave(){
+        // % reads out Waves forecast data
+        // % physical fields from either WAM or WW3 model:
+        String Stagein_path = "";
+        if(this.optim.getWaveModel() == 10){
+            Stagein_path = "inputFiles/wave/WW3/analysis";
+        } else {
+            if(this.optim.getWaveModel() == 1){
+                Stagein_path = "inputFiles/wave/WW3/forecast";
+            } else {
+                if(this.optim.getWaveModel() >= 20){//relocatable
+                    Stagein_path = "inputFiles/wave/SWAN";
+                }
+            }
+        }
+
+        String wave_filename = "/start__"+this.tGrid.getLatest_date()+".nc";
+        MyNetCDFParser parser = new MyNetCDFParser(wave_filename);
+        boolean wave_status = parser.isFileExists();
+        double[] lat;
+        double[] lon;
+        double[][][] VTDH;
+        double[][][] VDIR;
+        double[][][] VTPK;
+        if(wave_status){
+            waveForecastResults waveForecast = parser.parseWaveForecastData();
+            lat= waveForecast.getLatitude();
+            lon = waveForecast.getLongitude();
+
+            VTDH = waveForecast.getVTDH();
+            VDIR = waveForecast.getVDIR();
+            VTPK = waveForecast.getVTPK();
+
+            //############################ WAM convention used in VISIR!! ###################
+            // if optim.waveModel<optim.relocAnlsCode
+            //     % converting WW3 wave directions to WAM directions convention:
+            //     if numel(regexp(hostflag, 'okeanos'))==0
+            //         VDIR= VDIR + 180* sign(180- VDIR);
+            //         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
+            //     end
+            // elseif optim.waveModel>=optim.relocAnlsCode
+            //     VY=  cos(const.deg2rad*VDIR);
+            //     VX=  sin(const.deg2rad*VDIR);
+            //     VDIR= atan2(VY, VX)/const.deg2rad;
+            // end
+
+            if(this.optim.getWaveModel() >= this.optim.getRelocAnlsCode()){
+                double[][][] VY = new double[VDIR.length][VDIR[0].length][VDIR[0][0].length];
+                double[][][] VX = new double[VDIR.length][VDIR[0].length][VDIR[0][0].length];
+                for(int i=0;i<VDIR.length; i++){
+                    for(int j=0;j<VDIR[0].length;j++){
+                        for(int k=0;k<VDIR[0][0].length; k++){
+                            VY[i][j][k]=Math.cos(this.constants.getDeg2rad()*VDIR[i][j][k]);
+                            VX[i][j][k]=Math.sin(this.constants.getDeg2rad()*VDIR[i][j][k]);
+                            VDIR[i][j][k] = Math.atan2(VY[i][j][k], VX[i][j][k])/this.constants.getDeg2rad();
+                        }
+                    }
+                }
+            }
+
+            //######################################################################
+
+            // %     GM's note 23/5/2016
+            // %     WAM (WW3 pre13Jun2016) convention is the oceanographic (meteorological) convention
+            // %
+            // %     starting since 13/6/2016, INGV will provide VDIR with oceanographic convention
+            // %     Thus, the conversion:
+            // %          VDIR= VDIR + 180* sign(180- VDIR);
+            // %         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
+            // %     will have to be dismissed.
+
+        } else{
+            lat = new double[0];
+            lon = new double[0];
+            VTDH = new double[0][0][0];
+            VTPK = new double[0][0][0];
+            VDIR = new double[0][0][0];
+        }
+        return new readout_mWaveResults(lat, lon, wave_status, wave_filename, VTDH, VTPK, VDIR);
+    }
+
+    private prepare_sqrtY_fieldResults prepare_sqrtY_field(){
         // % preparation of a pseudo- waveheight field
         // % depending on sqrt of Y coordinate
         // % to be used for testing of analytical solution (=cycloid)
@@ -1253,7 +1456,7 @@ public class VisirModel {
         deg2utmResults tmp = deg2utm(tmpLat, tmpLon);
         double x_start = tmp.getX()[0];
         double y_start = tmp.getY()[0];
-        String utmzone_start = tmp.getUtmzone()[0];
+        String[] utmzone_start = tmp.getUtmzone()[0];
 
         tmpLat[0]=this.extreme_pts.getEnd_lat();
         tmpLon[0]=this.extreme_pts.getEnd_lon();
@@ -1261,9 +1464,159 @@ public class VisirModel {
         tmp = deg2utm(tmpLat,tmpLon);
         double x_end = tmp.getX()[0];
         double y_end = tmp.getY()[0];
-        String utm_zone_end = tmp.getUtmzone()[0];
+        String[] utm_zone_end = tmp.getUtmzone()[0];
 
-        //CONTINUA QUI!!!!
+        int zoneN_start = Integer.parseInt(utmzone_start[0]);
+
+        meshgridResults res = Utility.meshgrid(this.lat_bathy_Inset, this.lon_bathy_Inset);
+        double[][] lat_gr = res.getX();
+        double[][] lon_gr = res.getY();
+        int Np = lat_gr.length * lat_gr[0].length;
+
+        int[] utmzone_number = new int[Np];
+        Arrays.fill(utmzone_number, zoneN_start);
+        degzone2utmResults dz2uTmp = degzone2utm(Utility.reshape(lat_gr,Np), Utility.reshape(lon_gr, Np), utmzone_number);
+        double[] xx=dz2uTmp.getX();
+        double[] yy=dz2uTmp.getY();
+
+        int Ny = this.lat_bathy_Inset.size();//43
+        int Nx = this.lon_bathy_Inset.size();//72
+
+        int[] dim = new int[2];
+        dim[0]=Nx;
+        dim[1]=Ny;
+        double[][] Nyy = Utility.reshape(yy,dim);
+
+        //Dy
+        double[][] DeltaY = new double[Nx][Ny];
+        if(this.extreme_pts.getCycType() == "id"){//dd-type cycloid:
+            for(int ix = 0;ix<Nx; ix++){
+                double[] y_diff = new double[Ny];
+                for(int j =0;j<Ny;j++){
+                    y_diff[j] = Math.abs(Nyy[ix][j] - y_start); //m
+                }
+                minResults min = Utility.minWithIndex(y_diff);
+                double y_val = min.getElement();
+                int y_idx = min.getIndex();
+                for(int j=0;j<Ny;j++){
+                    DeltaY[ix][j] = Nyy[ix][y_idx] - Nyy[ix][j]; //m
+                }
+            }
+        } else { //id-type cycloid:
+            for(int ix = 0;ix<Nx; ix++){
+                double[] y_diff = new double[Ny];
+                for(int j =0;j<Ny;j++){
+                    y_diff[j] = Math.abs(Nyy[ix][j] - y_end); //m
+                }
+                minResults min = Utility.minWithIndex(y_diff);
+                double y_val = min.getElement();
+                int y_idx = min.getIndex();
+                for(int j=0;j<Ny;j++){
+                    DeltaY[ix][j] = Nyy[ix][j] - Nyy[ix][y_idx]; //m
+                }
+            }
+        }
+        for(int u =0 ;u<Nx; u++){
+            for(int v =0;v<Ny;v++){
+                if(DeltaY[u][v]<0){
+                    DeltaY[u][v] = 0;
+                }
+            }
+        }
+
+        //speed
+        this.extreme_pts.setPseudoG(0.001);
+        double[][][] VTDH_b = new double[(int) this.tGrid.getNt()][Ny][Nx];
+        double[][] DeltaYTransposed = Utility.transposeMatrix(DeltaY);
+        for(int i=0;i<(int) this.tGrid.getNt();i++){
+            for(int j=0;j<Ny;j++){
+                for(int k=0;k<Nx;k++){
+                    VTDH_b[i][j][k] = this.constants.getMs2kts() * Math.sqrt(2*this.extreme_pts.getPseudoG() * DeltaYTransposed[j][k]); //kts
+                }
+            }
+        }
+        double[][][] VDIR_b = Utility.NaN3Dmatrix((int) this.tGrid.getNt(), Ny, Nx);
+
+        //graphical pars
+        double smallFract = 0.5;
+        this.fstats.setWheight_min((1-smallFract)*Utility.min3d(VTDH_b));
+        this.fstats.setWheight_max((1+smallFract)*Utility.max3d(VTDH_b));
+        return new prepare_sqrtY_fieldResults(VTDH_b, VDIR_b);
+    }
+
+    private degzone2utmResults degzone2utm(double[] Lat, double[] Lon, int[] utmzone_number){
+        // % utmzone_number can be forced to be different from the proper one.
+        // % based on deg2utm; modified by G.Mannarini on dec.15, 2008
+
+        //Argument checking
+        int n1 = Lat.length;
+        int n2 = Lon.length;
+        int n3 = utmzone_number.length;
+
+        if(n1!=n2){
+            System.out.println("degzone2utm: Lat and Lon vectors should have the same length");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("degzone2utm: Lat and Lon vectors should have the same length");
+            debug.CloseFile();
+            System.exit(0);
+        } else{
+            if(n1!=n3){
+                System.out.println("degzone2utm: Lat and Lon vectors should have the same length of utmzone_number vector");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("degzone2utm: Lat and Lon vectors should have the same length of utmzone_number vector");
+                debug.CloseFile();
+                System.exit(0);
+            }
+        }
+
+        //Memory pre-allocation
+        double[] x = new double[n1];
+        double[] y = new double[n1];
+
+        //Main loop
+        for(int i=0;i<n1;i++){
+            double la = Lat[i];
+            double lo = Lon[i];
+
+            double sa = 6378137.000000 ;
+            double sb = 6356752.314245;
+
+            double e2 = ( Math.pow((Math.pow(sa,2) - Math.pow(sb,2)),0.5) )/sb;
+            double e2cuadrada = Math.pow(e2,2);
+            double c = Math.pow(sa,2)/sb;
+
+            double lat = la * (Math.PI/180);
+            double lon = lo * (Math.PI/180);
+
+            int Huso = utmzone_number[i];
+            int S =( (Huso * 6) - 183);
+            double deltaS = lon - ( S* (Math.PI/180));
+
+            double a = Math.cos(lat) * Math.sin(deltaS);
+            double epsilon = 0.5 * Math.log((1+a)/(1-a));
+            double nu = Math.atan(Math.tan(lat)/Math.cos(deltaS))-lat;
+            double v = (c/(Math.pow((Math.pow((e2cuadrada*Math.cos(lat)),2)),0.5)))*0.9996;
+            double ta = (e2cuadrada/2) * Math.pow(epsilon,2) + Math.pow(Math.cos(lat),2);
+            double a1 = Math.sin(2*lat);
+            double a2 = a1 * Math.pow(Math.cos(lat),2);
+            double j2 = lat + (a1/2);
+            double j4 = ((3*j2) + a2)/4;
+            double j6 = (5*j4) + (a2*Math.pow(Math.cos(lat),2)) /3;
+            double alfa = (3/4)*e2cuadrada;
+            double beta = (5/3)*Math.pow(alfa,2);
+            double gama = (35/27)*Math.pow(alfa,3);
+            double Bm = 0.9996 * c * (lat - alfa * j2 + beta * j4 - gama * j6);
+            double xx = epsilon * v * (1+(ta/3))+500000;
+            double yy = nu*v*(1+ta)+Bm;
+
+            if(yy<0)
+                yy+=9999999;
+
+            x[i] = xx;
+            y[i] = yy;
+        }
+
+        return new degzone2utmResults(x,y);
     }
 
     private deg2utmResults deg2utm(double[] Lat, double[] Lon){
@@ -1325,7 +1678,7 @@ public class VisirModel {
         //Memory pre-allocation
         double[] x = new double[n1];
         double[] y = new double[n1];
-        String[] utmzone = new String[n1];
+        String[][] utmzone = new String[n1][2];
 
         for(int i=0;i<n1;i++){
             double la = Lat[i];
@@ -1410,7 +1763,8 @@ public class VisirModel {
 
             x[i] = xx;
             y[i] = yy;
-            utmzone[i] = ""+Huso+" "+Letra;
+            utmzone[i][0] = ""+Huso;
+            utmzone[i][1] = Letra;
         }
 
         return new deg2utmResults(x,y,utmzone);
