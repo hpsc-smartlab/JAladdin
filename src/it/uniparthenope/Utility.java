@@ -10,11 +10,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 
-import it.uniparthenope.Boxing.meshgridResults;
-import it.uniparthenope.Boxing.minResults;
+import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
-import it.uniparthenope.Boxing.Point;
-import it.uniparthenope.Boxing.inpolygonResults;
 import org.apache.commons.math3.complex.Complex;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -374,6 +371,102 @@ public class Utility {
         return out;
     }
 
+    public static findResults find(double[] A, String condition1, double b, String condition2, double c){//TODO: implement other cases
+        ArrayList<Integer> indexes = new ArrayList<>();
+        ArrayList<Double> elements = new ArrayList<>();
+
+        switch(condition1){
+            case("<="):
+                switch(condition2){
+                    case("<="):
+                        for(int i=0;i<A.length;i++){
+                            if(b <= A[i] && A[i] <= c){
+                                elements.add(A[i]);
+                                indexes.add(i);
+                            }
+                        }
+                        break;
+                }
+                break;
+            case(">="):
+                switch(condition2){
+                    case("<="):
+                        for(int i=0;i<A.length;i++){
+                            if(b >= A[i] && A[i] <= c){
+                                elements.add(A[i]);
+                                indexes.add(i);
+                            }
+                        }
+                        break;
+                }
+                break;
+        }
+
+        int[] ind = new int[indexes.size()];
+        double[] elem = new double[elements.size()];
+        for(int i=0;i<indexes.size();i++){
+            ind[i] = indexes.get(i);
+            elem[i] = elements.get(i);
+        }
+        return new findResults(indexes.size(), elem, ind);
+
+    }
+
+    public static findResults find(double[] A, String condition, double b){
+        ArrayList<Integer> indexes = new ArrayList<>();
+        ArrayList<Double> elements = new ArrayList<>();
+        switch (condition){
+            case(">"):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]>b){
+                        elements.add(A[i]);
+                        indexes.add(i);
+                    }
+                }
+            break;
+            case("<"):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]<b){
+                        elements.add(A[i]);
+                        indexes.add(i);
+                    }
+                }
+                break;
+            case("=="):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]==b){
+                        elements.add(A[i]);
+                        indexes.add(i);
+                    }
+                }
+                break;
+            case(">="):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]>=b){
+                        elements.add(A[i]);
+                        indexes.add(i);
+                    }
+                }
+                break;
+            case("<="):
+                for(int i=0;i<A.length;i++){
+                    if(A[i]<=b){
+                        elements.add(A[i]);
+                        indexes.add(i);
+                    }
+                }
+                break;
+        }
+
+        int[] ind = new int[indexes.size()];
+        double[] elem = new double[elements.size()];
+        for(int i=0;i<indexes.size();i++){
+            ind[i] = indexes.get(i);
+            elem[i] = elements.get(i);
+        }
+        return new findResults(indexes.size(), elem, ind);
+    }
+
     public static boolean any(long[] A, String condition, long threshold){
         boolean output = false;
         switch(condition){
@@ -452,6 +545,26 @@ public class Utility {
             }
         }
         return  output;
+    }
+
+    public static double min(double a, double b){
+        if(Double.isNaN(a) && Double.isNaN(b)){
+            return Double.NaN;
+        }else{
+            if(Double.isNaN(a)){
+                return b;
+            } else {
+                if(Double.isNaN(b)){
+                    return a;
+                } else{
+                    if(a<b){
+                        return a;
+                    } else {
+                        return b;
+                    }
+                }
+            }
+        }
     }
 
     public static minResults minWithIndex(double[] array){
@@ -739,5 +852,7 @@ public class Utility {
     public static int fix(double a){
         return (int) a;
     }
+
+
 }
 
