@@ -15,6 +15,7 @@ public class TemporalGrid {
     private long depDateTime;
     private long wave_dep_TS;
     private long wind_dep_TS;
+    private double maxNt;
 
 
     public TemporalGrid(){
@@ -68,5 +69,13 @@ public class TemporalGrid {
 
     public long getNt() {
         return Nt;
+    }
+
+    public double getMaxNt() {
+        return maxNt;
+    }
+
+    public void setMaxNt(double maxNt) {
+        this.maxNt = maxNt;
     }
 }
