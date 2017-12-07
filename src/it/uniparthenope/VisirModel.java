@@ -1239,15 +1239,86 @@ public class VisirModel {
             double[][][] windDIR_out = Utility.NaN3Dmatrix(VTDH_out.length,VTDH_out[0].length,VTDH_out[0][0].length);
             double time_steps = Double.NaN;
         } else { //Reading of environmental Fields:
-            //CONTINUA DA
-//                [lat_wave, lon_wave, ecmwf_lat_wind,ecmwf_lon_wind, cosmo_lat_wind,cosmo_lon_wind,...
-//            VTDH,VTPK,VDIR, ecmwf_U10m,ecmwf_V10m, cosmo_U10m,cosmo_V10m, ...
-//            wave_origTimes, ecmwf_wind_origTimes, cosmo_wind_origTimes]= ...
-//            readout_envFields;
+            readout_envFieldsResults envFieldsResults = readout_envFields();
+            //this check must be run after input file time size has been determined
+            check_start_timestep(deltaHr_anls);
+
+            //-----------------------------------------------------------------------------------------------------
+            //Spatial subsetting:
+
+            //Wave data reduction to inset grid:
+            //mFields_reduction
         }
     }
 
-    private void readout_envFields(){
+    private void mFields_reduction(double[] lat, double[] lon, double[][][] VTDH, double[][][] VTPK, double [][][] VDIR){
+        double meshRes = 1/this.sGrid.getInvStepFields();
+
+        //reduction to given bounding box
+        findResults latTmp = Utility.find(lat, "<=", this.sGrid.getBbox__lat_min()-meshRes, "<=", this.sGrid.getBbox__lat_max()+meshRes);
+        int[] row_lat = latTmp.getIndexes();
+        findResults lonTmp = Utility.find(lon, "<=", this.sGrid.getBbox__lon_min()-meshRes, "<=", this.sGrid.getBbox__lon_max()+meshRes);
+        int[] row_lon = lonTmp.getIndexes();
+
+        if(row_lon.length<this.sGrid.getMinNoGridPoints() || row_lat.length<this.sGrid.getMinNoGridPoints()){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("check_start_timestep: too small or too narrow bounding box");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        double[] lat_red = new double[row_lat.length];
+        double[] lon_red = new double[row_lon.length];
+        for(int i=0;i<row_lat.length;i++){
+            lat_red[i]=lat[row_lat[i]];
+        }
+        for(int i=0;i<row_lon.length;i++){
+            lon_red[i]=lon[row_lon[i]];
+        }
+        //CONTINUA QUI
+    }
+
+    private void check_start_timestep(long deltaHr_anls){
+        if(deltaHr_anls <= 0){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("mFields_reduction: departure time too far back in the past!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+
+        if(this.forcing.getWave()==1){
+            if(this.tGrid.getWave_dep_TS() < 1){
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("check_start_timestep: departure time too far back in the past!");
+                debug.CloseFile();
+                System.exit(0);
+            }
+
+            if(this.tGrid.getWave_dep_TS() > this.tGrid.getMaxNt()){
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("check_start_timestep: departure time too far in future!");
+                debug.CloseFile();
+                System.exit(0);
+            }
+        }
+
+        if(this.forcing.getWind() == 1){
+            if(this.tGrid.getWind_dep_TS() < 1){
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("check_start_timestep: departure time too far back in the past!");
+                debug.CloseFile();
+                System.exit(0);
+            }
+
+            if(this.tGrid.getWind_dep_TS() > this.tGrid.getMaxNt()){
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("check_start_timestep: departure time too far back in the past!");
+                debug.CloseFile();
+                System.exit(0);
+            }
+        }
+    }
+
+    private readout_envFieldsResults readout_envFields(){
         //reads wave and wind model forecast and (when relevant) analysis fields
         double[][][] VTDH;
         double[][][] VTPK;
@@ -1255,6 +1326,7 @@ public class VisirModel {
         double[] lat_wave;
         double[] lon_wave;
         int[] wave_origtimes;
+        double wave_maxNt = 0.0;
         if(this.forcing.getWave() == 1){
             //------------------------------------------------------------------------
             //wave model
@@ -1289,9 +1361,9 @@ public class VisirModel {
             VTDH = readout_mWave.getVTHD();
             VTPK = readout_mWave.getVTPK();
             VDIR = readout_mWave.getVDIR();
-            int wave_maxNt = VTDH.length;
-            wave_origtimes = new int[wave_maxNt];
-            for(int i=0;i<wave_maxNt;i++)
+            wave_maxNt = VTDH.length;
+            wave_origtimes = new int[(int)wave_maxNt];
+            for(int i=0;i<(int)wave_maxNt;i++)
                 wave_origtimes[i]=(i+1);
             this.logFile = new MyFileWriter("","",true);
             this.logFile.WriteLog("\tdeparture at time step # "+this.tGrid.getWave_dep_TS()+" of hourly interpolated file");
@@ -1306,6 +1378,17 @@ public class VisirModel {
             VTPK = waveFields.getVTPK();
             VDIR = waveFields.getVDIR();
         }
+        double[] ecmwf_wind_origTimes;
+        double[] cosmo_wind_origTimes;
+        double[] ecmwf_lat_wind;
+        double[] cosmo_lat_wind;
+        double[] ecmwf_lon_wind;
+        double[] cosmo_lon_wind;
+        double[][][] ecmwf_U10m;
+        double[][][] cosmo_U10m;
+        double[][][] ecmwf_V10m;
+        double[][][] cosmo_V10m;
+        double wind_maxNt =0.0;
         if(this.forcing.getWind() == 1){
             String star_str = " (**using this one**)";
             String read_str1 = " attempt reading ";
@@ -1336,9 +1419,62 @@ public class VisirModel {
             this.logFile = new MyFileWriter("","",true);
             this.logFile.WriteLog("\t"+ecmwf_str);
             this.logFile.CloseFile();
-        } else {
 
+            //CONTINUA DA RIGA 84 A RIGA 143 FILE readout_envFields, lettura dei dati vento
+            //ELIMINA:
+            ecmwf_lat_wind = new double[0];
+            ecmwf_lon_wind = new double[0];
+            cosmo_lat_wind = new double[0];
+            cosmo_lon_wind = new double[0];
+            ecmwf_U10m = new double[0][0][0];
+            cosmo_U10m = new double[0][0][0];
+            ecmwf_V10m = new double[0][0][0];
+            cosmo_V10m = new double[0][0][0];
+            ecmwf_wind_origTimes = new double[0];
+            cosmo_wind_origTimes = new double[0];
+        } else { //Fake wind fields in case of motorboat:
+            fake_windFieldsResults res = fake_windFields(192, 45, 10, 30);
+            ecmwf_wind_origTimes = res.getWind_origTimes();
+            cosmo_wind_origTimes = res.getWind_origTimes();
+            ecmwf_lat_wind = res.getLat_wind();
+            cosmo_lat_wind = res.getLat_wind();
+            ecmwf_lon_wind = res.getLon_wind();
+            cosmo_lon_wind = res.getLon_wind();
+            ecmwf_U10m = res.getU10m();
+            cosmo_U10m = res.getU10m();
+            ecmwf_V10m = res.getV10m();
+            cosmo_V10m = res.getV10m();
         }
+        //------------------------------------------------------------------------
+        //Tgrid.maxNt:
+        if(this.forcing.getWave()!=1){
+            wave_maxNt = Double.NaN;
+        }
+        if(this.forcing.getWind()!=1){
+            wind_maxNt = Double.NaN;
+        }
+        this.tGrid.setMaxNt(Utility.min(wave_maxNt, wind_maxNt));
+
+        return new readout_envFieldsResults(lat_wave, lon_wave, ecmwf_lat_wind, ecmwf_lon_wind, cosmo_lat_wind, cosmo_lon_wind, VTDH, VTPK, VDIR,
+                ecmwf_U10m, ecmwf_V10m, cosmo_U10m, cosmo_V10m, wave_origtimes, ecmwf_wind_origTimes, cosmo_wind_origTimes);
+    }
+
+    private fake_windFieldsResults fake_windFields(int ntwind, int nsteps, int nlat, int nlon){
+        ArrayList<Double> lat_windTmp = Utility.linspace(this.sGrid.getDB_bbox__lat_min(), this.sGrid.getDB_bbox__lat_max(), nlat);
+        double[] lat_wind = new double[lat_windTmp.size()];
+        for(int i=0;i<lat_windTmp.size(); i++)
+            lat_wind[i] = lat_windTmp.get(i);
+        ArrayList<Double> lon_windTmp = Utility.linspace(this.sGrid.getBbox__lon_min(), this.sGrid.getBbox__lon_max(), nlon);
+        double[] lon_wind = new double[lon_windTmp.size()];
+        for(int i=0;i<lon_windTmp.size(); i++)
+            lon_wind[i] = lon_windTmp.get(i);
+        double[][][] U10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        double[][][] V10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        ArrayList<Double> wind_origTimesTmp = Utility.linspace(0, ntwind, nsteps);
+        double[] wind_origTimes = new double[wind_origTimesTmp.size()];
+        for(int i=0;i<wind_origTimesTmp.size();i++)
+            wind_origTimes[i]=wind_origTimesTmp.get(i);
+        return new fake_windFieldsResults(wind_origTimes, lat_wind, lon_wind, U10m, V10m);
     }
 
     private fake_waveFieldsResults fake_waveFields(int mtwave, int nsteps, int nlat, int nlon){
