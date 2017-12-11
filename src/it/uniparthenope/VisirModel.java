@@ -617,6 +617,21 @@ public class VisirModel {
         this.logFile.CloseFile();
     }
 
+    private double changeDirRule(double inField){
+        // % change of wind/current directional convention:
+        // %
+        // % from atan2 output concention to WAM-like convention, i.e.:
+        // % from:  [-pi, pi] counterclockwise with 0 at  3:00 o'clock
+        // %   to:  [0, 2*pi]        clockwise with 0 at 12:00 o'clock
+        // %
+        // % (inField and outField must be in radians)
+        // %
+        //---------------------------------------------
+        double inField1 = inField + (2*Math.PI);
+        double inField2 = inField1 - (Math.PI/2) + (2*Math.PI);
+        return -inField2*(2*Math.PI);
+    }
+
     private double[] changeDirRule(double[] inField){
         // % change of wind/current directional convention:
         // %
@@ -1247,11 +1262,291 @@ public class VisirModel {
             //Spatial subsetting:
 
             //Wave data reduction to inset grid:
-            //mFields_reduction
+            mFields_reductionResults waveDataReduction =mFields_reduction(envFieldsResults.getLat_wave(),envFieldsResults.getLon_wave(), envFieldsResults.getVTDH(), envFieldsResults.getVTPK(), envFieldsResults.getVDIR());
+            double[] lat_wave_Inset = waveDataReduction.getLat_red();
+            double[] lon_wave_Inset = waveDataReduction.getLon_red();
+            double[][][] VTDH_Inset = waveDataReduction.getOut1();
+            double[][][] VTPK_Inset = waveDataReduction.getOut2();
+            double[][][] VDIR_Inset = waveDataReduction.getOut3();
+            meshgridResults meshGWave = Utility.meshgrid(lon_wave_Inset, lat_wave_Inset);
+            double[][] lon_wave_m = meshGWave.getX();
+            double[][] lat_wave_m = meshGWave.getY();
+
+            //Wave direction into Cartesian components:
+            double[][][] X_Inset = new double[VDIR_Inset.length][VDIR_Inset[0].length][VDIR_Inset[0][0].length];
+            double[][][] Y_Inset = new double[VDIR_Inset.length][VDIR_Inset[0].length][VDIR_Inset[0][0].length];
+            for(int i=0;i<VDIR_Inset.length; i++){
+                for(int j=0;j<VDIR_Inset[0].length; j++){
+                    for(int k=0;k<VDIR_Inset[0][0].length; k++){
+                        X_Inset[i][j][k] = Math.sin(VDIR_Inset[i][j][k]);
+                        Y_Inset[i][j][k] = Math.cos(VDIR_Inset[i][j][k]);
+                    }
+                }
+            }
+            //clear VDIR_Inset
+            //Wind  data reduction to inset grid:
+            mFields_reductionResults ecmwfDataReduction = mFields_reduction(envFieldsResults.getEcmwf_lat_wind(), envFieldsResults.getEcmwf_lon_wind(), envFieldsResults.getEcmwf_U10m(), envFieldsResults.getEcmwf_V10m(), null);
+            double[] ecmwf_lat_wind = ecmwfDataReduction.getLat_red();
+            double[] ecmwf_lon_wind = ecmwfDataReduction.getLon_red();
+            double[][][] ecmwf_U10M_Inset = ecmwfDataReduction.getOut1();
+            double[][][] ecmwf_V10M_Inset = ecmwfDataReduction.getOut2();
+            mFields_reductionResults cosmoDataReduction = mFields_reduction(envFieldsResults.getCosmo_lat_wind(), envFieldsResults.getCosmo_lon_wind(), envFieldsResults.getCosmo_U10m(), envFieldsResults.getCosmo_V10m(), null);
+            double[] cosmof_lat_wind = cosmoDataReduction.getLat_red();
+            double[] cosmo_lon_wind = cosmoDataReduction.getLon_red();
+            double[][][] cosmo_U10M_Inset = cosmoDataReduction.getOut1();
+            double[][][] cosmo_V10M_Inset = cosmoDataReduction.getOut2();
+
+            //Wind unit conversion
+            for(int i=0;i<ecmwf_U10M_Inset.length;i++){
+                for(int j=0;j<ecmwf_U10M_Inset[0].length;j++){
+                    for(int k=0;k<ecmwf_U10M_Inset[0][0].length;k++){
+                        ecmwf_U10M_Inset[i][j][k] = this.constants.getMs2kts()*ecmwf_U10M_Inset[i][j][k];
+                    }
+                }
+            }
+            for(int i=0;i<ecmwf_V10M_Inset.length;i++){
+                for(int j=0;j<ecmwf_V10M_Inset[0].length;j++){
+                    for(int k=0;k<ecmwf_V10M_Inset[0][0].length;k++){
+                        ecmwf_V10M_Inset[i][j][k] = this.constants.getMs2kts()*ecmwf_V10M_Inset[i][j][k];
+                    }
+                }
+            }
+            for(int i=0;i<cosmo_U10M_Inset.length;i++){
+                for(int j=0;j<cosmo_U10M_Inset[0].length;j++){
+                    for(int k=0;k<cosmo_U10M_Inset[0][0].length;k++){
+                        cosmo_U10M_Inset[i][j][k] = this.constants.getMs2kts()*cosmo_U10M_Inset[i][j][k];
+                    }
+                }
+            }
+            for(int i=0;i<cosmo_V10M_Inset.length;i++){
+                for(int j=0;j<cosmo_V10M_Inset[0].length;j++){
+                    for(int k=0;k<cosmo_V10M_Inset[0][0].length;k++){
+                        cosmo_V10M_Inset[i][j][k] = this.constants.getMs2kts()*cosmo_V10M_Inset[i][j][k];
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------
+            //Time processing:
+            //CONTINUA QUI ->fieldStats
         }
     }
 
-    private void mFields_reduction(double[] lat, double[] lon, double[][][] VTDH, double[][][] VTPK, double [][][] VDIR){
+    private fieldStatsResults fieldStats(double[][] bathy, double[][][] VTDH, double[][][] VTPK, double[][][] ecmwf_U10M, double[][][] ecmwf_V10M, double[][][] cosmo_U10M, double[][][] cosmo_V10M){
+        //fields statistics:
+        // Please note that computed max and min values
+        // refer to the whole temporal window selected via timeprocess_* routines
+
+        double piccolo = 0.1;
+        //----------------------------------------------------------
+        //Bathy
+        this.fstats.setBathy_min(Utility.min(bathy));
+        this.fstats.setBathy_max(Utility.max(bathy));
+
+        //----------------------------------------------------------
+        //Wave
+        this.fstats.setWheight_min((1-piccolo)* Utility.min3d(VTDH));
+        this.fstats.setWheight_max((1+piccolo)* Utility.max3d(VTDH));
+        this.fstats.setWheight_avg(nanmean2(VTDH));
+
+        this.fstats.setWperiod_min((1-piccolo)* Utility.min3d(VTPK));
+        this.fstats.setWperiod_max((1+piccolo)*Utility.max3d(VTPK));
+
+        double[][][] Lambda = wave_dispersion(VTPK);
+        this.fstats.setWlength_min((1-piccolo)*Utility.min3d(Lambda));
+        //fstats.wlength_max  = (1+piccolo)* max(max(max(Lambda)));??????????????????????
+        this.fstats.setWlenght_max(Utility.max3d(Lambda));
+        //----------------------------------------------------------
+        //Wind
+        double[][][] ecmwf_wind10M_magn = new double[ecmwf_U10M.length][ecmwf_U10M[0].length][ecmwf_U10M[0][0].length];
+        for(int i=0;i<ecmwf_wind10M_magn.length; i++){
+            for(int j=0;j<ecmwf_wind10M_magn[0].length; j++){
+                for(int k=0;k<ecmwf_wind10M_magn[0][0].length; k++){
+                    ecmwf_wind10M_magn[i][j][k] = Math.sqrt(Math.pow(ecmwf_U10M[i][j][k],2) + Math.pow(ecmwf_V10M[i][j][k],2));
+                }
+            }
+        }
+        double ecmwf_wind10M_max = (1+piccolo) * Utility.max3d(ecmwf_wind10M_magn);
+        double ecmwf_wind10M_min = (1-piccolo) * Utility.min3d(ecmwf_wind10M_magn);
+
+        double[][][] cosmo_wind10M_magn = new double[cosmo_U10M.length][cosmo_U10M[0].length][cosmo_U10M[0][0].length];
+        for(int i=0;i<cosmo_wind10M_magn.length; i++){
+            for(int j=0;j<cosmo_wind10M_magn[0].length; j++){
+                for(int k=0;k<cosmo_wind10M_magn[0][0].length; k++){
+                    cosmo_wind10M_magn[i][j][k] = Math.sqrt(Math.pow(cosmo_U10M[i][j][k],2) + Math.pow(cosmo_V10M[i][j][k],2));
+                }
+            }
+        }
+        double cosmo_wind10M_max = (1+piccolo) * Utility.max3d(cosmo_wind10M_magn);
+        double cosmo_wind10M_min = (1-piccolo) * Utility.min3d(cosmo_wind10M_magn);
+
+        //wind direction:
+        double[][][] TmpEcmwf_cos_avg = new double[ecmwf_U10M.length][ecmwf_U10M[0].length][ecmwf_U10M[0][0].length];
+        double[][][] TmpEcmwf_sin_avg = new double[ecmwf_V10M.length][ecmwf_V10M[0].length][ecmwf_V10M[0][0].length];
+        for(int i=0;i<TmpEcmwf_cos_avg.length; i++){
+            for(int j=0;j<TmpEcmwf_cos_avg[0].length; j++){
+                for(int k=0;k<TmpEcmwf_cos_avg[0][0].length; k++){
+                    TmpEcmwf_cos_avg[i][j][k] = ecmwf_U10M[i][j][k]/ecmwf_wind10M_magn[i][j][k];
+                }
+            }
+        }
+        for(int i=0;i<TmpEcmwf_sin_avg.length; i++){
+            for(int j=0;j<TmpEcmwf_sin_avg[0].length; j++){
+                for(int k=0;k<TmpEcmwf_sin_avg[0][0].length; k++){
+                    TmpEcmwf_sin_avg[i][j][k] = ecmwf_V10M[i][j][k]/ecmwf_wind10M_magn[i][j][k];
+                }
+            }
+        }
+        double[][] ecmwf_cos_avg = nanmean2(TmpEcmwf_cos_avg);
+        double[][] ecmwf_sin_avg = nanmean2(TmpEcmwf_sin_avg);
+
+        double[][] ecmwf_dir_avg = new double[ecmwf_cos_avg.length][ecmwf_cos_avg[0].length];
+        for(int i=0;i<ecmwf_cos_avg.length;i++){
+            for(int j=0;j<ecmwf_cos_avg[0].length;j++){
+                ecmwf_dir_avg[i][j] = Math.atan2(ecmwf_sin_avg[i][j],ecmwf_cos_avg[i][j]);
+                ecmwf_dir_avg[i][j] = changeDirRule(ecmwf_dir_avg[i][j])/this.constants.getDeg2rad();
+            }
+        }
+
+        double[][][] TmpCosmo_cos_avg = new double[cosmo_U10M.length][cosmo_U10M[0].length][cosmo_U10M[0][0].length];
+        double[][][] TmpCosmo_sin_avg = new double[cosmo_V10M.length][cosmo_V10M[0].length][cosmo_V10M[0][0].length];
+        for(int i=0;i<TmpCosmo_cos_avg.length; i++){
+            for(int j=0;j<TmpCosmo_cos_avg[0].length; j++){
+                for(int k=0;k<TmpCosmo_cos_avg[0][0].length; k++){
+                    TmpCosmo_cos_avg[i][j][k] = cosmo_U10M[i][j][k]/cosmo_wind10M_magn[i][j][k];
+                }
+            }
+        }
+        for(int i=0;i<TmpCosmo_sin_avg.length; i++){
+            for(int j=0;j<TmpCosmo_sin_avg[0].length; j++){
+                for(int k=0;k<TmpCosmo_sin_avg[0][0].length; k++){
+                    TmpCosmo_sin_avg[i][j][k] = cosmo_V10M[i][j][k]/cosmo_wind10M_magn[i][j][k];
+                }
+            }
+        }
+        double[][] cosmo_cos_avg = nanmean2(TmpCosmo_cos_avg);
+        double[][] cosmo_sin_avg = nanmean2(TmpCosmo_sin_avg);
+
+        double[][] cosmo_dir_avg = new double[cosmo_cos_avg.length][cosmo_cos_avg[0].length];
+        for(int i=0;i<cosmo_cos_avg.length;i++){
+            for(int j=0;j<cosmo_cos_avg[0].length;j++){
+                cosmo_dir_avg[i][j] = Math.atan2(cosmo_sin_avg[i][j],cosmo_cos_avg[i][j]);
+                cosmo_dir_avg[i][j] = changeDirRule(cosmo_dir_avg[i][j])/this.constants.getDeg2rad();
+            }
+        }
+        // % Yamartino's method for wind std:
+        // % http://journals.ametsoc.org/doi/pdf/10.1175/1520-0450%281984%29023%3C1362%3AACOSPE%3E2.0.CO%3B2
+        double bb = -1 + 2/Math.sqrt(3.0);
+
+        double[][] ecmwf_epsilon = new double[ecmwf_cos_avg.length][ecmwf_cos_avg[0].length];
+        for(int i=0;i< ecmwf_epsilon.length; i++){
+            for(int j=0;j<ecmwf_epsilon[0].length; j++){
+                ecmwf_epsilon[i][j] = Math.sqrt(Math.pow(ecmwf_cos_avg[i][j],2) + Math.pow(ecmwf_sin_avg[i][j],2));
+            }
+        }
+        double[][] ecmwf_dir_std = new double[ecmwf_dir_avg.length][ecmwf_dir_avg[0].length];
+        for(int i=0;i<ecmwf_dir_std.length; i++){
+            for(int j=0;j<ecmwf_dir_std[0].length;j++){
+                ecmwf_dir_std[i][j] = Math.asin(ecmwf_epsilon[i][j]) * (1+bb+Math.pow(ecmwf_epsilon[i][j],2))/this.constants.getDeg2rad();
+            }
+        }
+
+        double[][] cosmo_epsilon = new double[cosmo_cos_avg.length][cosmo_cos_avg[0].length];
+        for(int i=0;i< cosmo_epsilon.length; i++){
+            for(int j=0;j<cosmo_epsilon[0].length; j++){
+                cosmo_epsilon[i][j] = Math.sqrt(Math.pow(cosmo_cos_avg[i][j],2) + Math.pow(cosmo_sin_avg[i][j],2));
+            }
+        }
+        double[][] cosmo_dir_std = new double[cosmo_dir_avg.length][cosmo_dir_avg[0].length];
+        for(int i=0;i<cosmo_dir_std.length; i++){
+            for(int j=0;j<cosmo_dir_std[0].length;j++){
+                cosmo_dir_std[i][j] = Math.asin(cosmo_epsilon[i][j]) * (1+bb+Math.pow(cosmo_epsilon[i][j],2))/this.constants.getDeg2rad();
+            }
+        }
+        return new fieldStatsResults(ecmwf_dir_avg, ecmwf_dir_std, cosmo_dir_avg, cosmo_dir_std);
+    }
+
+    private double[][][] wave_dispersion(double[][][] wave_period){
+        //    dispersion relation for monocromatic ocean waves
+        //      -) If just wave period provided --> deep water approximation
+        double twopi = 2*Math.PI;
+
+        //deep water approximation
+        double[][][] lambda = new double[wave_period.length][wave_period[0].length][wave_period[0][0].length];
+        for(int i=0;i<lambda.length; i++){
+            for(int j=0;j<lambda[0].length;j++){
+                for(int k=0;k<lambda[0][0].length;k++){
+                    lambda[i][j][k] = this.constants.getG0()/twopi* Math.pow(wave_period[i][j][k],2); //[m]
+                }
+            }
+        }
+        return lambda;
+    }
+
+    private double[][][] wave_dispersion(double[][][] wave_period, double[][][] depth){
+        double[][][] lambda = wave_dispersion(wave_period);
+        double[][][] fmk = Fenton_McKee_factor(wave_period,depth);
+        // %   -) If also depth provided       --> generic depth formula after:
+        // %   Fenton, JD and McKee, WD (1990)
+        // %
+        // %   wave_period [s]
+        // %   depth       [m]
+        // %   lambda      [m]
+        // %
+        if(this.forcing.getDeepWaterApprox()!=1){
+            for(int i=0;i<lambda.length;i++){
+                for(int j=0;j<lambda[0].length;j++){
+                    for(int k=0;k<lambda[0][0].length;k++){
+                        lambda[i][j][k] = lambda[i][j][k]*fmk[i][j][k];
+                    }
+                }
+            }
+        }
+        return lambda;
+    }
+
+    private double[][][] Fenton_McKee_factor(double[][][] wave_period, double[][][] depth){
+        // % Factor multiplying deep-water wavelength in
+        // % Fenton, JD and McKee, WD (1990)
+        // %
+        // % (it leads to a reduced wavelength in shallow water)
+        double twopi = Math.PI *2;
+        double[][][] lambda_0 = new double[wave_period.length][wave_period[0].length][wave_period[0][0].length];
+        for(int i=0;i<wave_period.length;i++){
+            for(int j=0;j<wave_period[0].length;j++){
+                for(int k=0;k<wave_period[0][0].length;k++){
+                    lambda_0[i][j][k] = this.constants.getG0()/twopi * Math.pow(wave_period[i][j][k],2);
+                }
+            }
+        }
+        double[][][] fmk = new double[wave_period.length][wave_period[0].length][wave_period[0][0].length];
+        for(int i=0;i<wave_period.length;i++){
+            for(int j=0;j<wave_period[0].length;j++){
+                for(int k=0;k<wave_period[0][0].length;k++){
+                    Math.pow(Math.tanh(Math.pow(twopi*depth[i][j][k] / lambda_0[i][j][k],(3/4))),(2/3));
+                }
+            }
+        }
+        return fmk;
+    }
+
+    private double[][] nanmean2(double[][][] A_mat){
+        //Abstract: compute mean of matrix elements of A_mat, even in presence of NaNs.
+        double[][][] matrix = A_mat;
+        for(int i=0;i<matrix.length;i++){
+            for(int j=0;j<matrix[0].length;j++){
+                for(int k=0;k<matrix[0][0].length;k++){
+                    if(Double.isNaN(matrix[i][j][k])){
+                        matrix[i][j][k] = 0.0;
+                    }
+                }
+            }
+        }
+        return Utility.mean3d(matrix);
+    }
+
+    private mFields_reductionResults mFields_reduction(double[] lat, double[] lon, double[][][] VTDH, double[][][] VTPK, double [][][] VDIR){
+        mFields_reductionResults retThis = new mFields_reductionResults();
         double meshRes = 1/this.sGrid.getInvStepFields();
 
         //reduction to given bounding box
@@ -1274,7 +1569,52 @@ public class VisirModel {
         for(int i=0;i<row_lon.length;i++){
             lon_red[i]=lon[row_lon[i]];
         }
-        //CONTINUA QUI
+        retThis.setLat_red(lat_red);
+        retThis.setLon_red(lon_red);
+        double[][][] out1 = null;
+        double[][][] out2 = null;
+        double[][][] out3 = null;
+        if(VTDH != null){
+            out1 = new double[VTDH.length][row_lat.length][row_lon.length];
+            for(int i=0;i<out1.length;i++){
+                for(int j=0;j<row_lat.length;j++){
+                    for(int k=0;k<row_lon.length;k++){
+                        out1[i][j][k] = VTDH[i][j][k];
+                    }
+                }
+            }
+        }
+        if(VTPK != null){
+            out2 = new double[VTPK.length][row_lat.length][row_lon.length];
+            for(int i=0;i<out2.length;i++){
+                for(int j=0;j<row_lat.length;j++){
+                    for(int k=0;k<row_lon.length;k++){
+                        out2[i][j][k] = VTPK[i][j][k];
+                    }
+                }
+            }
+        }
+        if(VDIR != null){
+            out3 = new double[VDIR.length][row_lat.length][row_lon.length];
+            for(int i=0;i<out3.length;i++){
+                for(int j=0;j<row_lat.length;j++){
+                    for(int k=0;k<row_lon.length;k++){
+                        out3[i][j][k] = VDIR[i][j][k];
+                    }
+                }
+            }
+        }
+        retThis.setOut1(out1);
+        retThis.setOut2(out2);
+        retThis.setOut3(out3);
+
+        //percent data reduction:
+        int n_elements=out1.length * out1[0].length * out1[0][0].length;
+        int red_percent = ((1- n_elements)/n_elements)*100;
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\t\tData reduction: "+red_percent+" %");
+        this.logFile.CloseFile();
+        return retThis;
     }
 
     private void check_start_timestep(long deltaHr_anls){
