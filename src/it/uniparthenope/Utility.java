@@ -264,6 +264,24 @@ public class Utility {
         return new meshgridResults(X,Y);
     }
 
+    public static meshgridResults meshgrid(double[] x, double[] y){
+        //[X, Y] =meshgrid(x,y) returns 2-D grid coordinates based on the coordinates contained
+        // in vectors x and y. X is a matrix where each row is a copy of x,
+        // and Y is a matrix where each column is a copy of y.
+        // The grid represented by the coordinates X and Y has length(y) rows and length(x) columns.
+        int nRows = y.length;
+        int nCols = x.length;
+        double[][] X = new double[nRows][nCols];
+        double[][] Y = new double[nRows][nCols];
+        for(int i =0;i<nRows;i++){
+            for(int j=0;j<nCols; j++){
+                X[i][j] = x[j];
+                Y[i][j] = y[i];
+            }
+        }
+        return new meshgridResults(X,Y);
+    }
+
 
     public static double[] reshape(double[][] A, int dim){// Reshape 1
         if(A.length*A[0].length != dim){
@@ -602,6 +620,24 @@ public class Utility {
         }
     }
 
+    public static double[][] mean3d(double[][][] mat3d){
+        int dim0 = mat3d.length;
+        int dim1 = mat3d[0].length;
+        int dim2 = mat3d[0][0].length;
+        double[][] output = new double[dim0][dim1];
+        for(int i=0;i<mat3d.length;i++){
+            for(int j=0;j<mat3d[0].length; j++){
+                double mean = 0.0;
+                for(int k=0;k<mat3d[0][0].length; k++){
+                    mean += mat3d[i][j][k];
+                }
+                mean = mean/dim2;
+                output[i][j] = mean;
+            }
+        }
+        return output;
+    }
+
     public static double min3d(double[][][] mat3d){
         double min = mat3d[0][0][0];
         for(int i=0;i<mat3d.length;i++){
@@ -630,6 +666,18 @@ public class Utility {
         return max;
     }
 
+    public static double max(double[][] matrix){
+        double max = matrix[0][0];
+        for(int i=0;i<matrix.length;i++){
+            for(int j=0;j<matrix[0].length; j++){
+                if(matrix[i][j]>max){
+                    max = matrix[i][j];
+                }
+            }
+        }
+        return max;
+    }
+
     private static double[] removeNaNs(double[] in){
         ArrayList<Double> notNaNs = new ArrayList<>();
         for(int i=0;i<in.length;i++){
@@ -642,6 +690,18 @@ public class Utility {
             out[i] = notNaNs.get(i);
         }
         return out;
+    }
+
+    public static double min(double[][] matrix){
+        double min = matrix[0][0];
+        for(int i=0;i<matrix.length;i++){
+            for(int j=0;j<matrix[0].length; j++){
+                if(matrix[i][j]<min){
+                    min = matrix[i][j];
+                }
+            }
+        }
+        return min;
     }
 
     public static double[] min(double[][] matrix, int flag){
