@@ -1329,7 +1329,123 @@ public class VisirModel {
             //-----------------------------------------------------------------------------------------------------
             //Time processing:
             fieldStatsResults field_res = fieldStats(this.bathy_Inset, VTDH_Inset, VTPK_Inset, ecmwf_U10M_Inset, ecmwf_V10M_Inset, cosmo_U10M_Inset, cosmo_V10M_Inset);
+            double[][] ecmwf_dir_avg = field_res.getEcmwf_dir_avg();
+            double[][] ecmwf_dir_std = field_res.getEcmwf_dir_std();
+            double[][] cosmo_dir_avg = field_res.getCosmo_dir_avg();
+            double[][] cosmo_dir_std = field_res.getCosmo_dir_std();
+            //Just for GMD paper's route #2 (1589_c) uncomment following line:
+            //this.fstats.setWlenght_max(85);
+
+            this.estim_Nt(estGdtDist, Math.max(this.tGrid.getWave_dep_TS(), this.tGrid.getWind_dep_TS()), this.H_array_m, this.vel_LUT);
+
+            int delta_hr_dep_int = Math.round(deltaHr_anls);
+            int[] interpTimes = new int[(int) this.tGrid.getNt()-1];
+            for(int i=0;i<interpTimes.length;i++){
+                interpTimes[i]=delta_hr_dep_int+i;
+            }
+            int[] time_steps = new int[(int) this.tGrid.getMaxNt()];
+            //time_steps always counted starting from step #1:
+            for(int i=0;i<time_steps.length; i++){
+                time_steps[i] = i+1;
+            }
+
+            double[] wind_origTimes = new double[0];
+            double[][][] U10M_Inset = new double[0][0][0];
+            double[][][] V10M_Inset = new double[0][0][0];
+            if(this.optim.getWindModel() == 11 || this.optim.getWindModel() == 12){//ecmwf
+                wind_origTimes = envFieldsResults.getEcmwf_wind_origTimes();
+                U10M_Inset = envFieldsResults.getEcmwf_U10m();
+                V10M_Inset = envFieldsResults.getEcmwf_V10m();
+            } else if(this.optim.getWindModel() == 2){//cosmo-me
+                wind_origTimes = envFieldsResults.getCosmo_wind_origTimes();
+                U10M_Inset = envFieldsResults.getCosmo_U10m();
+                V10M_Inset = envFieldsResults.getCosmo_V10m();
+            }
+
+            double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);
+            double[][][] V10M_at_TS = Utility.interp1(wind_origTimes,V10M_Inset, interpTimes);
+            //(wave_t1-const.twelve)
+            double[][][] VTDH_times = new double[interpTimes.length][VTDH_Inset[0].length][VTDH_Inset[0][0].length];
+            for(int i=0;i<interpTimes.length;i++){
+                for(int j=0;j<VTDH_Inset[0].length;j++){
+                    for(int k=0;k<VTDH_Inset[0][0].length;k++){
+                        VTDH_times[i][j][k]=VTDH_Inset[interpTimes[i]][j][k];
+                    }
+                }
+            }
+            double[][][] VTPK_times = new double[interpTimes.length][VTPK_Inset[0].length][VTPK_Inset[0][0].length];
+            for(int i=0;i<interpTimes.length;i++){
+                for(int j=0;j<VTPK_Inset[0].length;j++){
+                    for(int k=0;k<VTPK_Inset[0][0].length;k++){
+                        VTPK_times[i][j][k]=VTPK_Inset[interpTimes[i]][j][k];
+                    }
+                }
+            }
+            double[][][] X_times = new double[interpTimes.length][X_Inset[0].length][X_Inset[0][0].length];
+            for(int i=0;i<interpTimes.length;i++){
+                for(int j=0;j<X_Inset[0].length;j++){
+                    for(int k=0;k<X_Inset[0][0].length;k++){
+                        X_times[i][j][k]=X_Inset[interpTimes[i]][j][k];
+                    }
+                }
+            }
+            double[][][] Y_times = new double[interpTimes.length][Y_Inset[0].length][Y_Inset[0][0].length];
+            for(int i=0;i<interpTimes.length;i++){
+                for(int j=0;j<Y_Inset[0].length;j++){
+                    for(int k=0;k<Y_Inset[0][0].length;k++){
+                        Y_times[i][j][k]=Y_Inset[interpTimes[i]][j][k];
+                    }
+                }
+            }
+
+            //-----------------------------------------------------------------------------------------------------
+            // seaOverLand:
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\tseaOverLand extrapolation...");
+            this.logFile.CloseFile();
+
+            //Wave fields processing:
+            //CONTINUA QUI
         }
+    }
+
+    private void estim_Nt(double estGdtDist, long start_timestep, ArrayList<Double> H_array_m, double[][] ship_v_LUT){
+        // % estimates Tgrid.Nt (number of time steps)
+        // % - key quantity for RAM allocation and perfomance
+        // % ( "temporal bbox" )
+        // %
+        // %
+        // % fract parameter has a great impact on CPU times and is defined as follows:
+        // % 0[more conservative]:  v_kts_signif= v_kts_min;
+        // % 1[very optimistic]  :  v_kts_signif= v_kts_max
+
+        double fract = 0.2; //RAM saving setting
+        double v_kts_min = Double.NaN;
+        double v_kts_max = Double.NaN;
+        if(this.ship.getVessType() != this.ship.getSailType()){
+            double[] ship_v_LUT_1stCol = new double[ship_v_LUT.length];
+            for(int i=0;i<ship_v_LUT.length;i++){
+                ship_v_LUT_1stCol[i] = ship_v_LUT[i][0];
+            }
+            v_kts_min = Utility.interp1(H_array_m, ship_v_LUT_1stCol, this.fstats.getWheight_max());
+            v_kts_max = Utility.interp1(H_array_m, ship_v_LUT_1stCol, this.fstats.getWheight_min());
+        } else{//sailboat
+            v_kts_min=Utility.min(ship_v_LUT);
+            v_kts_max=Utility.max(ship_v_LUT);
+        }
+
+        double v_kts_signif = v_kts_min*(1-fract) + v_kts_max*fract;
+
+        double Nt_1 = this.tGrid.getMaxNt() - start_timestep + 1;
+        double Nt_2b = Math.ceil(estGdtDist/v_kts_signif);
+
+        double Nt_2 = Math.max(this.tGrid.getMinNt(), Nt_2b);
+        this.tGrid.setNt(Math.min(Nt_1, Nt_2));
+
+        System.out.println("# time steps of forecast file employed: "+this.tGrid.getNt());
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\t# time steps of forecast file employed:"+this.tGrid.getNt());
+        this.logFile.CloseFile();
     }
 
     private fieldStatsResults fieldStats(double[][] bathy, double[][][] VTDH, double[][][] VTPK, double[][][] ecmwf_U10M, double[][][] ecmwf_V10M, double[][][] cosmo_U10M, double[][][] cosmo_V10M){
