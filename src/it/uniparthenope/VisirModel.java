@@ -1328,7 +1328,7 @@ public class VisirModel {
 
             //-----------------------------------------------------------------------------------------------------
             //Time processing:
-            //CONTINUA QUI ->fieldStats
+            fieldStatsResults field_res = fieldStats(this.bathy_Inset, VTDH_Inset, VTPK_Inset, ecmwf_U10M_Inset, ecmwf_V10M_Inset, cosmo_U10M_Inset, cosmo_V10M_Inset);
         }
     }
 
