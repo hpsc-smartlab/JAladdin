@@ -9,6 +9,10 @@ import java.util.*;
 
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
+import org.apache.commons.math3.analysis.interpolation.BicubicInterpolatingFunction;
+import org.apache.commons.math3.analysis.interpolation.BicubicInterpolator;
+import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolatingFunction;
+import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.complex.Complex;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -524,18 +528,6 @@ public class Utility {
         return output;
     }
 
-//    public static void interp1(double[] x, double[][][] y, int[] xi){
-//        //wrapper for the interp1 method
-//        //xi from int array to double array
-//        double[] xiDouble = new double[xi.length];
-//        for(int i=0;i<xi.length;i++){
-//            xiDouble[i]=xi[i]+0.0;
-//        }
-//        double[][][] yi = new double[y.length][y[0].length][y[0][0].length];
-//        for(int col = 0; col<y.length; col++){
-//
-//        }
-//    }
 
 
     public static double[][] interp1(double[] x, double[][] y, double[] xi){
@@ -659,6 +651,68 @@ public class Utility {
             }
         }
         return yi;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static double[][] interp2(double[] X, double[] Y, double[][] Z, double[] Xq, double[] Yq){//double[][]
+        if(X.length != Y.length){
+            System.out.println("interp2: X and Y must be the same length!");
+            System.exit(0);
+        }
+        if(Xq.length != Yq.length){
+            System.out.println("interp2: Xq and Yq must be the same length!");
+            System.exit(0);
+        }
+        if(X.length*Y.length != Z.length*Z[0].length){
+            System.out.println("interp2: Z size must be equal to X size * Y size!");
+            System.exit(0);
+        }
+        double[][] Zq=new double[Xq.length][Yq.length];
+        //Interpolo sia con la bicubic sia con la spline:
+        //Utilizzo sempre i valori della spline tranne nel caso in cui Xq o Yq =0.
+        //In tal caso, approssimo il valore con la bicubic
+        BicubicInterpolator bi = new BicubicInterpolator();
+        BicubicInterpolatingFunction bif = bi.interpolate(X,Y,Z);
+        BicubicSplineInterpolator bsi = new BicubicSplineInterpolator();
+        BicubicSplineInterpolatingFunction bsif = bsi.interpolate(X,Y,Z);
+        for(int i=0;i<Zq.length;i++){
+            for(int j=0;j<Zq[0].length;j++){
+                if((Xq[i] == 0) || (Yq[i] == 0)){
+                    Zq[i][j] = bif.value(Xq[i],Yq[j]);
+                } else{
+                    Zq[i][j] = bsif.value(Xq[i],Yq[j]);
+                }
+            }
+        }
+        return Zq;
+    }
+
+    @SuppressWarnings("deprecation")
+    public static double interp2(double[] X, double[] Y, double[][] Z, double Xq, double Yq, String method){
+        if(X.length != Y.length){
+            System.out.println("interp2: X and Y must be the same length!");
+            System.exit(0);
+        }
+        if(X.length*Y.length != Z.length*Z[0].length){
+            System.out.println("interp2: Z size must be equal to X size * Y size!");
+            System.exit(0);
+        }
+        double Zq = Double.NaN;
+        if(method == "Bicubic"){
+            BicubicInterpolator bi = new BicubicInterpolator();
+            BicubicInterpolatingFunction bsi = bi.interpolate(X,Y,Z);
+            Zq = bsi.value(Xq, Yq);
+        } else{
+            if(method=="Spline"){
+                BicubicSplineInterpolator bi = new BicubicSplineInterpolator();
+                BicubicSplineInterpolatingFunction bsi = bi.interpolate(X,Y,Z);
+                Zq = bsi.value(Xq, Yq);
+            } else{
+                System.out.println("interp2: only \"Bicubic\" and \"Spline\" are allowed!");
+                System.exit(0);
+            }
+        }
+        return Zq;
     }
 
 
