@@ -5,10 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
@@ -527,6 +524,142 @@ public class Utility {
         return output;
     }
 
+//    public static void interp1(double[] x, double[][][] y, int[] xi){
+//        //wrapper for the interp1 method
+//        //xi from int array to double array
+//        double[] xiDouble = new double[xi.length];
+//        for(int i=0;i<xi.length;i++){
+//            xiDouble[i]=xi[i]+0.0;
+//        }
+//        double[][][] yi = new double[y.length][y[0].length][y[0][0].length];
+//        for(int col = 0; col<y.length; col++){
+//
+//        }
+//    }
+
+
+    public static double[][] interp1(double[] x, double[][] y, double[] xi){
+        //wrapper for the interp1 method
+        double[][] yi = new double[y.length][y[0].length];
+        for(int row=0;row<y.length; row++){
+            //splitting y in nRows arrays
+            double[] Y = new double[y[0].length];
+            for(int i=0;i<y[0].length;i++){
+                Y[i]=y[row][i];
+            }
+            //calculating y-row and adding it to result
+            double[] yirow = interp1(x,Y,xi);
+            for(int i=0;i<y[0].length;i++){
+                yi[row][i]=yirow[i];
+            }
+        }
+        return yi;
+    }
+
+    public static double[][][] interp1(double[] x, double[][][] y, int[] xi){
+        double[] xiDouble = new double[xi.length];
+        for(int i=0;i<xiDouble.length;i++)
+            xiDouble[i]=xi[i]+0.0;
+        return interp1(x, y, xiDouble);
+    }
+
+    public static double[][][] interp1(double[] x, double[][][] y, double[] xi){
+        //wrapper for the interp1 method
+        double[][][] yi = new double[y.length][xi.length][y[0][0].length];
+        for(int t=0;t<y.length;t++){
+            double[][] yt = new double[y[0].length][y[0][0].length];
+            for(int i=0;i<yt.length;i++){
+                for(int j=0;j<yt[0].length;j++){
+                    yt[i][j] = y[t][i][j];
+                }
+            }
+            double[][] yit = interp1(x, yt, xi);
+            for(int i=0;i<yit.length;i++){
+                for(int j=0;j<yit[0].length;j++){
+                    yi[t][i][j] = yit[i][j];
+                }
+            }
+            //yi[t] = interp1(x, y[t], xi);
+        }
+        return yi;
+    }
+
+
+    public static double interp1(ArrayList<Double> x, double[] y, double xi){
+        //wrapper for the interp1 method
+        double[] xArray = new double[x.size()];
+        for(int i=0;i<x.size();i++){
+            xArray[i]=x.get(i);
+        }
+        double[] xiArray = new double[1];
+        xiArray[0]=xi;
+        double[] yi = interp1(xArray, y, xiArray);
+        return yi[0];
+    }
+
+    public static double[] interp1(double[] x, double[] y, double[] xi){
+        //interp1 MATLAB function porting
+        if(x.length != y.length){
+            System.out.println("interp1: X and Y must be the same length!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("interp1: X and Y must be the same length!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        if(x.length == 1){
+            System.out.println("interp1: X must contain more than one value");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("interp1: X must contain more than one value");
+            debug.CloseFile();
+            System.exit(0);
+        }
+
+        double[] dx = new double[x.length - 1];
+        double[] dy = new double[x.length - 1];
+        double[] slope = new double[x.length - 1];
+        double[] intercept = new double[x.length - 1];
+
+        // Calculate the line equation (i.e. slope and intercept) between each point
+        for (int i = 0; i < x.length - 1; i++) {
+            dx[i] = x[i + 1] - x[i];
+            if (dx[i] == 0) {
+                System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
+                debug.CloseFile();
+                System.exit(0);
+            }
+            if (dx[i] < 0) {
+                System.out.println("interp1: X must be sorted");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("interp1: X must be sorted");
+                debug.CloseFile();
+                System.exit(0);
+            }
+            dy[i] = y[i + 1] - y[i];
+            slope[i] = dy[i] / dx[i];
+            intercept[i] = y[i] - x[i] * slope[i];
+        }
+
+        // Perform the interpolation here
+        double[] yi = new double[xi.length];
+        for (int i = 0; i < xi.length; i++) {
+            if ((xi[i] > x[x.length - 1]) || (xi[i] < x[0])) {
+                yi[i] = Double.NaN;
+            }
+            else {
+                int loc = Arrays.binarySearch(x, xi[i]);
+                if (loc < -1) {
+                    loc = -loc - 2;
+                    yi[i] = slope[loc] * xi[i] + intercept[loc];
+                }
+                else {
+                    yi[i] = y[loc];
+                }
+            }
+        }
+        return yi;
+    }
 
 
     public static double[][] transposeMatrix(double[][] matrix){
