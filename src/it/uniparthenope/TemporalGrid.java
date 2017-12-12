@@ -10,12 +10,13 @@ import java.util.TimeZone;
 public class TemporalGrid {
     private double Dt;
     private long minNt;
-    private long Nt;
+    private double Nt;
     private String latest_date;
     private long depDateTime;
     private long wave_dep_TS;
     private long wind_dep_TS;
     private double maxNt;
+
 
 
     public TemporalGrid(){
@@ -63,11 +64,11 @@ public class TemporalGrid {
         this.wind_dep_TS = wind_dep_TS;
     }
 
-    public void setNt(long nt) {
+    public void setNt(double nt) {
         Nt = nt;
     }
 
-    public long getNt() {
+    public double getNt() {
         return Nt;
     }
 
