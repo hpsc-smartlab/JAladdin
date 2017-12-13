@@ -1405,9 +1405,43 @@ public class VisirModel {
             this.logFile.CloseFile();
 
             //Wave fields processing:
+            //CONTINUA QUI -> seaOverLand_3steps
+
+        }
+    }
+
+    private void seaOverLand_3steps(ArrayList<Double> lon_bathy, ArrayList<Double> lat_bathy, double[][] lsm_mask, double[][] lon_f, double[][] lat_f, double[][][]... varargs){
+        //% "sea over land" 3-step process:
+        //% (1) extrapolation:
+        //% (2) regridding to bathy-grid:
+        //% (3) masking landmass on target grid:
+        //%
+        //%--------------------------------------------------------------------------
+        if(varargs.length < 1 || varargs.length > 4){
+            System.out.println("seaOverLand_3steps: varargs must be between 1 and 4");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("\tseaOverLand_3steps: varargs must be between 1 and 4");
+            debug.CloseFile();
+            System.exit(0);
+        }
+
+        if(Math.min(lon_f.length, lon_f[0].length) < this.sGrid.getMinNoGridPoints()){
+            System.out.println("seaOverLand_3steps: too small or too narrow bounding box");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("\tseaOverLand_3steps: too small or too narrow bounding box");
+            debug.CloseFile();
+            System.exit(0);
+        }
+
+        int n_loops = 50;
+        int i=0;
+        for(double[][][] myfield : varargs){
+            //(1) extrapolation - % #GM: check also mdata_EWeights.m:
             //CONTINUA QUI
         }
     }
+
+
 
     private void estim_Nt(double estGdtDist, long start_timestep, ArrayList<Double> H_array_m, double[][] ship_v_LUT){
         // % estimates Tgrid.Nt (number of time steps)
