@@ -528,7 +528,73 @@ public class Utility {
         return output;
     }
 
+    public static double[][] squeeze(double[][][] mat3d){
+        int z_dim = mat3d.length;
+        int rows = mat3d[0].length;
+        int cols = mat3d[0][0].length;
+        double[][] out = new double[0][0];
+        //check for singleton dimension:
+        if(z_dim==1){
+            //3rd dimension singleton
+            out = new double[rows][cols];
+            for(int i=0; i<mat3d[0].length; i++){
+                for(int j=0; j<mat3d[0][0].length; j++){
+                    out[i][j] = mat3d[0][i][j];
+                }
+            }
+        } else {
+            //rows singleton
+            if(rows == 1){
+                out = new double[cols][z_dim];
+                for(int i = 0; i<cols; i++){
+                    for(int j = 0; j<z_dim; j++){
+                        out[i][j] = mat3d[j][0][i];
+                    }
+                }
+            } else {
+                //cols singleton
+                if(cols == 1){
+                    out = new double[rows][z_dim];
+                    for(int i=0;i<rows;i++){
+                        for(int j=0;j<z_dim;j++){
+                            out[i][j] = mat3d[j][i][0];
+                        }
+                    }
+                } else {
+                    System.out.println("squeeze: no singleton dimension found!");
+                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    debug.WriteLog("squeeze: no singleton dimension found!");
+                    debug.CloseFile();
+                    System.exit(0);
+                }
+            }
+        }
+        return out;
+    }
 
+    public static int[] find(double[][] mat, double element){
+        ArrayList<Integer> indexes = new ArrayList<>();
+        int count=0;
+        boolean checkNaN = Double.isNaN(element);
+        for(int i=0;i<mat[0].length;i++){
+            for(int j=0;j<mat.length;j++){
+                if(checkNaN){
+                    if(Double.isNaN(mat[j][i])) {
+                        indexes.add(count);
+                    }
+                } else{
+                    if(mat[j][i] == element) {
+                        indexes.add(count);
+                    }
+                }
+                count++;
+            }
+        }
+        int[] _indexes = new int[indexes.size()];
+        for(int i=0;i<indexes.size();i++)
+            _indexes[i] = indexes.get(i);
+        return _indexes;
+    }
 
     public static double[][] interp1(double[] x, double[][] y, double[] xi){
         //wrapper for the interp1 method
