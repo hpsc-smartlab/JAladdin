@@ -1441,6 +1441,110 @@ public class VisirModel {
         }
     }
 
+    private static double[][] SeaOverLand(double[][] matrice_in, int loop){
+        //source: Nicoletta Fabroni (SINCEM, Ravenna), developed for Relocatable HOPS package
+        //% versione ricevuta da I.Federico via S. Falchetti in data 24/6/2013
+
+        double[][] dummy = new double[matrice_in.length+2][matrice_in[0].length+2];
+        for(int i=0;i<dummy.length;i++){
+            for(int j=0;j<dummy[0].length;j++){
+                if(i==0 || j==0 || i==(dummy.length-1) || j==(dummy[0].length-1)){
+                    dummy[i][j] = 9999;
+                }else{
+                    dummy[i][j] = matrice_in[i-1][j-1];
+                }
+            }
+        }
+
+        int[] idx = Utility.find(dummy, Double.NaN);
+
+        for(int i=0;i<dummy.length;i++){
+            for(int j=0;j<dummy[0].length;j++){
+                if(i==0 || j==0 || i==(dummy.length-1) || j==(dummy[0].length-1)){
+                    dummy[i][j] = Double.NaN;
+                }
+            }
+        }
+        //matrice dei vicini che voglio analizzare
+        int M = dummy.length;
+        double[] neighbor_offsets = new double[8];
+        neighbor_offsets[0] = M;
+        neighbor_offsets[1] = M+1;
+        neighbor_offsets[2] = 1;
+        neighbor_offsets[3] = -M+1;
+        neighbor_offsets[4] = -M;
+        neighbor_offsets[5] = -M-1;
+        neighbor_offsets[6] = -1;
+        neighbor_offsets[7] = M-1;
+        int count =0;
+        while(count < loop && idx.length > 0){
+
+            //Creo matrice dove ogni elemento è la somma di idx con neighbor_offset
+            double[][] neighbors = new double[neighbor_offsets.length][idx.length];
+            for(int i=0;i<neighbors.length;i++){
+                for(int j=0;j<neighbors[0].length;j++){
+                    neighbors[i][j] = idx[j]+neighbor_offsets[i];
+                }
+            }
+            double[][] mat = new double[neighbors.length][neighbors[0].length];
+            for(int i=0;i<mat.length;i++){
+                for(int j=0;j<mat[0].length;j++){
+                    double currentElem = neighbors[i][j];
+                    int _colIndex = ((int) Math.ceil(currentElem/dummy.length)) -1;
+                    int _rowIndex = ((int) currentElem%dummy.length);
+                    mat[i][j] = dummy[_rowIndex][_colIndex];
+                }
+            }
+
+            boolean[][] nans = Utility.isnan(mat);
+            int[] snn = new int[nans[0].length];
+            for(int i=0;i<snn.length;i++)
+                snn[i]=0;
+
+            for(int i=0;i<nans.length;i++){
+                for(int j=0;j<nans[0].length;j++){
+                    if(nans[i][j]){
+                        mat[i][j] = 0;
+                    } else{
+                        snn[j]++;
+                    }
+                }
+            }
+
+            double[] media = Utility.sum(mat);
+            for(int i=0;i<snn.length;i++){
+                media[i]= media[i]/snn[i];
+            }
+
+            for(int i=0;i<idx.length;i++){
+                double currentElem = media[i];
+                int currentIndex = idx[i];
+                int _colIndex = ((int) Math.ceil(currentIndex/dummy.length));
+                int _rowIndex = ((int) currentIndex%dummy.length);
+                dummy[_rowIndex][_colIndex] = currentElem;
+            }
+
+            ArrayList<Integer> tmp = new ArrayList<>();
+            for(int i=0;i<snn.length;i++){
+                if(snn[i]<0){
+                    tmp.add(snn[i]);
+                }
+            }
+            idx = new int[tmp.size()];
+            for(int i=0;i<tmp.size();i++)
+                idx[i]=tmp.get(i);
+            count++;
+        }
+
+        double[][] matrice_out = new double[dummy.length-2][dummy[0].length-2];
+        for(int i=0;i<matrice_out.length;i++){
+            for(int j=0;j<matrice_out[0].length;j++){
+                matrice_out[i][j] = dummy[i+1][j+1];
+            }
+        }
+        return matrice_out;
+    }
+
 
 
     private void estim_Nt(double estGdtDist, long start_timestep, ArrayList<Double> H_array_m, double[][] ship_v_LUT){
