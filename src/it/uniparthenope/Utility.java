@@ -572,6 +572,30 @@ public class Utility {
         return out;
     }
 
+    public static boolean[][] isnan(double[][] in){
+        boolean[][] out = new boolean[in.length][in[0].length];
+        for(int i=0;i<in.length;i++){
+            for(int j=0;j<in[0].length; j++){
+                if(Double.isNaN(in[i][j])){
+                    out[i][j] = true;
+                } else{
+                    out[i][j] = false;
+                }
+            }
+        }
+        return out;
+    }
+
+    public static double[] sum(double[][] in){
+        double[] out = new double[in[0].length];
+        for(int i=0;i<in.length; i++){
+            for(int j=0;j<in[0].length;j++){
+                out[j]+=in[i][j];
+            }
+        }
+        return out;
+    }
+
     public static int[] find(double[][] mat, double element){
         ArrayList<Integer> indexes = new ArrayList<>();
         int count=0;
