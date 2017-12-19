@@ -3,6 +3,7 @@ package it.uniparthenope.Parser;
 import it.uniparthenope.Boxing.waveForecastResults;
 import it.uniparthenope.Debug.MyFileWriter;
 import ucar.ma2.ArrayDouble;
+import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.NetcdfFile;
@@ -185,12 +186,11 @@ public class MyNetCDFParser {
         try {
             //Loading data from NetCDF file
             ArrayInt.D1 timeArray = (ArrayInt.D1) time.read(timeOrigin,timeShape);
-            //TODO: passa a float
-            ArrayDouble.D1 latitudeArray = (ArrayDouble.D1) latitude.read(latitudeOrigin,latitudeShape);
-            ArrayDouble.D1 longitudeArray = (ArrayDouble.D1) longitude.read(longitudeOrigin, longitudeShape);
-            ArrayDouble.D3 vdir3DMatrix = (ArrayDouble.D3) VDIR.read(VDIROrigin, VDIRShape);
-            ArrayDouble.D3 vtdh3DMatrix = (ArrayDouble.D3) VTDH.read(VTDHOrigin, VTDHShape);
-            ArrayDouble.D3 vtpk3DMatrix = (ArrayDouble.D3) VTPK.read(VTPKOrigin, VTPKShape);
+            ArrayFloat.D1 latitudeArray = (ArrayFloat.D1) latitude.read(latitudeOrigin, latitudeShape);
+            ArrayFloat.D1 longitudeArray = (ArrayFloat.D1) longitude.read(longitudeOrigin, longitudeShape);
+            ArrayFloat.D3 vdir3DMatrix = (ArrayFloat.D3) VDIR.read(VDIROrigin, VDIRShape);
+            ArrayFloat.D3 vtdh3DMatrix = (ArrayFloat.D3) VTDH.read(VTDHOrigin, VTDHShape);
+            ArrayFloat.D3 vtpk3DMatrix = (ArrayFloat.D3) VTPK.read(VTPKOrigin, VTPKShape);
             //passing to parseWaveForecastDataResults data types
             int[] parsedTime = new int[timeShape[0]];
             for(int i=0;i<timeShape[0];i++){
