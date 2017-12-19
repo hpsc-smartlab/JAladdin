@@ -1000,6 +1000,7 @@ public class VisirModel {
         //a list of longitudes and latitudes of points, this time described
         //clockwise. Again, for each island, the first point must be repeated as
         //the last one.
+        int totalLines = 0;//Total file lines (starting from 3rd line)
         try{
             int Nexternal = 0;
             ArrayList<Double> lat_tmp = new ArrayList<>();
@@ -1017,13 +1018,13 @@ public class VisirModel {
                 int x = coastFile.nextInt();
             }
             int varType = 0;
-            int totalLines = 0;//Total file lines (starting from 3rd line)
+            //int totalLines = 0;//Total file lines (starting from 3rd line)
             while(coastFile.hasNext()){//while EOF
                 if(varType%2==0){//1st element
-                    lon_tmp.add(coastFile.nextDouble());//adding in temp longitude array
+                    lon_tmp.add(Double.parseDouble(coastFile.next()));//adding in temp longitude array
                 }
                 else{//2nd element
-                    lat_tmp.add(coastFile.nextDouble());//adding in temp latitude array
+                    lat_tmp.add(Double.parseDouble(coastFile.next()));//adding in temp latitude array
                     totalLines++;
                 }
                 varType++;
@@ -1042,6 +1043,7 @@ public class VisirModel {
             //closing file
             file.close();
         } catch(Exception e){
+            System.out.println("Lines readed: "+totalLines);
             MyFileWriter debug = new MyFileWriter("","debug",false);
             debug.WriteLog("readout_coast: "+e.getMessage());
             debug.CloseFile();
@@ -2344,7 +2346,7 @@ public class VisirModel {
             }
         }
 
-        String wave_filename = "/start__"+this.tGrid.getLatest_date()+".nc";
+        String wave_filename = Stagein_path+"/start__"+this.tGrid.getLatest_date()+".nc";
         MyNetCDFParser parser = new MyNetCDFParser(wave_filename);
         boolean wave_status = parser.isFileExists();
         double[] lat;
