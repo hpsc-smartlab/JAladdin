@@ -1,0 +1,4 @@
+Put here wave forecast and analysis.
+Sample files are not here because of github upload size restrictions.
+wave forecast -> forecast/start__{date}.nc
+wave analysis -> analysis/start__{date}.nc
