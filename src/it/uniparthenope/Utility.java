@@ -1179,7 +1179,29 @@ public class Utility {
         try {
             Date data = sdf.parse("000000000000");
             DateTime from = new DateTime(data.getTime());
-            String toString = ""+year+""+month+""+day+""+hour+""+min;
+
+            String stringYear = ""+year;
+            if((year-100)<0){//check year format (2015 or 15)
+                stringYear="20"+year;
+            }
+            String stringMonth = ""+month;
+            if(month<10){
+                stringMonth = "0"+month;
+            }
+            String stringday = ""+day;
+            if(day<10){
+                stringday = "0"+day;
+            }
+            String stringhour=""+hour;
+            if(hour<10){
+                stringhour = "0"+hour;
+            }
+            String stringMin=""+min;
+            if(min<10){
+                stringMin="0"+min;
+            }
+
+            String toString = ""+year+""+stringMonth+""+stringday+""+stringhour+""+stringMin;
             data = sdf.parse(toString);
             DateTime to = new DateTime(data.getTime());
             return Days.daysBetween(from,to).getDays();
