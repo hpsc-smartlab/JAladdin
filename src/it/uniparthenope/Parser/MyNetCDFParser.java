@@ -127,22 +127,22 @@ public class MyNetCDFParser {
         int[] timeShape = time.getShape();
         int[] timeOrigin = new int[1];
         //Retrive the variable named "latitude"
-        Variable latitude = dataFile.findVariable("latitude");
+        Variable latitude = dataFile.findVariable("lat");
         if(latitude == null){
-            System.out.println("Can't find the variable named latitude");
+            System.out.println("Can't find the variable named lat");
             MyFileWriter debug = new MyFileWriter("","debug",false);
-            debug.WriteLog("parseMedWaveForecastData: Can't find the variable named latitude");
+            debug.WriteLog("parseMedWaveForecastData: Can't find the variable named lat");
             debug.CloseFile();
             System.exit(0);
         }
         int[] latitudeShape = latitude.getShape();
         int[] latitudeOrigin = new int[1];
         //Retrive the variable named "longitude"
-        Variable longitude = dataFile.findVariable("longitude");
+        Variable longitude = dataFile.findVariable("lon");
         if(longitude == null){
-            System.out.println("Can't find the variable named longitude");
+            System.out.println("Can't find the variable named lon");
             MyFileWriter debug = new MyFileWriter("","debug",false);
-            debug.WriteLog("parseMedWaveForecastData: Can't find the variable named longitude");
+            debug.WriteLog("parseMedWaveForecastData: Can't find the variable named lon");
             debug.CloseFile();
             System.exit(0);
         }
@@ -185,6 +185,7 @@ public class MyNetCDFParser {
         try {
             //Loading data from NetCDF file
             ArrayInt.D1 timeArray = (ArrayInt.D1) time.read(timeOrigin,timeShape);
+            //TODO: passa a float
             ArrayDouble.D1 latitudeArray = (ArrayDouble.D1) latitude.read(latitudeOrigin,latitudeShape);
             ArrayDouble.D1 longitudeArray = (ArrayDouble.D1) longitude.read(longitudeOrigin, longitudeShape);
             ArrayDouble.D3 vdir3DMatrix = (ArrayDouble.D3) VDIR.read(VDIROrigin, VDIRShape);
