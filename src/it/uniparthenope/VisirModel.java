@@ -1238,7 +1238,7 @@ public class VisirModel {
 
     public Fields_regriddingResults Fields_regridding(){
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tprocessing environmental fields...");
+        this.logFile.WriteLog("processing environmental fields...");
         this.logFile.CloseFile();
         //Spatial and temporal Grid:
         //Time parameters preprocessing:
@@ -2040,7 +2040,8 @@ public class VisirModel {
         return Utility.mean3d(matrix);
     }
 
-    private mFields_reductionResults mFields_reduction(double[] lat, double[] lon, double[][][] VTDH, double[][][] VTPK, double [][][] VDIR){
+    private mFields_reductionResults mFields_reduction(double[] lat, double[] lon, double[][][] VTDH,
+                                                       double[][][] VTPK, double [][][] VDIR){
         mFields_reductionResults retThis = new mFields_reductionResults();
         double meshRes = 1/this.sGrid.getInvStepFields();
 
@@ -2107,7 +2108,7 @@ public class VisirModel {
         int n_elements=out1.length * out1[0].length * out1[0][0].length;
         int red_percent = ((1- n_elements)/n_elements)*100;
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\t\tData reduction: "+red_percent+" %");
+        this.logFile.WriteLog("\t\tData reduction: "+red_percent+"%");
         this.logFile.CloseFile();
         return retThis;
     }
