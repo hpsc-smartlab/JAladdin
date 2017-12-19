@@ -665,6 +665,50 @@ public class VisirModel {
         return outFiled;
     }
 
+    public double[][][] changeDirRule(double[][][] inField){
+        // % change of wind/current directional convention:
+        // %
+        // % from atan2 output concention to WAM-like convention, i.e.:
+        // % from:  [-pi, pi] counterclockwise with 0 at  3:00 o'clock
+        // %   to:  [0, 2*pi]        clockwise with 0 at 12:00 o'clock
+        // %
+        // % (inField and outField must be in radians)
+        // %
+        //---------------------------------------------
+        double[][][] inField1 = inField;
+        for(int i=0;i<inField.length;i++){
+            for(int j=0;j<inField[0].length;j++){
+                for(int k=0;k<inField[0][0].length;k++){
+                    if(inField1[i][j][k]<0){
+                        inField1[i][j][k]+=(2*Math.PI);
+                    }
+                }
+            }
+        }
+        //---------------------------------------------
+        double[][][] inField2 = inField1;
+        for(int i=0;i<inField2.length;i++){
+            for(int j=0;j<inField2[0].length;j++){
+                for(int k=0;k<inField2[0][0].length;k++){
+                    inField2[i][j][k] -=(Math.PI/2);
+                    if(inField2[i][j][k]<0){
+                        inField2[i][j][k] += (2*Math.PI);
+                    }
+                }
+            }
+        }
+        //---------------------------------------------
+        double[][][] outField = new double[inField2.length][inField2[0].length][inField2[0][0].length];
+        for(int i=0;i<inField.length;i++){
+            for(int j=0;j<inField[0].length;j++){
+                for(int k=0;k<inField[0][0].length;k++){
+                    outField[i][j][k] = -inField2[i][j][k] * (2*Math.PI);
+                }
+            }
+        }
+        return outField;
+    }
+
     private double[] hor_distance(String method, double[][] P_a, double[][] P_b, double... varargin){
         // % horizontal distance between pair of points (expressed in NM)
         // % either on the plane or the sphere
@@ -1190,7 +1234,7 @@ public class VisirModel {
         return new nodes_free_form_barrierResults(free_nodes.size(),free_nodes,red_fact);
     }
 
-    public void Fields_regridding(){
+    public Fields_regriddingResults Fields_regridding(){
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("\tprocessing environmental fields...");
         this.logFile.CloseFile();
@@ -1250,9 +1294,11 @@ public class VisirModel {
             prepare_sqrtY_fieldResults out = prepare_sqrtY_field();
             double[][][] VTDH_out = out.getVTDH_b();
             double[][][] VDIR_out = out.getVDIR_b();
+            double[][][] VTPK_out = Utility.NaN3Dmatrix(VTDH_out.length,VTDH_out[0].length,VTDH_out[0][0].length);
             double[][][] windMAGN_out = Utility.NaN3Dmatrix(VTDH_out.length,VTDH_out[0].length,VTDH_out[0][0].length);
             double[][][] windDIR_out = Utility.NaN3Dmatrix(VTDH_out.length,VTDH_out[0].length,VTDH_out[0][0].length);
-            double time_steps = Double.NaN;
+            int[] time_steps = null;
+            return new Fields_regriddingResults(time_steps, VTDH_out, VTPK_out, VDIR_out, windMAGN_out, windDIR_out);
         } else { //Reading of environmental Fields:
             readout_envFieldsResults envFieldsResults = readout_envFields();
             //this check must be run after input file time size has been determined
@@ -1365,38 +1411,74 @@ public class VisirModel {
             double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);
             double[][][] V10M_at_TS = Utility.interp1(wind_origTimes,V10M_Inset, interpTimes);
             //(wave_t1-const.twelve)
-            double[][][] VTDH_times = new double[interpTimes.length][VTDH_Inset[0].length][VTDH_Inset[0][0].length];
-            for(int i=0;i<interpTimes.length;i++){
-                for(int j=0;j<VTDH_Inset[0].length;j++){
-                    for(int k=0;k<VTDH_Inset[0][0].length;k++){
-                        VTDH_times[i][j][k]=VTDH_Inset[interpTimes[i]][j][k];
+            //FORSE
+//            double[][][] VTDH_times = new double[interpTimes.length][VTDH_Inset[0].length][VTDH_Inset[0][0].length];
+//            for(int i=0;i<interpTimes.length;i++){
+//                for(int j=0;j<VTDH_Inset[0].length;j++){
+//                    for(int k=0;k<VTDH_Inset[0][0].length;k++){
+//                        VTDH_times[i][j][k]=VTDH_Inset[interpTimes[i]][j][k];
+//                    }
+//                }
+//            }
+            double[][][] VTDH_times = new double[VTDH_Inset[0][0].length][interpTimes.length][VTDH_Inset[0].length];
+            for(int i=0;i<VTDH_Inset[0][0].length;i++){
+                for(int j=0;j<interpTimes.length;j++){
+                    for(int k=0; k<VTDH_Inset[0].length; k++){
+                        VTDH_times[i][j][k]=VTDH_Inset[i][interpTimes[j]][k];
                     }
                 }
             }
-            double[][][] VTPK_times = new double[interpTimes.length][VTPK_Inset[0].length][VTPK_Inset[0][0].length];
-            for(int i=0;i<interpTimes.length;i++){
-                for(int j=0;j<VTPK_Inset[0].length;j++){
-                    for(int k=0;k<VTPK_Inset[0][0].length;k++){
-                        VTPK_times[i][j][k]=VTPK_Inset[interpTimes[i]][j][k];
+            //FORSE
+            double[][][] VTPK_times = new double[VTPK_Inset[0][0].length][interpTimes.length][VTPK_Inset[0].length];
+            for(int i=0;i<VTPK_Inset[0][0].length;i++){
+                for(int j=0;j<interpTimes.length;j++){
+                    for(int k=0; k<VTPK_Inset[0].length; k++){
+                        VTPK_times[i][j][k]=VTPK_Inset[i][interpTimes[j]][k];
                     }
                 }
             }
-            double[][][] X_times = new double[interpTimes.length][X_Inset[0].length][X_Inset[0][0].length];
-            for(int i=0;i<interpTimes.length;i++){
-                for(int j=0;j<X_Inset[0].length;j++){
-                    for(int k=0;k<X_Inset[0][0].length;k++){
-                        X_times[i][j][k]=X_Inset[interpTimes[i]][j][k];
+//            double[][][] VTPK_times = new double[interpTimes.length][VTPK_Inset[0].length][VTPK_Inset[0][0].length];
+//            for(int i=0;i<interpTimes.length;i++){
+//                for(int j=0;j<VTPK_Inset[0].length;j++){
+//                    for(int k=0;k<VTPK_Inset[0][0].length;k++){
+//                        VTPK_times[i][j][k]=VTPK_Inset[interpTimes[i]][j][k];
+//                    }
+//                }
+//            }
+            double[][][] X_times = new double[X_Inset[0][0].length][interpTimes.length][X_Inset[0].length];
+            for(int i=0;i<X_Inset[0][0].length;i++){
+                for(int j=0;j<interpTimes.length;j++){
+                    for(int k=0; k<X_Inset[0].length; k++){
+                        X_times[i][j][k]=X_Inset[i][interpTimes[j]][k];
                     }
                 }
             }
-            double[][][] Y_times = new double[interpTimes.length][Y_Inset[0].length][Y_Inset[0][0].length];
-            for(int i=0;i<interpTimes.length;i++){
-                for(int j=0;j<Y_Inset[0].length;j++){
-                    for(int k=0;k<Y_Inset[0][0].length;k++){
-                        Y_times[i][j][k]=Y_Inset[interpTimes[i]][j][k];
+            //FORSE
+//            double[][][] X_times = new double[interpTimes.length][X_Inset[0].length][X_Inset[0][0].length];
+//            for(int i=0;i<interpTimes.length;i++){
+//                for(int j=0;j<X_Inset[0].length;j++){
+//                    for(int k=0;k<X_Inset[0][0].length;k++){
+//                        X_times[i][j][k]=X_Inset[interpTimes[i]][j][k];
+//                    }
+//                }
+//            }
+            double[][][] Y_times = new double[Y_Inset[0][0].length][interpTimes.length][Y_Inset[0].length];
+            for(int i=0;i<Y_Inset[0][0].length;i++){
+                for(int j=0;j<interpTimes.length;j++){
+                    for(int k=0; k<Y_Inset[0].length; k++){
+                        Y_times[i][j][k]=Y_Inset[i][interpTimes[j]][k];
                     }
                 }
             }
+            //FORSE
+//            double[][][] Y_times = new double[interpTimes.length][Y_Inset[0].length][Y_Inset[0][0].length];
+//            for(int i=0;i<interpTimes.length;i++){
+//                for(int j=0;j<Y_Inset[0].length;j++){
+//                    for(int k=0;k<Y_Inset[0][0].length;k++){
+//                        Y_times[i][j][k]=Y_Inset[interpTimes[i]][j][k];
+//                    }
+//                }
+//            }
 
             //-----------------------------------------------------------------------------------------------------
             // seaOverLand:
@@ -1405,12 +1487,80 @@ public class VisirModel {
             this.logFile.CloseFile();
 
             //Wave fields processing:
-            //CONTINUA QUI -> seaOverLand_3steps
+            ArrayList<double[][][]> seaOverLand_3stepsOut = seaOverLand_3steps(this.lon_bathy_Inset, this.lat_bathy_Inset, this.lsm_mask, lon_wave_m, lat_wave_m,VTDH_times, VTPK_times, X_times, Y_times);
+            double[][][] VTDH_out = seaOverLand_3stepsOut.get(0);
+            double[][][] VTPK_out = seaOverLand_3stepsOut.get(1);
+            X_times = seaOverLand_3stepsOut.get(2);
+            Y_times = seaOverLand_3stepsOut.get(3);
 
+            double[][][] VDIR_times = new double[X_times.length][X_times[0].length][X_times[0][0].length];
+            for(int i=0;i<VDIR_times.length;i++){
+                for(int j=0;j<VDIR_times[0].length;j++){
+                    for(int k=0;k<VDIR_times[0][0].length;k++){
+                        VDIR_times[i][j][k] = Math.atan2(Y_times[i][j][k], X_times[i][j][k]);
+                    }
+                }
+            }
+
+            double[][][] VDIR_out = changeDirRule(VDIR_times);
+            for(int i=0;i<VDIR_out.length;i++){
+                for(int j=0;j<VDIR_out[0].length;j++){
+                    for(int k=0;k<VDIR_out[0][0].length;k++){
+                        VDIR_out[i][j][k]=VDIR_out[i][j][k]/this.constants.getDeg2rad();
+                    }
+                }
+            }
+            double[] lat_wind_Inset = new double[0];
+            double[] lon_wind_Inset = new double[0];
+            if (this.optim.getWindModel() == 11 || this.optim.getWindModel() == 12) {//ecmwf
+                lat_wind_Inset = ecmwfDataReduction.getLat_red();
+                lon_wind_Inset = ecmwfDataReduction.getLon_red();
+            } else {
+                if(this.optim.getWindModel() == 2){ //cosmo-me
+                    lat_wind_Inset = cosmoDataReduction.getLat_red();
+                    lon_wind_Inset = cosmoDataReduction.getLon_red();
+                }
+            }
+
+            meshgridResults wind_m = Utility.meshgrid(lon_wind_Inset, lat_wind_Inset);
+            double[][] lon_wind_m = wind_m.getX();
+            double[][] lat_wind_m = wind_m.getY();
+
+            ArrayList<double[][][]> seaOut = seaOverLand_3steps(lon_bathy_Inset,lat_bathy_Inset,lsm_mask,lon_wind_m,lat_wind_m, U10M_at_TS,V10M_at_TS);
+            U10M_at_TS = seaOut.get(0);
+            V10M_at_TS = seaOut.get(1);
+
+            double[][][] windDir_times = new double[V10M_at_TS.length][V10M_at_TS[0].length][V10M_at_TS[0][0].length];
+            double[][][] windDIR_out = new double[V10M_at_TS.length][V10M_at_TS[0].length][V10M_at_TS[0][0].length];
+            double[][][] windMAGN_out =new double[V10M_at_TS.length][V10M_at_TS[0].length][V10M_at_TS[0][0].length];
+            for(int i=0;i<windDir_times.length;i++){
+                for(int j=0;j<windDir_times[0].length;j++){
+                    for(int k=0;k<windDir_times[0][0].length;k++){
+                        windDir_times[i][j][k] = Math.atan2(V10M_at_TS[i][j][k],U10M_at_TS[i][j][k]);
+                    }
+                }
+            }
+            windDIR_out = changeDirRule(windDir_times);
+            for(int i=0;i<windDIR_out.length;i++){
+                for(int j=0;j<windDIR_out[0].length;j++){
+                    for(int k=0;k<windDIR_out[0][0].length;k++){
+                        windDIR_out[i][j][k] = windDIR_out[i][j][k]/this.constants.getDeg2rad();
+                    }
+                }
+            }
+
+            for(int i=0;i<windMAGN_out.length;i++){
+                for(int j=0;j<windMAGN_out[0].length;j++){
+                    for(int k=0;k<windMAGN_out[0][0].length;k++){
+                        windMAGN_out[i][j][k] = Math.sqrt(Math.pow(U10M_at_TS[i][j][k],2)+Math.pow(V10M_at_TS[i][j][k],2));
+                    }
+                }
+            }
+            return new Fields_regriddingResults(time_steps, VTDH_out, VTPK_out, VDIR_out, windMAGN_out, windDIR_out);
         }
     }
 
-    private void seaOverLand_3steps(ArrayList<Double> lon_bathy, ArrayList<Double> lat_bathy, double[][] lsm_mask, double[][] lon_f, double[][] lat_f, double[][][]... varargs){
+    private ArrayList<double[][][]> seaOverLand_3steps(ArrayList<Double> lon_bathy, ArrayList<Double> lat_bathy, double[][] lsm_mask, double[][] lon_f, double[][] lat_f, double[][][]... varargs){
         //% "sea over land" 3-step process:
         //% (1) extrapolation:
         //% (2) regridding to bathy-grid:
@@ -1434,11 +1584,100 @@ public class VisirModel {
         }
 
         int n_loops = 50;
-        int i=0;
+        double[] lon_fT = new double[lon_f[0].length];
+        for(int i=0;i<lon_f[0].length;i++){
+            lon_fT[i] = lon_f[0][i];
+        }
+        double[] lat_fT = new double[lat_f.length];
+        for(int i=0;i<lat_f.length;i++){
+            lat_fT[i]=lat_f[i][0];
+        }
+        double[][][] myfield_bathy = new double[lon_bathy.size()][(int)this.tGrid.getNt()][lat_bathy.size()];
+        ArrayList<double[][][]> out = new ArrayList<>();
         for(double[][][] myfield : varargs){
             //(1) extrapolation - % #GM: check also mdata_EWeights.m:
-            //CONTINUA QUI
+            for(int it=0;it<(int)this.tGrid.getNt(); it++){
+                double[][] myfield_mat = new double[0][0];
+                double[][][] tmp = new double[myfield.length][1][myfield[0][0].length];
+                for(int z=0;z<myfield.length;z++){
+                    for(int j =0; j<myfield[0][0].length; j++){
+                        tmp[z][0][j] = myfield[z][it][j];
+                    }
+                }
+                if(this.forcing.getWind()!=1){
+                    myfield_mat = SeaOverLand(Utility.squeeze(tmp),n_loops);
+                } else {
+                    myfield_mat = Utility.squeeze(tmp);
+                }
+
+                // (2) regridding to bathy-grid:
+                //myfield_mat= squeeze(myfield_mat); ????
+
+                //check that bbox is larger than minimum allowed area:
+                if(it==0){
+                    int size_min = Math.min(myfield_mat.length, myfield_mat[0].length);
+                    int nan_rank = Utility.rank(Utility.convertDouble(Utility.isnan(myfield_mat)));
+                    if((size_min-nan_rank) < 2){
+                        System.out.println("seaOverLand_3steps: too few sea grid points");
+                        MyFileWriter debug = new MyFileWriter("","debug",false);
+                        debug.WriteLog("\tseaOverLand_3steps: too few sea grid points");
+                        debug.CloseFile();
+                    }
+                }
+                double[] lon_bathyArray = new double[lon_bathy.size()];
+                for(int i=0;i<lon_bathy.size();i++){
+                    lon_bathyArray[i] = lon_bathy.get(i);
+                }
+                double[] lat_bathyArray = new double[lat_bathy.size()];
+                for(int i=0;i<lat_bathy.size();i++){
+                    lat_bathyArray[i] = lat_bathy.get(i);
+                }
+                double[][] tmpMtx = Utility.interp2(lon_fT, lat_fT, myfield_mat,lat_bathyArray, lon_bathyArray);
+                for(int i=0;i<tmpMtx.length;i++){
+                    for(int j=0;j<tmpMtx[0].length;j++){
+                        myfield_bathy[i][it][j]=tmpMtx[i][j];
+                    }
+                }
+                //FORSE??
+//                for(int i=0;i<tmpMtx.length;i++){
+//                    for(int j=0;j<tmpMtx[0].length;j++){
+//                        myfield[i][it][j]=tmpMtx[i][j];
+//                    }
+//                }
+            }
+            double[][][] myfield_Inset = new double[myfield_bathy.length][myfield_bathy[0].length][myfield_bathy[0][0].length];
+            if(this.visualization.getScientific_mode()==0){
+                /*
+                * % (3) masking landmass on target grid:
+                %
+                % ok also for wind 10mt.
+                % warning: for ocean currents it will become necessary to set field=0 on the
+                % landmass for reproducing the no-slip boundary condition!*/
+                if(this.forcing.getWind()!=1){
+                    for(int it=0;it<(int) this.tGrid.getNt(); it++){
+                        double[][][] tmp = new double[myfield_bathy.length][1][myfield_bathy[0][0].length];
+                        for(int row=0;row<myfield_bathy.length;row++){
+                            for(int col=0;col<myfield_bathy[0][0].length; col++){
+                                tmp[row][0][col] = myfield_bathy[row][0][col];
+                            }
+                        }
+                        double[][] vv1 = Utility.MatrixComponentXcomponent(Utility.squeeze(tmp),Utility.transposeMatrix(this.lsm_mask));
+                        for(int i=0;i<myfield_bathy.length;i++){
+                            for(int j=0;j<myfield_bathy[0][0].length;j++){
+                                myfield_bathy[i][it][j] = vv1[i][j];
+                            }
+                        }
+                    }
+                } else {
+                    myfield_Inset = myfield_bathy;
+                }
+            } else{
+                myfield_Inset = myfield_bathy;
+            }
+            //varargout{ia} = myfield_Inset;
+            out.add(myfield_Inset);
         }
+        return out;
     }
 
     private static double[][] SeaOverLand(double[][] matrice_in, int loop){
@@ -2014,8 +2253,6 @@ public class VisirModel {
             this.logFile.WriteLog("\t"+ecmwf_str);
             this.logFile.CloseFile();
 
-            //CONTINUA DA RIGA 84 A RIGA 143 FILE readout_envFields, lettura dei dati vento
-            //ELIMINA:
             ecmwf_lat_wind = new double[0];
             ecmwf_lon_wind = new double[0];
             cosmo_lat_wind = new double[0];
@@ -2256,16 +2493,27 @@ public class VisirModel {
 
         //speed
         this.extreme_pts.setPseudoG(0.001);
-        double[][][] VTDH_b = new double[(int) this.tGrid.getNt()][Ny][Nx];
+        double[][][] VTDH_b = new double[Ny][(int) this.tGrid.getNt()][Nx];
         double[][] DeltaYTransposed = Utility.transposeMatrix(DeltaY);
-        for(int i=0;i<(int) this.tGrid.getNt();i++){
-            for(int j=0;j<Ny;j++){
-                for(int k=0;k<Nx;k++){
-                    VTDH_b[i][j][k] = this.constants.getMs2kts() * Math.sqrt(2*this.extreme_pts.getPseudoG() * DeltaYTransposed[j][k]); //kts
+        for(int i=0;i<Ny;i++){
+            for(int it=0;it<(int) this.tGrid.getNt(); it++){
+                for(int j=0;j<Nx;j++){
+                    VTDH_b[i][it][j] = this.constants.getMs2kts() * Math.sqrt(2*this.extreme_pts.getPseudoG()*DeltaYTransposed[i][j]);//kts
                 }
             }
         }
-        double[][][] VDIR_b = Utility.NaN3Dmatrix((int) this.tGrid.getNt(), Ny, Nx);
+        double[][][] VDIR_b = Utility.NaN3Dmatrix(Ny, (int) this.tGrid.getNt(), Nx);
+        //FORSE??
+//        double[][][] VTDH_b = new double[(int) this.tGrid.getNt()][Ny][Nx];
+//        double[][] DeltaYTransposed = Utility.transposeMatrix(DeltaY);
+//        for(int i=0;i<(int) this.tGrid.getNt();i++){
+//            for(int j=0;j<Ny;j++){
+//                for(int k=0;k<Nx;k++){
+//                    VTDH_b[i][j][k] = this.constants.getMs2kts() * Math.sqrt(2*this.extreme_pts.getPseudoG() * DeltaYTransposed[j][k]); //kts
+//                }
+//            }
+//        }
+//        double[][][] VDIR_b = Utility.NaN3Dmatrix((int) this.tGrid.getNt(), Ny, Nx);
 
         //graphical pars
         double smallFract = 0.5;
