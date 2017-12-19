@@ -14,6 +14,9 @@ import org.apache.commons.math3.analysis.interpolation.BicubicInterpolator;
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolatingFunction;
 import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
@@ -528,6 +531,7 @@ public class Utility {
         return output;
     }
 
+
     public static double[][] squeeze(double[][][] mat3d){
         int z_dim = mat3d.length;
         int rows = mat3d[0].length;
@@ -572,6 +576,13 @@ public class Utility {
         return out;
     }
 
+    public static int rank(double[][] matrix){
+        RealMatrix m = MatrixUtils.createRealMatrix(matrix);
+        SingularValueDecomposition x = new SingularValueDecomposition(m);
+        return x.getRank();
+    }
+
+
     public static boolean[][] isnan(double[][] in){
         boolean[][] out = new boolean[in.length][in[0].length];
         for(int i=0;i<in.length;i++){
@@ -580,6 +591,20 @@ public class Utility {
                     out[i][j] = true;
                 } else{
                     out[i][j] = false;
+                }
+            }
+        }
+        return out;
+    }
+
+    public static double[][] convertDouble(boolean[][] in){
+        double[][] out = new double[in.length][in[0].length];
+        for(int i=0;i<in.length;i++){
+            for(int j=0;j<in[0].length; j++){
+                if(in[i][j]){
+                    out[i][j] = 1.0;
+                } else{
+                    out[i][j] = 0.0;
                 }
             }
         }
