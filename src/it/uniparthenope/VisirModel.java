@@ -1404,7 +1404,7 @@ public class VisirModel {
             int delta_hr_dep_int = Math.round(deltaHr_anls);
             int[] interpTimes = new int[(int)this.tGrid.getNt()];
             for(int i=0;i<interpTimes.length;i++){
-                interpTimes[i] = delta_hr_dep_int+i;
+                interpTimes[i] = delta_hr_dep_int+(i-1);
             }
             int[] time_steps = new int[(int) this.tGrid.getMaxNt()];
             //time_steps always counted starting from step #1:
@@ -1425,40 +1425,43 @@ public class VisirModel {
                 V10M_Inset = cosmo_V10M_Inset;
             }
 
-            double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);//DA DEBUGGARE DA QUI IN POI!
+            double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);
             double[][][] V10M_at_TS = Utility.interp1(wind_origTimes,V10M_Inset, interpTimes);
             //(wave_t1-const.twelve)
 
-            double[][][] VTDH_times = new double[VTDH_Inset[0][0].length][interpTimes.length][VTDH_Inset[0].length];
-            for(int i=0;i<VTDH_Inset[0][0].length;i++){
+            double[][][] VTDH_times = new double[VTDH_Inset.length][interpTimes.length][VTDH_Inset[0][0].length];
+            for(int i=0;i<VTDH_Inset.length;i++){
                 for(int j=0;j<interpTimes.length;j++){
-                    for(int k=0; k<VTDH_Inset[0].length; k++){
+                    for(int k=0; k<VTDH_Inset[0][0].length; k++){
                         VTDH_times[i][j][k]=VTDH_Inset[i][interpTimes[j]][k];
                     }
                 }
             }
-            double[][][] VTPK_times = new double[VTPK_Inset[0][0].length][interpTimes.length][VTPK_Inset[0].length];
-            for(int i=0;i<VTPK_Inset[0][0].length;i++){
+
+            double[][][] VTPK_times = new double[VTPK_Inset.length][interpTimes.length][VTPK_Inset[0][0].length];
+            for(int i=0;i<VTPK_Inset.length;i++){
                 for(int j=0;j<interpTimes.length;j++){
-                    for(int k=0; k<VTPK_Inset[0].length; k++){
+                    for(int k=0; k<VTPK_Inset[0][0].length; k++){
                         VTPK_times[i][j][k]=VTPK_Inset[i][interpTimes[j]][k];
                     }
                 }
             }
 
-            double[][][] X_times = new double[X_Inset[0][0].length][interpTimes.length][X_Inset[0].length];
-            for(int i=0;i<X_Inset[0][0].length;i++){
+
+            double[][][] X_times = new double[X_Inset.length][interpTimes.length][X_Inset[0][0].length];
+            for(int i=0;i<X_Inset.length;i++){
                 for(int j=0;j<interpTimes.length;j++){
-                    for(int k=0; k<X_Inset[0].length; k++){
+                    for(int k=0; k<X_Inset[0][0].length; k++){
                         X_times[i][j][k]=X_Inset[i][interpTimes[j]][k];
                     }
                 }
             }
 
-            double[][][] Y_times = new double[Y_Inset[0][0].length][interpTimes.length][Y_Inset[0].length];
-            for(int i=0;i<Y_Inset[0][0].length;i++){
+
+            double[][][] Y_times = new double[Y_Inset.length][interpTimes.length][Y_Inset[0][0].length];
+            for(int i=0;i<Y_Inset.length;i++){
                 for(int j=0;j<interpTimes.length;j++){
-                    for(int k=0; k<Y_Inset[0].length; k++){
+                    for(int k=0; k<Y_Inset[0][0].length; k++){
                         Y_times[i][j][k]=Y_Inset[i][interpTimes[j]][k];
                     }
                 }
@@ -1467,7 +1470,7 @@ public class VisirModel {
 
             //-----------------------------------------------------------------------------------------------------
             // seaOverLand:
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true);//DA DEBUGGARE DA QUI IN POI!
             this.logFile.WriteLog("\tseaOverLand extrapolation...");
             this.logFile.CloseFile();
 
