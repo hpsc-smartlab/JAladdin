@@ -664,33 +664,12 @@ public class Utility {
     }
 
     public static double[][][] interp1(double[] x, double[][][] y, int[] xi){
+        //wrapper for the interp1 method
         double[] xiDouble = new double[xi.length];
         for(int i=0;i<xiDouble.length;i++)
             xiDouble[i]=xi[i]+0.0;
         return interp1(x, y, xiDouble);
     }
-
-    public static double[][][] interp1(double[] x, double[][][] y, double[] xi){
-        //wrapper for the interp1 method
-        double[][][] yi = new double[y.length][xi.length][y[0][0].length];
-        for(int t=0;t<y.length;t++){
-            double[][] yt = new double[y[0].length][y[0][0].length];
-            for(int i=0;i<yt.length;i++){
-                for(int j=0;j<yt[0].length;j++){
-                    yt[i][j] = y[t][i][j];
-                }
-            }
-            double[][] yit = interp1(x, yt, xi);
-            for(int i=0;i<yit.length;i++){
-                for(int j=0;j<yit[0].length;j++){
-                    yi[t][i][j] = yit[i][j];
-                }
-            }
-            //yi[t] = interp1(x, y[t], xi);
-        }
-        return yi;
-    }
-
 
     public static double interp1(ArrayList<Double> x, double[] y, double xi){
         //wrapper for the interp1 method
@@ -702,6 +681,28 @@ public class Utility {
         xiArray[0]=xi;
         double[] yi = interp1(xArray, y, xiArray);
         return yi[0];
+    }
+
+    public static double[][][] interp1(double[] x, double[][][] y, double[] xi){
+        //wrapper for the interp1 method
+        int Z = y.length;
+        int rows = y[0].length;
+        int cols = y[0][0].length;
+        double[][][] out = new double[Z][xi.length][cols];
+        //cols extraction:
+        for(int z=0;z<Z;z++){
+            for(int j=0;j<cols;j++){
+                double[] row = new double[rows];
+                for(int i=0;i<rows;i++){
+                    row[i]=y[z][i][j];
+                }
+                double[] rowOut = interp1(x,row,xi);
+                for(int i=0;i<rowOut.length;i++){
+                    out[z][i][j] = rowOut[i];
+                }
+            }
+        }
+        return out;
     }
 
     public static double[] interp1(double[] x, double[] y, double[] xi){
