@@ -95,20 +95,12 @@ public class MyNetCDFParser {
             return new parseMedOneMinResults(lat, lon, depth);
 
         } catch(Exception e){
-            e.printStackTrace();
-            MyFileWriter debug = new MyFileWriter("","debug",false);
-            debug.WriteLog("parseMedOneMinResults: "+e.getMessage());
-            debug.CloseFile();
-            System.exit(0);
+            errLog(e);
         } finally {
             try {
                 this.dataFile.close();
             } catch (Exception e){
-                e.printStackTrace();
-                MyFileWriter debug = new MyFileWriter("","debug",false);
-                debug.WriteLog("parseMedOneMinResults: "+e.getMessage());
-                debug.CloseFile();
-                System.exit(0);
+                errLog(e);
 
             }
         }
@@ -204,51 +196,46 @@ public class MyNetCDFParser {
             for(int i=0;i<longitudeShape[0];i++){
                 parsedLongitude[i] = longitudeArray.get(i);
             }
-            double[][][] parsedVDIR = new double[VDIRShape[0]][VDIRShape[1]][VDIRShape[2]];
-            for(int i=0;i<VDIRShape[0];i++){
-                for(int j=0;j<VDIRShape[1];j++){
-                    for(int k=0;k<VDIRShape[2];k++){
-                        parsedVDIR[i][j][k] = vdir3DMatrix.get(i, j, k);
-                    }
-                }
-            }
-            double[][][] parsedVTDH = new double[VTDHShape[0]][VTDHShape[1]][VTDHShape[2]];
-            for(int i=0;i<VTDHShape[0];i++){
-                for(int j=0;j<VTDHShape[1];j++){
-                    for(int k=0;k<VTDHShape[2];k++){
-                        parsedVTDH[i][j][k] = vtdh3DMatrix.get(i, j, k);
-                    }
-                }
-            }
-            double[][][] parsedVTPK = new double[VTPKShape[0]][VTPKShape[1]][VTPKShape[2]];
-            for(int i=0;i<VTPKShape[0];i++){
-                for(int j=0;j<VTPKShape[1];j++){
-                    for(int k=0;k<VTPKShape[2];k++){
-                        parsedVTPK[i][j][k] = vtpk3DMatrix.get(i, j, k);
-                    }
-                }
-            }
+
+            double[][][] parsedVDIR = ArrayFloatD3ToDouble3D(vdir3DMatrix, VDIRShape);
+            double[][][] parsedVTDH = ArrayFloatD3ToDouble3D(vtdh3DMatrix, VTDHShape);
+            double[][][] parsedVTPK = ArrayFloatD3ToDouble3D(vtpk3DMatrix, VTPKShape);
             return new waveForecastResults(parsedVDIR, parsedVTDH, parsedVTPK, parsedTime, parsedLatitude, parsedLongitude);
 
         } catch (Exception e){
-            e.printStackTrace();
-            MyFileWriter debug = new MyFileWriter("","debug",false);
-            debug.WriteLog("parseMedWaveForecastData: "+e.getMessage());
-            debug.CloseFile();
-            System.exit(0);
+            errLog(e);
         } finally {
             try {
                 this.dataFile.close();
             } catch (Exception e){
-                e.printStackTrace();
-                MyFileWriter debug = new MyFileWriter("","debug",false);
-                debug.WriteLog("parseMedWaveForecastData: "+e.getMessage());
-                debug.CloseFile();
-                System.exit(0);
-
+                errLog(e);
             }
         }
         return null;
     }
 
+    private double[][][] ArrayFloatD3ToDouble3D(ArrayFloat.D3 Matrix, int[] shape){
+        double[][][] out = new double[shape[2]][shape[0]][shape[1]];
+        for(int k=0;k<shape[2];k++){
+            for(int i=0;i<shape[0];i++){
+                for(int j=0;j<shape[1];j++){
+                    //if(Matrix.get(i,j,k) == 1.0000000200408773E20)
+                    if(Matrix.get(i,j,k) >= 1.0E20){
+                        out[k][i][j] = Double.NaN;
+                    } else {
+                        out[k][i][j] = Matrix.get(i,j,k);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    private void errLog(Exception e){
+        e.printStackTrace();
+        MyFileWriter debug = new MyFileWriter("","debug",false);
+        debug.WriteLog("parseMedWaveForecastData: "+e.getMessage());
+        debug.CloseFile();
+        System.exit(0);
+    }
 }

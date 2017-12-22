@@ -7,7 +7,7 @@ public class Fstats {
     private double bathy_max;
     private double wperiod_min;
     private double wperiod_max;
-    private double[][] wheight_avg;
+    private double wheight_avg;
     private double wlength_min;
     private double wlenght_max;
 
@@ -43,11 +43,11 @@ public class Fstats {
         this.bathy_max = bathy_max;
     }
 
-    public double[][] getWheight_avg() {
+    public double getWheight_avg() {
         return wheight_avg;
     }
 
-    public void setWheight_avg(double[][] wheight_avg) {
+    public void setWheight_avg(double wheight_avg) {
         this.wheight_avg = wheight_avg;
     }
 

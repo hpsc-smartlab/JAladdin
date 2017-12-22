@@ -162,9 +162,9 @@ public class VisirModel {
         H_array_m.add(0, 0.0);//adding 0 at first element of H_array_m
 
         //preallocations:
-        double[][] vel_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
-        double[][] Rc_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
-        double[][] Raw_LUT = Utility.zeros((int) Nh+1, this.ship.getP_level_hp().size()+1);
+        double[][] vel_LUT = new double[(int)Nh][this.ship.getP_level_hp().size()];
+        double[][] Rc_LUT =  new double[(int)Nh][this.ship.getP_level_hp().size()];
+        double[][] Raw_LUT =  new double[(int)Nh][this.ship.getP_level_hp().size()];
         ArrayList<Double> P_level_thro = new ArrayList<Double>();
         double max = Collections.max(this.ship.getP_level_hp());
         for(double element : this.ship.getP_level_hp()){
@@ -180,7 +180,7 @@ public class VisirModel {
         //LUT computation
         for(int ih = 0; ih< Nh; ih++){
             this.ship.ship_resistance(H_array_m.get(ih), this.constants);
-            for(int j = 1; j<this.ship.getP_level_hp().size(); j++){
+            for(int j = 0; j<this.ship.getP_level_hp().size(); j++){
                 vel_LUT[ih][j] = this.ship.getV_out_kts().get(j);
                 Rc_LUT[ih][j] = this.ship.getR_c().get(j);
                 Raw_LUT[ih][j] = this.ship.getR_aw().get(j);
@@ -627,9 +627,23 @@ public class VisirModel {
         // % (inField and outField must be in radians)
         // %
         //---------------------------------------------
-        double inField1 = inField + (2*Math.PI);
-        double inField2 = inField1 - (Math.PI/2) + (2*Math.PI);
-        return -inField2*(2*Math.PI);
+        double inField1 = inField;
+        double inField1_ = 0;
+        if(inField1 < 0){
+            inField1_ = inField1;
+            inField1_ = inField1_ + 2*Math.PI;
+            inField1 = inField1_;
+        }
+        //---------------------------------------------
+        double inField2 = inField1 -Math.PI/2;
+        double inField2_ = 0;
+        if(inField2 < 0){
+            inField2_ = inField2;
+            inField2_ = inField2_ + 2*Math.PI;
+            inField2 = inField2_;
+        }
+        //---------------------------------------------
+        return (-inField2+(2*Math.PI));
     }
 
     private double[] changeDirRule(double[] inField){
@@ -1270,14 +1284,15 @@ public class VisirModel {
 
         this.tGrid.setDepDateTime(Utility.datenum(2000+this.dep_datetime.getYear(),this.dep_datetime.getMonth(),
                 this.dep_datetime.getDay(),this.dep_datetime.getHour(),this.dep_datetime.getMin()));
-
+        //Adding 6 hours delay to original departure date time:
+        double delayed = this.tGrid.getDepDateTime()-0.25;
         //hrs elapsed between latest analysis and departure time
         int cento = 100;
         long deltaHr_anls=0;
         if(this.forcing.getAnalytic()==1){
             deltaHr_anls = 1;
         } else{
-            deltaHr_anls = Math.round(cento*this.constants.getTwentyfour()*(this.tGrid.getDepDateTime() - l_num)/cento);
+            deltaHr_anls = Math.round(cento*this.constants.getTwentyfour()*(delayed - l_num)/cento);
         }
 
         this.tGrid.setWave_dep_TS(Math.round(1+ deltaHr_anls - (wave_t1 - this.constants.getTwelve())));
@@ -1377,19 +1392,19 @@ public class VisirModel {
             //-----------------------------------------------------------------------------------------------------
             //Time processing:
             fieldStatsResults field_res = fieldStats(this.bathy_Inset, VTDH_Inset, VTPK_Inset, ecmwf_U10M_Inset, ecmwf_V10M_Inset, cosmo_U10M_Inset, cosmo_V10M_Inset);
-            double[][] ecmwf_dir_avg = field_res.getEcmwf_dir_avg();
-            double[][] ecmwf_dir_std = field_res.getEcmwf_dir_std();
-            double[][] cosmo_dir_avg = field_res.getCosmo_dir_avg();
-            double[][] cosmo_dir_std = field_res.getCosmo_dir_std();
+            double ecmwf_dir_avg = field_res.getEcmwf_dir_avg();
+            double ecmwf_dir_std = field_res.getEcmwf_dir_std();
+            double cosmo_dir_avg = field_res.getCosmo_dir_avg();
+            double cosmo_dir_std = field_res.getCosmo_dir_std();
             //Just for GMD paper's route #2 (1589_c) uncomment following line:
             //this.fstats.setWlenght_max(85);
 
             this.estim_Nt(estGdtDist, Math.max(this.tGrid.getWave_dep_TS(), this.tGrid.getWind_dep_TS()), this.H_array_m, this.vel_LUT);
 
             int delta_hr_dep_int = Math.round(deltaHr_anls);
-            int[] interpTimes = new int[(int) this.tGrid.getNt()-1];
+            int[] interpTimes = new int[(int)this.tGrid.getNt()];
             for(int i=0;i<interpTimes.length;i++){
-                interpTimes[i]=delta_hr_dep_int+i;
+                interpTimes[i] = delta_hr_dep_int+i;
             }
             int[] time_steps = new int[(int) this.tGrid.getMaxNt()];
             //time_steps always counted starting from step #1:
@@ -1413,15 +1428,7 @@ public class VisirModel {
             double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);
             double[][][] V10M_at_TS = Utility.interp1(wind_origTimes,V10M_Inset, interpTimes);
             //(wave_t1-const.twelve)
-            //FORSE
-//            double[][][] VTDH_times = new double[interpTimes.length][VTDH_Inset[0].length][VTDH_Inset[0][0].length];
-//            for(int i=0;i<interpTimes.length;i++){
-//                for(int j=0;j<VTDH_Inset[0].length;j++){
-//                    for(int k=0;k<VTDH_Inset[0][0].length;k++){
-//                        VTDH_times[i][j][k]=VTDH_Inset[interpTimes[i]][j][k];
-//                    }
-//                }
-//            }
+
             double[][][] VTDH_times = new double[VTDH_Inset[0][0].length][interpTimes.length][VTDH_Inset[0].length];
             for(int i=0;i<VTDH_Inset[0][0].length;i++){
                 for(int j=0;j<interpTimes.length;j++){
@@ -1430,7 +1437,6 @@ public class VisirModel {
                     }
                 }
             }
-            //FORSE
             double[][][] VTPK_times = new double[VTPK_Inset[0][0].length][interpTimes.length][VTPK_Inset[0].length];
             for(int i=0;i<VTPK_Inset[0][0].length;i++){
                 for(int j=0;j<interpTimes.length;j++){
@@ -1439,14 +1445,7 @@ public class VisirModel {
                     }
                 }
             }
-//            double[][][] VTPK_times = new double[interpTimes.length][VTPK_Inset[0].length][VTPK_Inset[0][0].length];
-//            for(int i=0;i<interpTimes.length;i++){
-//                for(int j=0;j<VTPK_Inset[0].length;j++){
-//                    for(int k=0;k<VTPK_Inset[0][0].length;k++){
-//                        VTPK_times[i][j][k]=VTPK_Inset[interpTimes[i]][j][k];
-//                    }
-//                }
-//            }
+
             double[][][] X_times = new double[X_Inset[0][0].length][interpTimes.length][X_Inset[0].length];
             for(int i=0;i<X_Inset[0][0].length;i++){
                 for(int j=0;j<interpTimes.length;j++){
@@ -1455,15 +1454,7 @@ public class VisirModel {
                     }
                 }
             }
-            //FORSE
-//            double[][][] X_times = new double[interpTimes.length][X_Inset[0].length][X_Inset[0][0].length];
-//            for(int i=0;i<interpTimes.length;i++){
-//                for(int j=0;j<X_Inset[0].length;j++){
-//                    for(int k=0;k<X_Inset[0][0].length;k++){
-//                        X_times[i][j][k]=X_Inset[interpTimes[i]][j][k];
-//                    }
-//                }
-//            }
+
             double[][][] Y_times = new double[Y_Inset[0][0].length][interpTimes.length][Y_Inset[0].length];
             for(int i=0;i<Y_Inset[0][0].length;i++){
                 for(int j=0;j<interpTimes.length;j++){
@@ -1472,15 +1463,7 @@ public class VisirModel {
                     }
                 }
             }
-            //FORSE
-//            double[][][] Y_times = new double[interpTimes.length][Y_Inset[0].length][Y_Inset[0][0].length];
-//            for(int i=0;i<interpTimes.length;i++){
-//                for(int j=0;j<Y_Inset[0].length;j++){
-//                    for(int k=0;k<Y_Inset[0][0].length;k++){
-//                        Y_times[i][j][k]=Y_Inset[interpTimes[i]][j][k];
-//                    }
-//                }
-//            }
+
 
             //-----------------------------------------------------------------------------------------------------
             // seaOverLand:
@@ -1835,13 +1818,13 @@ public class VisirModel {
         double piccolo = 0.1;
         //----------------------------------------------------------
         //Bathy
-        this.fstats.setBathy_min(Utility.min(bathy));
-        this.fstats.setBathy_max(Utility.max(bathy));
+        this.fstats.setBathy_min(Utility.minNotNaN(bathy));
+        this.fstats.setBathy_max(Utility.maxNotNaN(bathy));
 
         //----------------------------------------------------------
         //Wave
-        this.fstats.setWheight_min((1-piccolo)* Utility.min3d(VTDH));
-        this.fstats.setWheight_max((1+piccolo)* Utility.max3d(VTDH));
+        this.fstats.setWheight_min((1.0-piccolo)* Utility.min3d(VTDH));
+        this.fstats.setWheight_max((1.0+piccolo)* Utility.max3d(VTDH));
         this.fstats.setWheight_avg(nanmean2(VTDH));
 
         this.fstats.setWperiod_min((1-piccolo)* Utility.min3d(VTPK));
@@ -1849,7 +1832,6 @@ public class VisirModel {
 
         double[][][] Lambda = wave_dispersion(VTPK);
         this.fstats.setWlength_min((1-piccolo)*Utility.min3d(Lambda));
-        //fstats.wlength_max  = (1+piccolo)* max(max(max(Lambda)));??????????????????????
         this.fstats.setWlenght_max(Utility.max3d(Lambda));
         //----------------------------------------------------------
         //Wind
@@ -1892,16 +1874,12 @@ public class VisirModel {
                 }
             }
         }
-        double[][] ecmwf_cos_avg = nanmean2(TmpEcmwf_cos_avg);
-        double[][] ecmwf_sin_avg = nanmean2(TmpEcmwf_sin_avg);
+        double ecmwf_cos_avg = nanmean2(TmpEcmwf_cos_avg);
+        double ecmwf_sin_avg = nanmean2(TmpEcmwf_sin_avg);
 
-        double[][] ecmwf_dir_avg = new double[ecmwf_cos_avg.length][ecmwf_cos_avg[0].length];
-        for(int i=0;i<ecmwf_cos_avg.length;i++){
-            for(int j=0;j<ecmwf_cos_avg[0].length;j++){
-                ecmwf_dir_avg[i][j] = Math.atan2(ecmwf_sin_avg[i][j],ecmwf_cos_avg[i][j]);
-                ecmwf_dir_avg[i][j] = changeDirRule(ecmwf_dir_avg[i][j])/this.constants.getDeg2rad();
-            }
-        }
+        double ecmwf_dir_avg = Math.atan2(ecmwf_sin_avg, ecmwf_cos_avg);
+        ecmwf_dir_avg = changeDirRule(ecmwf_dir_avg)/this.constants.getDeg2rad();
+
 
         double[][][] TmpCosmo_cos_avg = new double[cosmo_U10M.length][cosmo_U10M[0].length][cosmo_U10M[0][0].length];
         double[][][] TmpCosmo_sin_avg = new double[cosmo_V10M.length][cosmo_V10M[0].length][cosmo_V10M[0][0].length];
@@ -1919,45 +1897,28 @@ public class VisirModel {
                 }
             }
         }
-        double[][] cosmo_cos_avg = nanmean2(TmpCosmo_cos_avg);
-        double[][] cosmo_sin_avg = nanmean2(TmpCosmo_sin_avg);
 
-        double[][] cosmo_dir_avg = new double[cosmo_cos_avg.length][cosmo_cos_avg[0].length];
-        for(int i=0;i<cosmo_cos_avg.length;i++){
-            for(int j=0;j<cosmo_cos_avg[0].length;j++){
-                cosmo_dir_avg[i][j] = Math.atan2(cosmo_sin_avg[i][j],cosmo_cos_avg[i][j]);
-                cosmo_dir_avg[i][j] = changeDirRule(cosmo_dir_avg[i][j])/this.constants.getDeg2rad();
-            }
-        }
+        double cosmo_cos_avg = nanmean2(TmpCosmo_cos_avg);
+        double cosmo_sin_avg = nanmean2(TmpCosmo_sin_avg);
+
+        double cosmo_dir_avg = Math.atan2(cosmo_sin_avg, cosmo_cos_avg);
+        cosmo_dir_avg = changeDirRule(cosmo_dir_avg)/this.constants.getDeg2rad();
+
+
         // % Yamartino's method for wind std:
         // % http://journals.ametsoc.org/doi/pdf/10.1175/1520-0450%281984%29023%3C1362%3AACOSPE%3E2.0.CO%3B2
         double bb = -1 + 2/Math.sqrt(3.0);
 
-        double[][] ecmwf_epsilon = new double[ecmwf_cos_avg.length][ecmwf_cos_avg[0].length];
-        for(int i=0;i< ecmwf_epsilon.length; i++){
-            for(int j=0;j<ecmwf_epsilon[0].length; j++){
-                ecmwf_epsilon[i][j] = Math.sqrt(Math.pow(ecmwf_cos_avg[i][j],2) + Math.pow(ecmwf_sin_avg[i][j],2));
-            }
-        }
-        double[][] ecmwf_dir_std = new double[ecmwf_dir_avg.length][ecmwf_dir_avg[0].length];
-        for(int i=0;i<ecmwf_dir_std.length; i++){
-            for(int j=0;j<ecmwf_dir_std[0].length;j++){
-                ecmwf_dir_std[i][j] = Math.asin(ecmwf_epsilon[i][j]) * (1+bb+Math.pow(ecmwf_epsilon[i][j],2))/this.constants.getDeg2rad();
-            }
-        }
+        //Numero complesso... ma non lo uso ?
+        double ecmwf_epsilon = Math.sqrt(1- (Math.pow(ecmwf_cos_avg, 2) + Math.pow(ecmwf_sin_avg, 2) ));
+        double ecmwf_dir_std = Math.asin(ecmwf_epsilon) * (1+bb+Math.pow(ecmwf_epsilon, 2))/this.constants.getDeg2rad();
 
-        double[][] cosmo_epsilon = new double[cosmo_cos_avg.length][cosmo_cos_avg[0].length];
-        for(int i=0;i< cosmo_epsilon.length; i++){
-            for(int j=0;j<cosmo_epsilon[0].length; j++){
-                cosmo_epsilon[i][j] = Math.sqrt(Math.pow(cosmo_cos_avg[i][j],2) + Math.pow(cosmo_sin_avg[i][j],2));
-            }
-        }
-        double[][] cosmo_dir_std = new double[cosmo_dir_avg.length][cosmo_dir_avg[0].length];
-        for(int i=0;i<cosmo_dir_std.length; i++){
-            for(int j=0;j<cosmo_dir_std[0].length;j++){
-                cosmo_dir_std[i][j] = Math.asin(cosmo_epsilon[i][j]) * (1+bb+Math.pow(cosmo_epsilon[i][j],2))/this.constants.getDeg2rad();
-            }
-        }
+
+        //Numero complesso... ma non lo uso ?
+        double cosmo_epsilon = Math.sqrt(Math.pow(cosmo_cos_avg, 2) + Math.pow(cosmo_sin_avg, 2));
+        double cosmo_dir_std = Math.asin(cosmo_epsilon) * (1+bb+Math.pow(cosmo_epsilon,2))/this.constants.getDeg2rad();
+
+
         return new fieldStatsResults(ecmwf_dir_avg, ecmwf_dir_std, cosmo_dir_avg, cosmo_dir_std);
     }
 
@@ -2025,25 +1986,45 @@ public class VisirModel {
         return fmk;
     }
 
-    private double[][] nanmean2(double[][][] A_mat){
+//    private double[][] nanmean2(double[][][] A_mat){
+//        //Abstract: compute mean of matrix elements of A_mat, even in presence of NaNs.
+//        double[][][] matrix = A_mat;
+//        for(int i=0;i<matrix.length;i++){
+//            for(int j=0;j<matrix[0].length;j++){
+//                for(int k=0;k<matrix[0][0].length;k++){
+//                    if(Double.isNaN(matrix[i][j][k])){
+//                        matrix[i][j][k] = 0.0;
+//                    }
+//                }
+//            }
+//        }
+//        return Utility.mean3d(matrix);
+//    }
+
+    private double nanmean2(double[][][] A_mat){
         //Abstract: compute mean of matrix elements of A_mat, even in presence of NaNs.
-        double[][][] matrix = A_mat;
-        for(int i=0;i<matrix.length;i++){
-            for(int j=0;j<matrix[0].length;j++){
-                for(int k=0;k<matrix[0][0].length;k++){
-                    if(Double.isNaN(matrix[i][j][k])){
-                        matrix[i][j][k] = 0.0;
+        ArrayList<Double> elements = new ArrayList<>();
+        for(int k=0;k<A_mat.length;k++){
+            for(int i=0;i<A_mat[0].length;i++){
+                for(int j=0;j<A_mat[0][0].length;j++){
+                    if(!Double.isNaN(A_mat[k][i][j])){
+                        elements.add(A_mat[k][i][j]);
                     }
                 }
             }
         }
-        return Utility.mean3d(matrix);
+        int nElements = elements.size();
+        double cumSum = 0.0;
+        for(int i=0;i<elements.size();i++){
+            cumSum+=elements.get(i);
+        }
+        return (cumSum/nElements);
     }
 
     private mFields_reductionResults mFields_reduction(double[] lat, double[] lon, double[][][] VTDH,
                                                        double[][][] VTPK, double [][][] VDIR){
         mFields_reductionResults retThis = new mFields_reductionResults();
-        double meshRes = 1/this.sGrid.getInvStepFields();
+        double meshRes = 1.0/this.sGrid.getInvStepFields();
 
         //reduction to given bounding box
         findResults latTmp = Utility.find(lat, "<=", this.sGrid.getBbox__lat_min()-meshRes, "<=", this.sGrid.getBbox__lat_max()+meshRes);
@@ -2071,31 +2052,32 @@ public class VisirModel {
         double[][][] out2 = null;
         double[][][] out3 = null;
         if(VTDH != null){
-            out1 = new double[VTDH.length][row_lat.length][row_lon.length];
-            for(int i=0;i<out1.length;i++){
-                for(int j=0;j<row_lat.length;j++){
-                    for(int k=0;k<row_lon.length;k++){
-                        out1[i][j][k] = VTDH[i][j][k];
+
+            out1=new double[row_lon.length][VTDH[0].length][row_lat.length];
+            for(int k=0;k<row_lon.length;k++){
+                for(int i=0;i<out1[0].length;i++){
+                    for(int j=0;j<row_lat.length;j++){
+                        out1[k][i][j] = VTDH[row_lon[k]][i][row_lat[j]];
                     }
                 }
             }
         }
         if(VTPK != null){
-            out2 = new double[VTPK.length][row_lat.length][row_lon.length];
-            for(int i=0;i<out2.length;i++){
-                for(int j=0;j<row_lat.length;j++){
-                    for(int k=0;k<row_lon.length;k++){
-                        out2[i][j][k] = VTPK[i][j][k];
+            out2 = new double[row_lon.length][VTPK[0].length][row_lat.length];
+            for(int k=0;k<row_lon.length;k++){
+                for(int i=0;i<VTPK[0].length;i++){
+                    for(int j=0;j<row_lat.length;j++){
+                        out2[k][i][j] = VTPK[row_lon[k]][i][row_lat[j]];
                     }
                 }
             }
         }
         if(VDIR != null){
-            out3 = new double[VDIR.length][row_lat.length][row_lon.length];
-            for(int i=0;i<out3.length;i++){
-                for(int j=0;j<row_lat.length;j++){
-                    for(int k=0;k<row_lon.length;k++){
-                        out3[i][j][k] = VDIR[i][j][k];
+            out3 = new double[row_lon.length][VDIR[0].length][row_lat.length];
+            for(int k=0;k<row_lon.length;k++){
+                for(int i=0;i<VDIR[0].length;i++){
+                    for(int j=0;j<row_lat.length;j++){
+                        out3[k][i][j] = VDIR[row_lon[k]][i][row_lat[j]];
                     }
                 }
             }
@@ -2197,7 +2179,7 @@ public class VisirModel {
             VTDH = readout_mWave.getVTHD();
             VTPK = readout_mWave.getVTPK();
             VDIR = readout_mWave.getVDIR();
-            wave_maxNt = VTDH.length;
+            wave_maxNt = VTDH[0].length;
             wave_origtimes = new int[(int)wave_maxNt];
             for(int i=0;i<(int)wave_maxNt;i++)
                 wave_origtimes[i]=(i+1);
@@ -2294,7 +2276,7 @@ public class VisirModel {
     }
 
     private fake_windFieldsResults fake_windFields(int ntwind, int nsteps, int nlat, int nlon){
-        ArrayList<Double> lat_windTmp = Utility.linspace(this.sGrid.getDB_bbox__lat_min(), this.sGrid.getDB_bbox__lat_max(), nlat);
+        ArrayList<Double> lat_windTmp = Utility.linspace(this.sGrid.getBbox__lat_min(), this.sGrid.getBbox__lat_max(), nlat);
         double[] lat_wind = new double[lat_windTmp.size()];
         for(int i=0;i<lat_windTmp.size(); i++)
             lat_wind[i] = lat_windTmp.get(i);
@@ -2302,8 +2284,11 @@ public class VisirModel {
         double[] lon_wind = new double[lon_windTmp.size()];
         for(int i=0;i<lon_windTmp.size(); i++)
             lon_wind[i] = lon_windTmp.get(i);
-        double[][][] U10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
-        double[][][] V10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        //FORSE
+//        double[][][] U10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+//        double[][][] V10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        double[][][] U10m = Utility.ones3Dmatrix(nlon, nsteps, nlat);
+        double[][][] V10m = Utility.ones3Dmatrix(nlon, nsteps, nlat);
         ArrayList<Double> wind_origTimesTmp = Utility.linspace(0, ntwind, nsteps);
         double[] wind_origTimes = new double[wind_origTimesTmp.size()];
         for(int i=0;i<wind_origTimesTmp.size();i++)
@@ -2322,9 +2307,13 @@ public class VisirModel {
         for(int i=0;i<lon_waveTmp.size();i++){
             lon_wave[i]=lon_waveTmp.get(i);
         }
-        double[][][] VTDH = Utility.ones3Dmatrix(nsteps, nlat, nlon);
-        double[][][] VTPK = Utility.ones3Dmatrix(nsteps, nlat, nlon);
-        double[][][] VDIR = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        //FORSE
+//        double[][][] VTDH = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+//        double[][][] VTPK = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+//        double[][][] VDIR = Utility.ones3Dmatrix(nsteps, nlat, nlon);
+        double[][][] VTDH = Utility.ones3Dmatrix(nlon,nsteps,nlat);
+        double[][][] VTPK = Utility.ones3Dmatrix(nlon,nsteps,nlat);
+        double[][][] VDIR = Utility.ones3Dmatrix(nlon,nsteps,nlat);
         int[] wave_origtimes = new int[mtwave];
         for(int i=0;i<mtwave; i++)
             wave_origtimes[i]=(i+1);

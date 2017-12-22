@@ -167,7 +167,7 @@ public class Ship {
         this.R_c.add(0,Double.NaN);
         this.R_aw.add(0,Double.NaN);
         String num_method ="Newton";
-        for(int ip=1; ip<P_w.size(); ip++){
+        for(int ip=0; ip<P_w.size(); ip++){
             double k0 = -P_w.get(ip);
             double v_out_ms=0;
             if(num_method == "Newton") {

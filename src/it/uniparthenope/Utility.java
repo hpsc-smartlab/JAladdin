@@ -941,11 +941,11 @@ public class Utility {
     }
 
     public static double min3d(double[][][] mat3d){
-        double min = mat3d[0][0][0];
+        double min = Double.MAX_VALUE;
         for(int i=0;i<mat3d.length;i++){
             for(int j=0;j<mat3d[0].length;j++){
-                for(int k=0; k<mat3d[0][0].length-1;k++){
-                    if(mat3d[i][j][k]<min){
+                for(int k=0; k<mat3d[0][0].length;k++){
+                    if(mat3d[i][j][k]<min && !Double.isNaN(mat3d[i][j][k])){
                         min = mat3d[i][j][k];
                     }
                 }
@@ -955,11 +955,11 @@ public class Utility {
     }
 
     public static double max3d(double[][][] mat3d){
-        double max = mat3d[0][0][0];
+        double max = Double.MIN_VALUE;
         for(int i=0;i<mat3d.length;i++){
             for(int j=0;j<mat3d[0].length;j++){
-                for(int k=0; k<mat3d[0][0].length-1;k++){
-                    if(mat3d[i][j][k]>max){
+                for(int k=0; k<mat3d[0][0].length;k++){
+                    if(mat3d[i][j][k]>max && !Double.isNaN(mat3d[i][j][k])){
                         max = mat3d[i][j][k];
                     }
                 }
@@ -980,6 +980,28 @@ public class Utility {
         return max;
     }
 
+    public static double maxNotNaN(double[][] matrix){
+        double max = Double.MIN_VALUE;
+        for(int i=0;i<matrix.length;i++){
+            for(int j=0;j<matrix[0].length; j++){
+                if(matrix[i][j]>max && !Double.isNaN(matrix[i][j])){
+                    max = matrix[i][j];
+                }
+            }
+        }
+        return max;
+    }
+
+    public static int max(int[] array){
+        int max = array[0];
+        for(int i=1;i<array.length;i++){
+            if(array[i]> max){
+                max = array[i];
+            }
+        }
+        return max;
+    }
+
     private static double[] removeNaNs(double[] in){
         ArrayList<Double> notNaNs = new ArrayList<>();
         for(int i=0;i<in.length;i++){
@@ -994,11 +1016,24 @@ public class Utility {
         return out;
     }
 
+
+
     public static double min(double[][] matrix){
         double min = matrix[0][0];
         for(int i=0;i<matrix.length;i++){
             for(int j=0;j<matrix[0].length; j++){
                 if(matrix[i][j]<min){
+                    min = matrix[i][j];
+                }
+            }
+        }
+        return min;
+    }
+    public static double minNotNaN(double[][] matrix){
+        double min = Double.MAX_VALUE;
+        for(int i=0;i<matrix.length;i++){
+            for(int j=0;j<matrix[0].length; j++){
+                if(matrix[i][j]<min && !Double.isNaN(matrix[i][j])){
                     min = matrix[i][j];
                 }
             }
@@ -1160,7 +1195,7 @@ public class Utility {
     public static long datenum(String dateString, String format){
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         try {
-            Date data = sdf.parse("000000000000");
+            Date data = sdf.parse("000001000000");
             DateTime from = new DateTime(data.getTime());
             data = sdf.parse(dateString);
             DateTime to = new DateTime(data.getTime());
@@ -1177,7 +1212,7 @@ public class Utility {
     public static long datenum(long year, long month, long day, long hour, long min){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         try {
-            Date data = sdf.parse("000000000000");
+            Date data = sdf.parse("000001000000");
             DateTime from = new DateTime(data.getTime());
 
             String stringYear = ""+year;

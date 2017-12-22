@@ -141,6 +141,20 @@ public class MyFileWriter {
         }
     }
 
+    public void Write3DMatrix(String varName, double[][][] matrix){
+        WriteLine(varName+":");
+        for(int k=0;k<matrix.length;k++){
+            WriteLine("K: "+k);
+            for(int i=0;i<matrix[0].length;i++){
+                String row="";
+                for(int j=0;j<matrix[0][0].length;j++){
+                    row+=matrix[k][i][j]+" ";
+                }
+                WriteLine(row);
+            }
+        }
+    }
+
     public void WriteIntMatrix(String varName, int[][] matrix){
         WriteLine(varName+":");
         for(int i=0;i<matrix.length;i++){
