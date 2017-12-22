@@ -1414,18 +1414,18 @@ public class VisirModel {
 
             double[] wind_origTimes = new double[0];
             double[][][] U10M_Inset = new double[0][0][0];
-            double[][][] V10M_Inset = new double[0][0][0];
+            double[][][] V10M_Inset = new double[0][0][0];//FIN QUI OK
             if(this.optim.getWindModel() == 11 || this.optim.getWindModel() == 12){//ecmwf
                 wind_origTimes = envFieldsResults.getEcmwf_wind_origTimes();
-                U10M_Inset = envFieldsResults.getEcmwf_U10m();
-                V10M_Inset = envFieldsResults.getEcmwf_V10m();
+                U10M_Inset = ecmwf_U10M_Inset;
+                V10M_Inset = ecmwf_V10M_Inset;
             } else if(this.optim.getWindModel() == 2){//cosmo-me
                 wind_origTimes = envFieldsResults.getCosmo_wind_origTimes();
-                U10M_Inset = envFieldsResults.getCosmo_U10m();
-                V10M_Inset = envFieldsResults.getCosmo_V10m();
+                U10M_Inset = cosmo_U10M_Inset;
+                V10M_Inset = cosmo_V10M_Inset;
             }
 
-            double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);
+            double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);//DA DEBUGGARE DA QUI IN POI!
             double[][][] V10M_at_TS = Utility.interp1(wind_origTimes,V10M_Inset, interpTimes);
             //(wave_t1-const.twelve)
 
