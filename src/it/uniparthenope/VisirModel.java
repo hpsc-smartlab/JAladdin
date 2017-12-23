@@ -1593,7 +1593,7 @@ public class VisirModel {
                     }
                 }
                 if(this.forcing.getWind()!=1){
-                    myfield_mat = SeaOverLand(Utility.squeeze(tmp),n_loops);
+                    myfield_mat = SeaOverLand(Utility.squeeze(tmp),n_loops);//DEBUG DA QUI
                 } else {
                     myfield_mat = Utility.squeeze(tmp);
                 }
@@ -1704,7 +1704,7 @@ public class VisirModel {
         neighbor_offsets[6] = -1;
         neighbor_offsets[7] = M-1;
         int count =0;
-        while(count < loop && idx.length > 0){
+        while(count < loop && idx.length > 1){
 
             //Creo matrice dove ogni elemento è la somma di idx con neighbor_offset
             double[][] neighbors = new double[neighbor_offsets.length][idx.length];
@@ -1713,17 +1713,18 @@ public class VisirModel {
                     neighbors[i][j] = idx[j]+neighbor_offsets[i];
                 }
             }
+            //FIN QUI OK!
             double[][] mat = new double[neighbors.length][neighbors[0].length];
             for(int i=0;i<mat.length;i++){
                 for(int j=0;j<mat[0].length;j++){
                     double currentElem = neighbors[i][j];
-                    int _colIndex = ((int) Math.ceil(currentElem/dummy.length)) -1;
+                    int _colIndex = ((int) Math.floor(currentElem/dummy.length));
                     int _rowIndex = ((int) currentElem%dummy.length);
                     mat[i][j] = dummy[_rowIndex][_colIndex];
                 }
             }
 
-            boolean[][] nans = Utility.isnan(mat);
+            boolean[][] nans = Utility.isnan(mat);//FIN QUI OK
             int[] snn = new int[nans[0].length];
             for(int i=0;i<snn.length;i++)
                 snn[i]=0;
