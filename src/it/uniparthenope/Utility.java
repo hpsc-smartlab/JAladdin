@@ -434,6 +434,8 @@ public class Utility {
 
     }
 
+
+
     public static findResults find(double[] A, String condition, double b){
         ArrayList<Integer> indexes = new ArrayList<>();
         ArrayList<Double> elements = new ArrayList<>();
@@ -621,7 +623,8 @@ public class Utility {
         return out;
     }
 
-    public static int[] find(double[][] mat, double element){
+
+    public static ArrayList<Integer> find(double[][] mat, double element){
         ArrayList<Integer> indexes = new ArrayList<>();
         int count=0;
         boolean checkNaN = Double.isNaN(element);
@@ -639,11 +642,9 @@ public class Utility {
                 count++;
             }
         }
-        int[] _indexes = new int[indexes.size()];
-        for(int i=0;i<indexes.size();i++)
-            _indexes[i] = indexes.get(i);
-        return _indexes;
+        return  indexes;
     }
+
 
     public static double[][] interp1(double[] x, double[][] y, double[] xi){
         //wrapper for the interp1 method
