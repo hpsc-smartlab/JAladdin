@@ -1572,14 +1572,14 @@ public class VisirModel {
         }
 
         int n_loops = 50;
-        double[] lon_fT = new double[lon_f[0].length];
-        for(int i=0;i<lon_f[0].length;i++){
-            lon_fT[i] = lon_f[0][i];
-        }
-        double[] lat_fT = new double[lat_f.length];
-        for(int i=0;i<lat_f.length;i++){
-            lat_fT[i]=lat_f[i][0];
-        }
+//        double[] lon_fT = new double[lon_f[0].length];
+//        for(int i=0;i<lon_f[0].length;i++){
+//            lon_fT[i] = lon_f[0][i];
+//        }
+//        double[] lat_fT = new double[lat_f.length];
+//        for(int i=0;i<lat_f.length;i++){
+//            lat_fT[i]=lat_f[i][0];
+//        }
         double[][][] myfield_bathy = new double[lon_bathy.size()][(int)this.tGrid.getNt()][lat_bathy.size()];
         ArrayList<double[][][]> out = new ArrayList<>();
         for(double[][][] myfield : varargs){
@@ -1620,7 +1620,8 @@ public class VisirModel {
                 for(int i=0;i<lat_bathy.size();i++){
                     lat_bathyArray[i] = lat_bathy.get(i);
                 }
-                double[][] tmpMtx = Utility.interp2(lon_fT, lat_fT, myfield_mat,lat_bathyArray, lon_bathyArray);
+                double[][] tmpMtx=Utility.interp2(lon_f, lat_f, myfield_mat, lat_bathyArray, lon_bathyArray);
+//                double[][] tmpMtx = Utility.interp2(lon_fT, lat_fT, myfield_mat,lat_bathyArray, lon_bathyArray);
                 for(int i=0;i<tmpMtx.length;i++){
                     for(int j=0;j<tmpMtx[0].length;j++){
                         myfield_bathy[i][it][j]=tmpMtx[i][j];
@@ -1705,7 +1706,6 @@ public class VisirModel {
         neighbor_offsets[7] = M-1;
         int count=0;
         while(count<loop && idx.size()>0){
-            System.out.println("Iteration "+(count+1));
 
             //Creo matrice dove ogni elemento è la somma di idx con neighbor_offset
             double[][] neighbors = new double[neighbor_offsets.length][idx.size()];
