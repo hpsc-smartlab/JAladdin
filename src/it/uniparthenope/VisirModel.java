@@ -1683,7 +1683,7 @@ public class VisirModel {
             }
         }
 
-        int[] idx = Utility.find(dummy, Double.NaN);
+        ArrayList<Integer> idx = Utility.find(dummy, Double.NaN);
 
         for(int i=0;i<dummy.length;i++){
             for(int j=0;j<dummy[0].length;j++){
@@ -1703,17 +1703,18 @@ public class VisirModel {
         neighbor_offsets[5] = -M-1;
         neighbor_offsets[6] = -1;
         neighbor_offsets[7] = M-1;
-        int count =0;
-        while(count < loop && idx.length > 1){
+        int count=0;
+        while(count<loop && idx.size()>0){
+            System.out.println("Iteration "+(count+1));
 
             //Creo matrice dove ogni elemento è la somma di idx con neighbor_offset
-            double[][] neighbors = new double[neighbor_offsets.length][idx.length];
+            double[][] neighbors = new double[neighbor_offsets.length][idx.size()];
             for(int i=0;i<neighbors.length;i++){
                 for(int j=0;j<neighbors[0].length;j++){
-                    neighbors[i][j] = idx[j]+neighbor_offsets[i];
+                    neighbors[i][j] = idx.get(j)+neighbor_offsets[i];
                 }
             }
-            //FIN QUI OK!
+
             double[][] mat = new double[neighbors.length][neighbors[0].length];
             for(int i=0;i<mat.length;i++){
                 for(int j=0;j<mat[0].length;j++){
@@ -1724,10 +1725,10 @@ public class VisirModel {
                 }
             }
 
-            boolean[][] nans = Utility.isnan(mat);//FIN QUI OK
+            boolean[][] nans = Utility.isnan(mat);
             int[] snn = new int[nans[0].length];
             for(int i=0;i<snn.length;i++)
-                snn[i]=0;
+                snn[i]=-1;
 
             for(int i=0;i<nans.length;i++){
                 for(int j=0;j<nans[0].length;j++){
@@ -1741,26 +1742,26 @@ public class VisirModel {
 
             double[] media = Utility.sum(mat);
             for(int i=0;i<snn.length;i++){
-                media[i]= media[i]/snn[i];
+                media[i]= media[i]/(snn[i]+1);
             }
 
-            for(int i=0;i<idx.length;i++){
+            for(int i=0;i<idx.size();i++){
                 double currentElem = media[i];
-                int currentIndex = idx[i];
-                int _colIndex = ((int) Math.ceil(currentIndex/dummy.length));
-                int _rowIndex = ((int) currentIndex%dummy.length);
+                int currentIndex = idx.get(i);
+                int _colIndex = ((int) Math.floor(currentIndex/dummy.length));
+                int _rowIndex = (currentIndex%dummy.length);
                 dummy[_rowIndex][_colIndex] = currentElem;
             }
 
-            ArrayList<Integer> tmp = new ArrayList<>();
-            for(int i=0;i<snn.length;i++){
-                if(snn[i]<0){
-                    tmp.add(snn[i]);
-                }
+            int i=0;
+            ArrayList<Integer> tmp=new ArrayList<>();
+            while(i<idx.size() && i<snn.length){
+                if(snn[i]==-1)
+                    tmp.add(idx.get(i));
+                i++;
             }
-            idx = new int[tmp.size()];
-            for(int i=0;i<tmp.size();i++)
-                idx[i]=tmp.get(i);
+            idx = tmp;
+
             count++;
         }
 
