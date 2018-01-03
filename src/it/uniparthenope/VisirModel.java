@@ -1480,7 +1480,7 @@ public class VisirModel {
             double[][][] VTPK_out = seaOverLand_3stepsOut.get(1);
             X_times = seaOverLand_3stepsOut.get(2);
             Y_times = seaOverLand_3stepsOut.get(3);
-
+            //CONTROLLARE BENE???
             double[][][] VDIR_times = new double[X_times.length][X_times[0].length][X_times[0][0].length];
             for(int i=0;i<VDIR_times.length;i++){
                 for(int j=0;j<VDIR_times[0].length;j++){
@@ -1572,14 +1572,7 @@ public class VisirModel {
         }
 
         int n_loops = 50;
-//        double[] lon_fT = new double[lon_f[0].length];
-//        for(int i=0;i<lon_f[0].length;i++){
-//            lon_fT[i] = lon_f[0][i];
-//        }
-//        double[] lat_fT = new double[lat_f.length];
-//        for(int i=0;i<lat_f.length;i++){
-//            lat_fT[i]=lat_f[i][0];
-//        }
+
         double[][][] myfield_bathy = new double[lon_bathy.size()][(int)this.tGrid.getNt()][lat_bathy.size()];
         ArrayList<double[][][]> out = new ArrayList<>();
         for(double[][][] myfield : varargs){
@@ -1593,13 +1586,12 @@ public class VisirModel {
                     }
                 }
                 if(this.forcing.getWind()!=1){
-                    myfield_mat = SeaOverLand(Utility.squeeze(tmp),n_loops);//DEBUG DA QUI
+                    myfield_mat = SeaOverLand(Utility.squeeze(tmp),n_loops);
                 } else {
                     myfield_mat = Utility.squeeze(tmp);
                 }
 
                 // (2) regridding to bathy-grid:
-                //myfield_mat= squeeze(myfield_mat); ????
 
                 //check that bbox is larger than minimum allowed area:
                 if(it==0){
@@ -1620,20 +1612,15 @@ public class VisirModel {
                 for(int i=0;i<lat_bathy.size();i++){
                     lat_bathyArray[i] = lat_bathy.get(i);
                 }
-                double[][] tmpMtx=Utility.interp2(lon_f, lat_f, myfield_mat, lat_bathyArray, lon_bathyArray);
-//                double[][] tmpMtx = Utility.interp2(lon_fT, lat_fT, myfield_mat,lat_bathyArray, lon_bathyArray);
-                for(int i=0;i<tmpMtx.length;i++){
-                    for(int j=0;j<tmpMtx[0].length;j++){
-                        myfield_bathy[i][it][j]=tmpMtx[i][j];
+                double[][] tmpMtx=Utility.interp2(lon_f, lat_f, myfield_mat, lon_bathyArray, lat_bathyArray);
+                double[][] transposedTmpMtx = Utility.transposeMatrix(tmpMtx);
+                for(int i=0;i<transposedTmpMtx.length;i++){
+                    for(int j=0;j<transposedTmpMtx[0].length;j++){
+                        myfield_bathy[i][it][j]=transposedTmpMtx[i][j];
                     }
                 }
-                //FORSE??
-//                for(int i=0;i<tmpMtx.length;i++){
-//                    for(int j=0;j<tmpMtx[0].length;j++){
-//                        myfield[i][it][j]=tmpMtx[i][j];
-//                    }
-//                }
             }
+            //FIN QUI OK
             double[][][] myfield_Inset = new double[myfield_bathy.length][myfield_bathy[0].length][myfield_bathy[0][0].length];
             if(this.visualization.getScientific_mode()==0){
                 /*
@@ -1644,16 +1631,11 @@ public class VisirModel {
                 % landmass for reproducing the no-slip boundary condition!*/
                 if(this.forcing.getWind()!=1){
                     for(int it=0;it<(int) this.tGrid.getNt(); it++){
-                        double[][][] tmp = new double[myfield_bathy.length][1][myfield_bathy[0][0].length];
-                        for(int row=0;row<myfield_bathy.length;row++){
-                            for(int col=0;col<myfield_bathy[0][0].length; col++){
-                                tmp[row][0][col] = myfield_bathy[row][0][col];
-                            }
-                        }
-                        double[][] vv1 = Utility.MatrixComponentXcomponent(Utility.squeeze(tmp),Utility.transposeMatrix(this.lsm_mask));
-                        for(int i=0;i<myfield_bathy.length;i++){
-                            for(int j=0;j<myfield_bathy[0][0].length;j++){
-                                myfield_bathy[i][it][j] = vv1[i][j];
+                        double[][] tmp = Utility.squeeze(myfield_bathy,1,it);
+                        double[][] vv1 = Utility.MatrixComponentXcomponent(tmp,Utility.transposeMatrix(this.lsm_mask));
+                        for(int i=0;i<vv1.length;i++){
+                            for(int j=0;j<vv1[0].length;j++){
+                                myfield_Inset[j][it][i] = vv1[i][j];
                             }
                         }
                     }
