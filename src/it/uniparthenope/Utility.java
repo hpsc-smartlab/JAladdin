@@ -567,6 +567,71 @@ public class Utility {
         return output;
     }
 
+    public static double[][] squeeze(double[][][] mat3d, int dimToSqueeze, int index){
+        int z_dim = mat3d.length;
+        int rows = mat3d[0].length;
+        int cols = mat3d[0][0].length;
+        double[][] out = new double[0][0];
+        switch (dimToSqueeze){
+            case 0://Z
+                //squeezing Zs
+                if(index>=z_dim){
+                    System.out.println("squeeze: index "+index+" exceed Z dimension ("+z_dim+")");
+                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    debug.WriteLog("squeeze: index "+index+" exceed Z dimension ("+z_dim+")");
+                    debug.CloseFile();
+                    System.exit(0);
+                }
+                out = new double[rows][cols];
+                for(int i=0; i<mat3d[0].length; i++){
+                    for(int j=0; j<mat3d[0][0].length; j++){
+                        out[i][j] = mat3d[index][i][j];
+                    }
+                }
+                break;
+            case 1://rows:
+                //squeezing rows:
+                if(index>=rows){
+                    System.out.println("squeeze: index "+index+" exceed rows dimension ("+rows+")");
+                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    debug.WriteLog("squeeze: index "+index+" exceed rows dimension ("+rows+")");
+                    debug.CloseFile();
+                    System.exit(0);
+                }
+                out = new double[cols][z_dim];
+                for(int i = 0; i<cols; i++){
+                    for(int j = 0; j<z_dim; j++){
+                        out[i][j] = mat3d[j][index][i];
+                    }
+                }
+                break;
+            case 2://cols
+                //squeezing cols:
+                if(index>=cols){
+                    System.out.println("squeeze: index "+index+" exceed cols dimension ("+cols+")");
+                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    debug.WriteLog("squeeze: index "+index+" exceed cols dimension ("+cols+")");
+                    debug.CloseFile();
+                    System.exit(0);
+                }
+                out = new double[rows][z_dim];
+                for(int i=0;i<rows;i++){
+                    for(int j=0;j<z_dim;j++){
+                        out[i][j] = mat3d[j][i][index];
+                    }
+                }
+                break;
+            default:
+                System.out.println("squeeze: "+dimToSqueeze+" is not a valid dimension");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("squeeze: "+dimToSqueeze+" is not a valid dimension");
+                debug.CloseFile();
+                System.exit(0);
+                break;
+        }
+        return out;
+    }
+
 
     public static double[][] squeeze(double[][][] mat3d){
         int z_dim = mat3d.length;
@@ -822,59 +887,6 @@ public class Utility {
         }
         return out;
     }
-
-//    @SuppressWarnings("deprecation")
-//    public static double[][] interp2(double[] X, double[] Y, double[][] Z, double[] Xq, double[] Yq){//double[][]
-//
-//        meshgridResults mesh=meshgrid(Xq,Yq);
-//        double[][] XQ=mesh.getX();
-//        double[][] YQ=mesh.getY();
-//        double[][] Zq=new double[XQ.length][YQ[0].length];
-//        //Interpolo sia con la bicubic sia con la spline:
-//        //Utilizzo sempre i valori della spline tranne nel caso in cui Xq o Yq =0.
-//        //In tal caso, approssimo il valore con la bicubic
-//
-//        BicubicSplineInterpolator bsi = new BicubicSplineInterpolator();
-//        BicubicSplineInterpolatingFunction bsif = bsi.interpolate(X,Y,Z);
-//        for(int i=0;i<Zq.length;i++){
-//            for(int j=0;j<Zq[0].length;j++){
-//
-//                Zq[i][j] = bsif.value(XQ[i][j],YQ[j][j]);
-//            }
-//        }
-//        return Zq;
-//    }
-//
-//
-//
-//    @SuppressWarnings("deprecation")
-//    public static double interp2(double[] X, double[] Y, double[][] Z, double Xq, double Yq, String method){
-//        if(X.length != Y.length){
-//            System.out.println("interp2: X and Y must be the same length!");
-//            System.exit(0);
-//        }
-//        if(X.length*Y.length != Z.length*Z[0].length){
-//            System.out.println("interp2: Z size must be equal to X size * Y size!");
-//            System.exit(0);
-//        }
-//        double Zq = Double.NaN;
-//        if(method == "Bicubic"){
-//            BicubicInterpolator bi = new BicubicInterpolator();
-//            BicubicInterpolatingFunction bsi = bi.interpolate(X,Y,Z);
-//            Zq = bsi.value(Xq, Yq);
-//        } else{
-//            if(method=="Spline"){
-//                BicubicSplineInterpolator bi = new BicubicSplineInterpolator();
-//                BicubicSplineInterpolatingFunction bsi = bi.interpolate(X,Y,Z);
-//                Zq = bsi.value(Xq, Yq);
-//            } else{
-//                System.out.println("interp2: only \"Bicubic\" and \"Spline\" are allowed!");
-//                System.exit(0);
-//            }
-//        }
-//        return Zq;
-//    }
-
 
     public static double[][] transposeMatrix(double[][] matrix){
         double[][] output = new double[matrix[0].length][matrix.length];
