@@ -656,7 +656,7 @@ public class VisirModel {
         // % (inField and outField must be in radians)
         // %
         //---------------------------------------------
-        double[] inField1 = inField;
+        double[] inField1 = Utility.deepCopy(inField);
         for(int i=0;i<inField1.length;i++){
             if(inField1[i]<0){
                 inField1[i]+=(2*Math.PI);
@@ -674,7 +674,7 @@ public class VisirModel {
         //---------------------------------------------
         double[] outFiled = new double[inField2.length];
         for(int i=0;i<inField2.length;i++){
-            outFiled[i] = -inField2[i]*(2*Math.PI);
+            outFiled[i] = -inField2[i]+(2*Math.PI);
         }
         return outFiled;
     }
@@ -689,7 +689,7 @@ public class VisirModel {
         // % (inField and outField must be in radians)
         // %
         //---------------------------------------------
-        double[][][] inField1 = inField;
+        double[][][] inField1 = Utility.deepCopy(inField);
         for(int i=0;i<inField.length;i++){
             for(int j=0;j<inField[0].length;j++){
                 for(int k=0;k<inField[0][0].length;k++){
@@ -700,7 +700,7 @@ public class VisirModel {
             }
         }
         //---------------------------------------------
-        double[][][] inField2 = inField1;
+        double[][][] inField2 = Utility.deepCopy(inField1);
         for(int i=0;i<inField2.length;i++){
             for(int j=0;j<inField2[0].length;j++){
                 for(int k=0;k<inField2[0][0].length;k++){
@@ -716,7 +716,7 @@ public class VisirModel {
         for(int i=0;i<inField.length;i++){
             for(int j=0;j<inField[0].length;j++){
                 for(int k=0;k<inField[0][0].length;k++){
-                    outField[i][j][k] = -inField2[i][j][k] * (2*Math.PI);
+                    outField[i][j][k] = -inField2[i][j][k] + (2*Math.PI);
                 }
             }
         }
@@ -1473,7 +1473,6 @@ public class VisirModel {
             this.logFile = new MyFileWriter("","",true);
             this.logFile.WriteLog("\tseaOverLand extrapolation...");
             this.logFile.CloseFile();
-            //TODO: CONTROLLA X_times e Y_times
             //Wave fields processing:
             ArrayList<double[][][]> seaOverLand_3stepsOut = seaOverLand_3steps(this.lon_bathy_Inset, this.lat_bathy_Inset, this.lsm_mask, lon_wave_m, lat_wave_m,VTDH_times, VTPK_times, X_times, Y_times);
             double[][][] VTDH_out = seaOverLand_3stepsOut.get(0);
@@ -1574,9 +1573,7 @@ public class VisirModel {
 
         double[][][] myfield_bathy = new double[lon_bathy.size()][(int)this.tGrid.getNt()][lat_bathy.size()];
         ArrayList<double[][][]> out = new ArrayList<>();
-        int debugCount =0;
         for(double[][][] myfield : varargs){
-            debugCount++;
             //(1) extrapolation - % #GM: check also mdata_EWeights.m:
             for(int it=0;it<(int)this.tGrid.getNt(); it++){
                 double[][] myfield_mat = new double[0][0];
@@ -1619,9 +1616,6 @@ public class VisirModel {
                     for(int j=0;j<transposedTmpMtx[0].length;j++){
                         myfield_bathy[i][it][j]=transposedTmpMtx[i][j];
                     }
-                }
-                if(debugCount==3 && it==23){
-                    System.out.println("MAMMT");
                 }
             }
             double[][][] myfield_Inset = new double[myfield_bathy.length][myfield_bathy[0].length][myfield_bathy[0][0].length];
@@ -2353,7 +2347,18 @@ public class VisirModel {
             //     VDIR= atan2(VY, VX)/const.deg2rad;
             // end
 
-            if(this.optim.getWaveModel() >= this.optim.getRelocAnlsCode()){
+
+            if(this.optim.getWaveModel() < this.optim.getRelocAnlsCode()){
+                for(int i=0;i<VDIR.length; i++){
+                    for(int j=0;j<VDIR[0].length;j++){
+                        for(int k=0;k<VDIR[0][0].length; k++){
+                            VDIR[i][j][k] = VDIR[i][j][k] + (180*Math.signum((180.0-VDIR[i][j][k])));
+                            if(VDIR[i][j][k]==180.0)
+                                VDIR[i][j][k] = 0.0;
+                        }
+                    }
+                }
+            } else {
                 double[][][] VY = new double[VDIR.length][VDIR[0].length][VDIR[0][0].length];
                 double[][][] VX = new double[VDIR.length][VDIR[0].length][VDIR[0][0].length];
                 for(int i=0;i<VDIR.length; i++){
