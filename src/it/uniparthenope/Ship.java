@@ -65,7 +65,7 @@ public class Ship {
         this.P_level_hp = new ArrayList<Double>();
     }
 
-    private boolean IntegrityCheck(){
+    private boolean IntegrityCheck(){//namelist_check.m file porting
         boolean check = true;
         if(this.vessType != this.sailType){
             if( this.P_max_hp <= 0 ||
