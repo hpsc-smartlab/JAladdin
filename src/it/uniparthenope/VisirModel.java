@@ -1341,8 +1341,8 @@ public class VisirModel {
             for(int i=0;i<VDIR_Inset.length; i++){
                 for(int j=0;j<VDIR_Inset[0].length; j++){
                     for(int k=0;k<VDIR_Inset[0][0].length; k++){
-                        X_Inset[i][j][k] = Math.sin(VDIR_Inset[i][j][k]);
-                        Y_Inset[i][j][k] = Math.cos(VDIR_Inset[i][j][k]);
+                        X_Inset[i][j][k] = Math.sin(VDIR_Inset[i][j][k]*this.constants.getDeg2rad());
+                        Y_Inset[i][j][k] = Math.cos(VDIR_Inset[i][j][k]*this.constants.getDeg2rad());
                     }
                 }
             }
@@ -1414,7 +1414,7 @@ public class VisirModel {
 
             double[] wind_origTimes = new double[0];
             double[][][] U10M_Inset = new double[0][0][0];
-            double[][][] V10M_Inset = new double[0][0][0];//FIN QUI OK
+            double[][][] V10M_Inset = new double[0][0][0];
             if(this.optim.getWindModel() == 11 || this.optim.getWindModel() == 12){//ecmwf
                 wind_origTimes = envFieldsResults.getEcmwf_wind_origTimes();
                 U10M_Inset = ecmwf_U10M_Inset;
@@ -1424,7 +1424,7 @@ public class VisirModel {
                 U10M_Inset = cosmo_U10M_Inset;
                 V10M_Inset = cosmo_V10M_Inset;
             }
-
+            //OK
             double[][][] U10M_at_TS = Utility.interp1(wind_origTimes,U10M_Inset, interpTimes);
             double[][][] V10M_at_TS = Utility.interp1(wind_origTimes,V10M_Inset, interpTimes);
             //(wave_t1-const.twelve)
@@ -1470,17 +1470,16 @@ public class VisirModel {
 
             //-----------------------------------------------------------------------------------------------------
             // seaOverLand:
-            this.logFile = new MyFileWriter("","",true);//DA DEBUGGARE DA QUI IN POI!
+            this.logFile = new MyFileWriter("","",true);
             this.logFile.WriteLog("\tseaOverLand extrapolation...");
             this.logFile.CloseFile();
-
+            //TODO: CONTROLLA X_times e Y_times
             //Wave fields processing:
             ArrayList<double[][][]> seaOverLand_3stepsOut = seaOverLand_3steps(this.lon_bathy_Inset, this.lat_bathy_Inset, this.lsm_mask, lon_wave_m, lat_wave_m,VTDH_times, VTPK_times, X_times, Y_times);
             double[][][] VTDH_out = seaOverLand_3stepsOut.get(0);
             double[][][] VTPK_out = seaOverLand_3stepsOut.get(1);
             X_times = seaOverLand_3stepsOut.get(2);
             Y_times = seaOverLand_3stepsOut.get(3);
-            //CONTROLLARE BENE???
             double[][][] VDIR_times = new double[X_times.length][X_times[0].length][X_times[0][0].length];
             for(int i=0;i<VDIR_times.length;i++){
                 for(int j=0;j<VDIR_times[0].length;j++){
@@ -1575,7 +1574,9 @@ public class VisirModel {
 
         double[][][] myfield_bathy = new double[lon_bathy.size()][(int)this.tGrid.getNt()][lat_bathy.size()];
         ArrayList<double[][][]> out = new ArrayList<>();
+        int debugCount =0;
         for(double[][][] myfield : varargs){
+            debugCount++;
             //(1) extrapolation - % #GM: check also mdata_EWeights.m:
             for(int it=0;it<(int)this.tGrid.getNt(); it++){
                 double[][] myfield_mat = new double[0][0];
@@ -1619,8 +1620,10 @@ public class VisirModel {
                         myfield_bathy[i][it][j]=transposedTmpMtx[i][j];
                     }
                 }
+                if(debugCount==3 && it==23){
+                    System.out.println("MAMMT");
+                }
             }
-            //FIN QUI OK
             double[][][] myfield_Inset = new double[myfield_bathy.length][myfield_bathy[0].length][myfield_bathy[0][0].length];
             if(this.visualization.getScientific_mode()==0){
                 /*
@@ -2271,9 +2274,6 @@ public class VisirModel {
         double[] lon_wind = new double[lon_windTmp.size()];
         for(int i=0;i<lon_windTmp.size(); i++)
             lon_wind[i] = lon_windTmp.get(i);
-        //FORSE
-//        double[][][] U10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
-//        double[][][] V10m = Utility.ones3Dmatrix(nsteps, nlat, nlon);
         double[][][] U10m = Utility.ones3Dmatrix(nlon, nsteps, nlat);
         double[][][] V10m = Utility.ones3Dmatrix(nlon, nsteps, nlat);
         ArrayList<Double> wind_origTimesTmp = Utility.linspace(0, ntwind, nsteps);

@@ -219,7 +219,6 @@ public class MyNetCDFParser {
         for(int k=0;k<shape[2];k++){
             for(int i=0;i<shape[0];i++){
                 for(int j=0;j<shape[1];j++){
-                    //if(Matrix.get(i,j,k) == 1.0000000200408773E20)
                     if(Matrix.get(i,j,k) >= 1.0E20){
                         out[k][i][j] = Double.NaN;
                     } else {
