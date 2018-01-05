@@ -1329,6 +1329,34 @@ public class Utility {
         return (int) a;
     }
 
+    public static double[] deepCopy(double[] in){
+        double[] out = new double[in.length];
+        for(int i=0;i<in.length;i++){
+            out[i]=in[i];
+        }
+        return  out;
+    }
 
+    public static double[][] deepCopy(double[][] in){
+        double[][] out = new double[in.length][in[0].length];
+        for(int i=0;i<in.length;i++){
+            for(int j=0;j<in[0].length;j++){
+                out[i][j] = in[i][j];
+            }
+        }
+        return out;
+    }
+
+    public static double[][][] deepCopy(double[][][] in){
+        double[][][] out = new double[in.length][in[0].length][in[0][0].length];
+        for(int k=0;k<in.length;k++){
+            for(int i=0;i<in[0].length;i++){
+                for(int j=0;j<in[0][0].length;j++){
+                    out[k][i][j] = in[k][i][j];
+                }
+            }
+        }
+        return out;
+    }
 }
 
