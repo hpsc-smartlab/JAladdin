@@ -102,7 +102,7 @@ public class VisirModel {
 
     public void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Loading data...");
+        this.logFile.WriteLog("Processing namelists...");
         this.logFile.CloseFile();
         this.extreme_pts = new ExtremePoints();
         this.dep_datetime = new DepartureParameters();
@@ -112,10 +112,7 @@ public class VisirModel {
         this.visualization.VisualizationParameters();
     }
 
-    public void CalculateParameters(){//Set some parameters based on other parameters
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Calculating parameters...");
-        this.logFile.CloseFile();
+    public void CalculateParameters(){//namelist_postproc.m
         this.ship.setStepsInPowerReduction(this.optim.getIntentional_speed_red());
         this.sGrid.setInvStepFields(this.optim.getWaveModel());
         this.forcing = new EnvironmentalFields(this.ship.getVessType(), this.ship.getSailType(),this.optim.getWindModel());
@@ -130,7 +127,6 @@ public class VisirModel {
             this.dep_datetime.setYear(14);
             this.dep_datetime.setMonth(1);
             this.dep_datetime.setDay(1);
-            //this.dep_datetime.setHour(0);
             this.dep_datetime.setHour(6);
             this.dep_datetime.setMin(0);
             this.visualization.setEnv_forcing(1);
@@ -142,14 +138,12 @@ public class VisirModel {
             this.ship.setVessType(1);
             this.timedep_flag = 0;
         }
+
     }
 
     private void ship_Model(){//called from vessel_Response.m, ship_model.m implementation
         //Look-up table for involuntary ship speed reduction in waves.
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Calculating ship model...");
         this.ship.setFn_max(this.constants.getMs2kts(), this.constants.getG0());
-        this.logFile.CloseFile();
         //LUT independent variables:
         long Nh = 25; //40
         long Nl = 40; //30
@@ -202,9 +196,14 @@ public class VisirModel {
 
     public void vessel_Response(){//vessel_Response.m implementation
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Calculating ship power levels...");
-        this.ship.shipPowerLevels();
+        if(this.forcing.getAnalytic()==1){
+            this.logFile.WriteLog("Analitical benchmark...");
+        } else{
+            this.logFile.WriteLog("Ship model response (motorboat)...");
+
+        }
         this.logFile.CloseFile();
+        this.ship.shipPowerLevels();
         this.ship_Model();
         this.maxWind = Double.NaN;
         this.minWind = Double.NaN;
@@ -214,7 +213,7 @@ public class VisirModel {
 
     public void Grid_definition(){//Grid_definition.m implementation
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Grid definition: ");
+        this.logFile.WriteLog("Bounding boxes and bathymetry postprocessing (grid definition): ");
         this.logFile.CloseFile();
         String freeedges_DB_filename = "freeedges_DB.dat";
         String freenodes_DB_filename = "freeNodes_DB.dat";
@@ -273,7 +272,7 @@ public class VisirModel {
             x_coast.add(element);
         }
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tLoading bathymetry data...");
+        this.logFile.WriteLog("\tCreating target grid and loading bathymetry data...");
         this.logFile.CloseFile();
         //Bathymetry:
         //read-out database:
@@ -471,7 +470,6 @@ public class VisirModel {
             int nC = x_coast_Inset.size();
             int cols = dim[0]*dim[1];
             if(nC>0){
-                //Double[][] coast_dist = Utility.zeros(nC, cols);
                 double[][] coast_dist = new double[nC][cols];
                 double[][] P_b = new double[1][2];
                 for(int i=0;i<nC;i++){
@@ -991,7 +989,10 @@ public class VisirModel {
                 }
             }
         }
-
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\t\tGrid size: "+this.sGrid.getInset_Nx()+"x"+this.sGrid.getInset_Ny()+" = "+(this.sGrid.getInset_Ny()*this.sGrid.getInset_Nx()));
+        this.logFile.WriteLog("\t\t[min, max] grid depth (m): ["+Utility.min2d(field_out)+", "+Utility.max2d(field_out)+"]");
+        this.logFile.CloseFile();
         return new grid_extreme_coordsResults(lat_red,lon_red,field_out);
     }
 
@@ -1328,9 +1329,12 @@ public class VisirModel {
             mFields_reductionResults waveDataReduction =mFields_reduction(envFieldsResults.getLat_wave(),envFieldsResults.getLon_wave(), envFieldsResults.getVTDH(), envFieldsResults.getVTPK(), envFieldsResults.getVDIR());
             double[] lat_wave_Inset = waveDataReduction.getLat_red();
             double[] lon_wave_Inset = waveDataReduction.getLon_red();
-            double[][][] VTDH_Inset = waveDataReduction.getOut1();
-            double[][][] VTPK_Inset = waveDataReduction.getOut2();
-            double[][][] VDIR_Inset = waveDataReduction.getOut3();
+//            double[][][] VTDH_Inset = waveDataReduction.getOut1();
+//            double[][][] VTPK_Inset = waveDataReduction.getOut2();
+//            double[][][] VDIR_Inset = waveDataReduction.getOut3();
+            double[][][] VTDH_Inset = waveDataReduction.getOut(0);
+            double[][][] VTPK_Inset = waveDataReduction.getOut(1);
+            double[][][] VDIR_Inset = waveDataReduction.getOut(2);
             meshgridResults meshGWave = Utility.meshgrid(lon_wave_Inset, lat_wave_Inset);
             double[][] lon_wave_m = meshGWave.getX();
             double[][] lat_wave_m = meshGWave.getY();
@@ -1348,16 +1352,20 @@ public class VisirModel {
             }
             //clear VDIR_Inset
             //Wind  data reduction to inset grid:
-            mFields_reductionResults ecmwfDataReduction = mFields_reduction(envFieldsResults.getEcmwf_lat_wind(), envFieldsResults.getEcmwf_lon_wind(), envFieldsResults.getEcmwf_U10m(), envFieldsResults.getEcmwf_V10m(), null);
+            mFields_reductionResults ecmwfDataReduction = mFields_reduction(envFieldsResults.getEcmwf_lat_wind(), envFieldsResults.getEcmwf_lon_wind(), envFieldsResults.getEcmwf_U10m(), envFieldsResults.getEcmwf_V10m());
             double[] ecmwf_lat_wind = ecmwfDataReduction.getLat_red();
             double[] ecmwf_lon_wind = ecmwfDataReduction.getLon_red();
-            double[][][] ecmwf_U10M_Inset = ecmwfDataReduction.getOut1();
-            double[][][] ecmwf_V10M_Inset = ecmwfDataReduction.getOut2();
-            mFields_reductionResults cosmoDataReduction = mFields_reduction(envFieldsResults.getCosmo_lat_wind(), envFieldsResults.getCosmo_lon_wind(), envFieldsResults.getCosmo_U10m(), envFieldsResults.getCosmo_V10m(), null);
+//            double[][][] ecmwf_U10M_Inset = ecmwfDataReduction.getOut1();
+//            double[][][] ecmwf_V10M_Inset = ecmwfDataReduction.getOut2();
+            double[][][] ecmwf_U10M_Inset = ecmwfDataReduction.getOut(0);
+            double[][][] ecmwf_V10M_Inset = ecmwfDataReduction.getOut(1);
+            mFields_reductionResults cosmoDataReduction = mFields_reduction(envFieldsResults.getCosmo_lat_wind(), envFieldsResults.getCosmo_lon_wind(), envFieldsResults.getCosmo_U10m(), envFieldsResults.getCosmo_V10m());
             double[] cosmof_lat_wind = cosmoDataReduction.getLat_red();
             double[] cosmo_lon_wind = cosmoDataReduction.getLon_red();
-            double[][][] cosmo_U10M_Inset = cosmoDataReduction.getOut1();
-            double[][][] cosmo_V10M_Inset = cosmoDataReduction.getOut2();
+//            double[][][] cosmo_U10M_Inset = cosmoDataReduction.getOut1();
+//            double[][][] cosmo_V10M_Inset = cosmoDataReduction.getOut2();
+            double[][][] cosmo_U10M_Inset = cosmoDataReduction.getOut(0);
+            double[][][] cosmo_V10M_Inset = cosmoDataReduction.getOut(1);
 
             //Wind unit conversion
             for(int i=0;i<ecmwf_U10M_Inset.length;i++){
@@ -1790,7 +1798,6 @@ public class VisirModel {
         double Nt_2 = Math.max(this.tGrid.getMinNt(), Nt_2b);
         this.tGrid.setNt(Math.min(Nt_1, Nt_2));
 
-        System.out.println("# time steps of forecast file employed: "+this.tGrid.getNt());
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("\t# time steps of forecast file employed: "+this.tGrid.getNt());
         this.logFile.CloseFile();
@@ -1993,8 +2000,7 @@ public class VisirModel {
         return (cumSum/nElements);
     }
 
-    private mFields_reductionResults mFields_reduction(double[] lat, double[] lon, double[][][] VTDH,
-                                                       double[][][] VTPK, double [][][] VDIR){
+    private mFields_reductionResults mFields_reduction(double[] lat, double[] lon, double[][][]... varargin){
         mFields_reductionResults retThis = new mFields_reductionResults();
         double meshRes = 1.0/this.sGrid.getInvStepFields();
 
@@ -2006,7 +2012,7 @@ public class VisirModel {
 
         if(row_lon.length<this.sGrid.getMinNoGridPoints() || row_lat.length<this.sGrid.getMinNoGridPoints()){
             MyFileWriter debug = new MyFileWriter("","debug",false);
-            debug.WriteLog("check_start_timestep: too small or too narrow bounding box");
+            debug.WriteLog("mFields_reduction: check_start_timestep: too small or too narrow bounding box");
             debug.CloseFile();
             System.exit(0);
         }
@@ -2020,52 +2026,105 @@ public class VisirModel {
         }
         retThis.setLat_red(lat_red);
         retThis.setLon_red(lon_red);
-        double[][][] out1 = null;
-        double[][][] out2 = null;
-        double[][][] out3 = null;
-        if(VTDH != null){
-
-            out1=new double[row_lon.length][VTDH[0].length][row_lat.length];
+        int n_in =0;
+        double[][][] last=new double[0][0][0];
+        for(double[][][] mat3d : varargin){
+            n_in++;
+            last=mat3d;
+            double[][][] out=new double[row_lon.length][mat3d[0].length][row_lat.length];
             for(int k=0;k<row_lon.length;k++){
-                for(int i=0;i<out1[0].length;i++){
+                for(int i=0;i<out[0].length;i++){
                     for(int j=0;j<row_lat.length;j++){
-                        out1[k][i][j] = VTDH[row_lon[k]][i][row_lat[j]];
+                        out[k][i][j] = mat3d[row_lon[k]][i][row_lat[j]];
                     }
                 }
             }
+            retThis.addOut(out);
         }
-        if(VTPK != null){
-            out2 = new double[row_lon.length][VTPK[0].length][row_lat.length];
-            for(int k=0;k<row_lon.length;k++){
-                for(int i=0;i<VTPK[0].length;i++){
-                    for(int j=0;j<row_lat.length;j++){
-                        out2[k][i][j] = VTPK[row_lon[k]][i][row_lat[j]];
-                    }
-                }
-            }
+        long n_elementsIn = Utility.numel(last);
+        long n_elementsOut = Utility.numel(retThis.getOut(n_in-1));
+        double red_percent = (n_elementsOut+0.0)/(n_elementsIn+0.0);
+        if(red_percent<1.0){
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("\t\tData reduction: "+(red_percent*100)+"%");
+            this.logFile.CloseFile();
         }
-        if(VDIR != null){
-            out3 = new double[row_lon.length][VDIR[0].length][row_lat.length];
-            for(int k=0;k<row_lon.length;k++){
-                for(int i=0;i<VDIR[0].length;i++){
-                    for(int j=0;j<row_lat.length;j++){
-                        out3[k][i][j] = VDIR[row_lon[k]][i][row_lat[j]];
-                    }
-                }
-            }
-        }
-        retThis.setOut1(out1);
-        retThis.setOut2(out2);
-        retThis.setOut3(out3);
-
-        //percent data reduction:
-        int n_elements=out1.length * out1[0].length * out1[0][0].length;
-        int red_percent = ((1- n_elements)/n_elements)*100;
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\t\tData reduction: "+red_percent+"%");
-        this.logFile.CloseFile();
         return retThis;
     }
+
+//    private mFields_reductionResults mFields_reduction(double[] lat, double[] lon, double[][][] VTDH,
+//                                                       double[][][] VTPK, double [][][] VDIR){
+//        mFields_reductionResults retThis = new mFields_reductionResults();
+//        double meshRes = 1.0/this.sGrid.getInvStepFields();
+//
+//        //reduction to given bounding box
+//        findResults latTmp = Utility.find(lat, "<=", this.sGrid.getBbox__lat_min()-meshRes, "<=", this.sGrid.getBbox__lat_max()+meshRes);
+//        int[] row_lat = latTmp.getIndexes();
+//        findResults lonTmp = Utility.find(lon, "<=", this.sGrid.getBbox__lon_min()-meshRes, "<=", this.sGrid.getBbox__lon_max()+meshRes);
+//        int[] row_lon = lonTmp.getIndexes();
+//
+//        if(row_lon.length<this.sGrid.getMinNoGridPoints() || row_lat.length<this.sGrid.getMinNoGridPoints()){
+//            MyFileWriter debug = new MyFileWriter("","debug",false);
+//            debug.WriteLog("check_start_timestep: too small or too narrow bounding box");
+//            debug.CloseFile();
+//            System.exit(0);
+//        }
+//        double[] lat_red = new double[row_lat.length];
+//        double[] lon_red = new double[row_lon.length];
+//        for(int i=0;i<row_lat.length;i++){
+//            lat_red[i]=lat[row_lat[i]];
+//        }
+//        for(int i=0;i<row_lon.length;i++){
+//            lon_red[i]=lon[row_lon[i]];
+//        }
+//        retThis.setLat_red(lat_red);
+//        retThis.setLon_red(lon_red);
+//        double[][][] out1 = null;
+//        double[][][] out2 = null;
+//        double[][][] out3 = null;
+//        if(VTDH != null){
+//
+//            out1=new double[row_lon.length][VTDH[0].length][row_lat.length];
+//            for(int k=0;k<row_lon.length;k++){
+//                for(int i=0;i<out1[0].length;i++){
+//                    for(int j=0;j<row_lat.length;j++){
+//                        out1[k][i][j] = VTDH[row_lon[k]][i][row_lat[j]];
+//                    }
+//                }
+//            }
+//        }
+//        if(VTPK != null){
+//            out2 = new double[row_lon.length][VTPK[0].length][row_lat.length];
+//            for(int k=0;k<row_lon.length;k++){
+//                for(int i=0;i<VTPK[0].length;i++){
+//                    for(int j=0;j<row_lat.length;j++){
+//                        out2[k][i][j] = VTPK[row_lon[k]][i][row_lat[j]];
+//                    }
+//                }
+//            }
+//        }
+//        if(VDIR != null){
+//            out3 = new double[row_lon.length][VDIR[0].length][row_lat.length];
+//            for(int k=0;k<row_lon.length;k++){
+//                for(int i=0;i<VDIR[0].length;i++){
+//                    for(int j=0;j<row_lat.length;j++){
+//                        out3[k][i][j] = VDIR[row_lon[k]][i][row_lat[j]];
+//                    }
+//                }
+//            }
+//        }
+//        retThis.setOut1(out1);
+//        retThis.setOut2(out2);
+//        retThis.setOut3(out3);
+//
+//        //percent data reduction:
+//        int n_elements=out1.length * out1[0].length * out1[0][0].length;
+//        int red_percent = ((1- n_elements)/n_elements)*100;
+//        this.logFile = new MyFileWriter("","",true);
+//        this.logFile.WriteLog("\t\tData reduction: "+red_percent+"%");
+//        this.logFile.CloseFile();
+//        return retThis;
+//    }
 
     private void check_start_timestep(long deltaHr_anls){
         if(deltaHr_anls <= 0){
