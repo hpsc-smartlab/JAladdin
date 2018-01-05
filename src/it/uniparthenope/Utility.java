@@ -1306,16 +1306,25 @@ public class Utility {
         }
     }
 
-    public static String datestr(long datenum){
+
+    public static String datestr(long datenum, long hours, long minutes){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         try {
             Date data = sdf.parse("000000000000");
             Calendar c = Calendar.getInstance();
             c.setTime(data);
             c.add(Calendar.DATE, (int) datenum);
-
-            SimpleDateFormat outDate = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-            return outDate.format(c.getTime());
+            SimpleDateFormat outDate = new SimpleDateFormat("dd-MM-yyyy");
+            String out = outDate.format(c.getTime());
+            if(hours<10)
+                out+=" 0"+hours;
+            else
+                out+=" "+hours;
+            if(minutes<10)
+                out+=":0"+minutes;
+            else
+                out+=":"+minutes;
+            return out;
         } catch (Exception ex) {
             ex.printStackTrace();
             MyFileWriter debug = new MyFileWriter("","debug",false);
