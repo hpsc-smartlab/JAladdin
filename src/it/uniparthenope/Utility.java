@@ -1011,6 +1011,18 @@ public class Utility {
         return min;
     }
 
+    public static double min2d(double[][] mat){
+        double min = Double.MAX_VALUE;
+        for(int i=0;i<mat.length;i++){
+            for(int j=0;j<mat[0].length;j++){
+                if(mat[i][j]<min && !Double.isNaN(mat[i][j])){
+                    min = mat[i][j];
+                }
+            }
+        }
+        return min;
+    }
+
     public static double max3d(double[][][] mat3d){
         double max = Double.MIN_VALUE;
         for(int i=0;i<mat3d.length;i++){
@@ -1019,6 +1031,18 @@ public class Utility {
                     if(mat3d[i][j][k]>max && !Double.isNaN(mat3d[i][j][k])){
                         max = mat3d[i][j][k];
                     }
+                }
+            }
+        }
+        return max;
+    }
+
+    public static double max2d(double[][] mat){
+        double max = Double.MIN_VALUE;
+        for(int i=0;i<mat.length;i++){
+            for(int j=0;j<mat[0].length;j++){
+                if(mat[i][j]>max && !Double.isNaN(mat[i][j])){
+                    max = mat[i][j];
                 }
             }
         }
@@ -1147,6 +1171,10 @@ public class Utility {
         } else {
             return -1;
         }
+    }
+
+    public static long numel(double[][][] mat){
+        return mat.length*mat[0].length*mat[0][0].length;
     }
 
     //MATLAB inpolygon implementation
