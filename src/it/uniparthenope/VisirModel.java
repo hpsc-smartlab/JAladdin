@@ -130,7 +130,8 @@ public class VisirModel {
             this.dep_datetime.setYear(14);
             this.dep_datetime.setMonth(1);
             this.dep_datetime.setDay(1);
-            this.dep_datetime.setHour(0);
+            //this.dep_datetime.setHour(0);
+            this.dep_datetime.setHour(6);
             this.dep_datetime.setMin(0);
             this.visualization.setEnv_forcing(1);
             this.visualization.setWaypoint_info(0);
@@ -1284,15 +1285,14 @@ public class VisirModel {
 
         this.tGrid.setDepDateTime(Utility.datenum(2000+this.dep_datetime.getYear(),this.dep_datetime.getMonth(),
                 this.dep_datetime.getDay(),this.dep_datetime.getHour(),this.dep_datetime.getMin()));
-        //Adding 6 hours delay to original departure date time:
-        double delayed = this.tGrid.getDepDateTime()-0.25;
+
         //hrs elapsed between latest analysis and departure time
         int cento = 100;
         long deltaHr_anls=0;
         if(this.forcing.getAnalytic()==1){
             deltaHr_anls = 1;
         } else{
-            deltaHr_anls = Math.round(cento*this.constants.getTwentyfour()*(delayed - l_num)/cento);
+            deltaHr_anls = Math.round(cento*this.constants.getTwentyfour()*(this.tGrid.getDepDateTime() - l_num)/cento);
         }
 
         this.tGrid.setWave_dep_TS(Math.round(1+ deltaHr_anls - (wave_t1 - this.constants.getTwelve())));
@@ -1300,8 +1300,8 @@ public class VisirModel {
         this.tGrid.setWind_dep_TS(Math.round(1+ deltaHr_anls - (wave_t1 - this.constants.getTwelve())));
 
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tlatest analysis date and time :"+Utility.datestr(l_num));
-        this.logFile.WriteLog("\tdeparture date and time :"+Utility.datestr(this.tGrid.getDepDateTime()));
+        this.logFile.WriteLog("\tlatest analysis date and time: "+Utility.datestr(l_num,12,00));
+        this.logFile.WriteLog("\tdeparture date and time: "+Utility.datestr(this.tGrid.getDepDateTime(),this.dep_datetime.getHour(),this.dep_datetime.getMin()));
         this.logFile.CloseFile();
 
         //-----------------------------------------------------------------------------------------------------
@@ -1542,6 +1542,9 @@ public class VisirModel {
                     }
                 }
             }
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("Done.");
+            this.logFile.CloseFile();
             return new Fields_regriddingResults(time_steps, VTDH_out, VTPK_out, VDIR_out, windMAGN_out, windDIR_out);
         }
     }
@@ -1642,7 +1645,6 @@ public class VisirModel {
             } else{
                 myfield_Inset = myfield_bathy;
             }
-            //varargout{ia} = myfield_Inset;
             out.add(myfield_Inset);
         }
         return out;
@@ -1790,7 +1792,7 @@ public class VisirModel {
 
         System.out.println("# time steps of forecast file employed: "+this.tGrid.getNt());
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\t# time steps of forecast file employed:"+this.tGrid.getNt());
+        this.logFile.WriteLog("\t# time steps of forecast file employed: "+this.tGrid.getNt());
         this.logFile.CloseFile();
     }
 
@@ -1970,20 +1972,6 @@ public class VisirModel {
         return fmk;
     }
 
-//    private double[][] nanmean2(double[][][] A_mat){
-//        //Abstract: compute mean of matrix elements of A_mat, even in presence of NaNs.
-//        double[][][] matrix = A_mat;
-//        for(int i=0;i<matrix.length;i++){
-//            for(int j=0;j<matrix[0].length;j++){
-//                for(int k=0;k<matrix[0][0].length;k++){
-//                    if(Double.isNaN(matrix[i][j][k])){
-//                        matrix[i][j][k] = 0.0;
-//                    }
-//                }
-//            }
-//        }
-//        return Utility.mean3d(matrix);
-//    }
 
     private double nanmean2(double[][][] A_mat){
         //Abstract: compute mean of matrix elements of A_mat, even in presence of NaNs.
@@ -2168,7 +2156,7 @@ public class VisirModel {
             for(int i=0;i<(int)wave_maxNt;i++)
                 wave_origtimes[i]=(i+1);
             this.logFile = new MyFileWriter("","",true);
-            this.logFile.WriteLog("\tdeparture at time step # "+this.tGrid.getWave_dep_TS()+" of hourly interpolated file");
+            this.logFile.WriteLog("\tdeparture at time step #"+(this.tGrid.getWave_dep_TS()-1)+" of hourly interpolated file");
             this.logFile.CloseFile();
         } else{
             //fake wave fields in case of sailboat:
