@@ -12,12 +12,6 @@ public class Main {
 
     public static void main(String[] args) {
         VisirModel v = new VisirModel(2,2);//Same input provided for testing .m files
-        v.LoadData();
-        v.CalculateParameters();
-        v.vessel_Response();
-        v.Grid_definition();
-        v.Fields_regridding();
-        System.out.println("Data loaded");
-
+        v.Start();
     }
 }

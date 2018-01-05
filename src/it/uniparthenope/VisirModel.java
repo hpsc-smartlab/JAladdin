@@ -99,8 +99,16 @@ public class VisirModel {
         this.lat_int = new ArrayList<>();
     }
 
+    public void Start(){
+        LoadData();
+        CalculateParameters();
+        vessel_Response();
+        Grid_definition();
+        Fields_regridding();
+    }
 
-    public void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
+
+    private void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Processing namelists...");
         this.logFile.CloseFile();
@@ -112,7 +120,7 @@ public class VisirModel {
         this.visualization.VisualizationParameters();
     }
 
-    public void CalculateParameters(){//namelist_postproc.m
+    private void CalculateParameters(){//namelist_postproc.m
         this.ship.setStepsInPowerReduction(this.optim.getIntentional_speed_red());
         this.sGrid.setInvStepFields(this.optim.getWaveModel());
         this.forcing = new EnvironmentalFields(this.ship.getVessType(), this.ship.getSailType(),this.optim.getWindModel());
@@ -194,7 +202,7 @@ public class VisirModel {
         this.vel_LUT = vel_LUT;
     }
 
-    public void vessel_Response(){//vessel_Response.m implementation
+    private void vessel_Response(){//vessel_Response.m implementation
         this.logFile = new MyFileWriter("","",true);
         if(this.forcing.getAnalytic()==1){
             this.logFile.WriteLog("Analitical benchmark...");
@@ -211,7 +219,7 @@ public class VisirModel {
         this.polar_tws = Double.NaN;
     }
 
-    public void Grid_definition(){//Grid_definition.m implementation
+    private void Grid_definition(){//Grid_definition.m implementation
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Bounding boxes and bathymetry postprocessing (grid definition): ");
         this.logFile.CloseFile();
@@ -678,7 +686,7 @@ public class VisirModel {
         return outFiled;
     }
 
-    public double[][][] changeDirRule(double[][][] inField){
+    private double[][][] changeDirRule(double[][][] inField){
         // % change of wind/current directional convention:
         // %
         // % from atan2 output concention to WAM-like convention, i.e.:
@@ -1252,7 +1260,7 @@ public class VisirModel {
         return new nodes_free_form_barrierResults(free_nodes.size(),free_nodes,red_fact);
     }
 
-    public Fields_regriddingResults Fields_regridding(){
+    private Fields_regriddingResults Fields_regridding(){
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("processing environmental fields...");
         this.logFile.CloseFile();
@@ -2779,63 +2787,4 @@ public class VisirModel {
         return new deg2utmResults(x,y,utmzone);
     }
 
-
-    /*****************Getter methods*********************/
-    public Const getConstants() {
-        return this.constants;
-    }
-
-    public Optim getOptim() {
-        return this.optim;
-    }
-
-    public Ship getShip() {
-        return this.ship;
-    }
-
-    public SpatialGrid getsGrid() {
-        return this.sGrid;
-    }
-
-    public TemporalGrid gettGrid() {
-        return this.tGrid;
-    }
-
-    public ExtremePoints getExtreme_pts() {
-        return extreme_pts;
-    }
-
-    public SafetyParameters getSafety() {
-        return safety;
-    }
-
-    public DepartureParameters getDep_datetime() {
-        return dep_datetime;
-    }
-
-    public Visualization getVisualization() {
-        return visualization;
-    }
-
-    public long getBar_flag() {
-        return bar_flag;
-    }
-
-    public long getTimedep_flag() {
-        return timedep_flag;
-    }
-
-    public long getEstimatedTime() {
-        return estimatedTime;
-    }
-
-    public double[][] getVel_LUT() {
-        return vel_LUT;
-    }
-
-    public ArrayList<Double> getH_array_m() {
-        return H_array_m;
-    }
-
-    /******************************************************/
 }
