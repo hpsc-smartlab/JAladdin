@@ -29,6 +29,8 @@ public class Ship {
     ArrayList<Double> v_out_kts;
     ArrayList<Double> R_c;
     ArrayList<Double> R_aw;
+    private double maxWind;
+    private double minWind;
 
     public Ship(){
         this.sailType = 4; //sailboats
@@ -381,5 +383,25 @@ public class Ship {
 
     public void setFn_max(double ms2kts, double g0){
         this.Fn_max = this.maxv/(ms2kts * Math.sqrt(g0*this.length));
+    }
+
+    public void setSailType(long sailType) {
+        this.sailType = sailType;
+    }
+
+    public double getMaxWind() {
+        return maxWind;
+    }
+
+    public void setMaxWind(double maxWind) {
+        this.maxWind = maxWind;
+    }
+
+    public double getMinWind() {
+        return minWind;
+    }
+
+    public void setMinWind(double minWind) {
+        this.minWind = minWind;
     }
 }
