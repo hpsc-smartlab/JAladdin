@@ -10,10 +10,6 @@ import java.util.*;
 import flanagan.interpolation.BiCubicSplineFast;
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
-import org.apache.commons.math3.analysis.interpolation.BicubicInterpolatingFunction;
-import org.apache.commons.math3.analysis.interpolation.BicubicInterpolator;
-import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolatingFunction;
-import org.apache.commons.math3.analysis.interpolation.BicubicSplineInterpolator;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -46,8 +42,8 @@ public class Utility {
         //generate an arraylist of n logaritmically spaced elements between min and max (base 10)
         ArrayList<Double> log = new ArrayList<>();
         ArrayList<Double> exps = linspace(min, max, n);
-        Double base = 10.0;
-        for(Double exp: exps){
+        double base = 10.0;
+        for(double exp: exps){
             log.add(Math.pow(base,exp));
         }
         return log;
