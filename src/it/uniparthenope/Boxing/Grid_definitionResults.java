@@ -1,8 +1,9 @@
 package it.uniparthenope.Boxing;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Grid_definitionResults {
+public class Grid_definitionResults implements Serializable {
     private double[][] xy;
     private double[][] xg;
     private double[][] yg;
