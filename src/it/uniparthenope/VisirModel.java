@@ -84,9 +84,9 @@ public class VisirModel {
         Grid_definitionResults gridDefinitionResults = (Grid_definitionResults) ObjectSerializer.Deserialize("gridDefinitionResults");
         Fields_regriddingResults fieldsRegriddingResults = (Fields_regriddingResults) ObjectSerializer.Deserialize("fieldsRegriddingResults");
         /************END DEBUGGING**************/
-//        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
-//                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
-//                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
+                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
+                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
     }
 
     private void Edges_definition(double[][] xg, double[] xg_array, double[] yg_array, double[][][] VTDH_Inset, double[][][] VTPK_Inset,

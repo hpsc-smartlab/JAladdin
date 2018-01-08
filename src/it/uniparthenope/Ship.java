@@ -3,10 +3,11 @@ package it.uniparthenope;
 import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.MyJSONParser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Ship {
+public class Ship implements Serializable {
     /*defined in settings.m*/
     private long sailType;
     private double etaEngine;

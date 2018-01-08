@@ -6,9 +6,10 @@ import it.uniparthenope.Parser.MyJSONParser;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ExtremePoints {
+public class ExtremePoints implements Serializable {
     //Route extreme points
     private double start_lat;
     private double start_lon;

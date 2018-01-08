@@ -2,7 +2,9 @@ package it.uniparthenope;
 
 import it.uniparthenope.Parser.MyJSONParser;
 
-public class Visualization {
+import java.io.Serializable;
+
+public class Visualization implements Serializable {
     private long resamp_factor;
     private long env_fields;
     private long waypoint_info;

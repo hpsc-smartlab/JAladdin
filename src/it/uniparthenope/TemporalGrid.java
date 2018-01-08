@@ -1,5 +1,6 @@
 package it.uniparthenope;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -7,7 +8,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-public class TemporalGrid {
+public class TemporalGrid implements Serializable {
     private double Dt;
     private long minNt;
     private double Nt;

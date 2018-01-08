@@ -1,6 +1,8 @@
 package it.uniparthenope;
 
-public class EnvironmentalFields {
+import java.io.Serializable;
+
+public class EnvironmentalFields implements Serializable {
     private long wave;
     private long current;
     private long stokes_drift;

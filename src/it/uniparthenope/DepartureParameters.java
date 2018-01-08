@@ -2,7 +2,9 @@ package it.uniparthenope;
 
 import it.uniparthenope.Parser.MyJSONParser;
 
-public class DepartureParameters {
+import java.io.Serializable;
+
+public class DepartureParameters implements Serializable {
     private long year;
     private long month;
     private long day;

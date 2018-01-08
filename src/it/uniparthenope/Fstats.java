@@ -1,6 +1,8 @@
 package it.uniparthenope;
 
-public class Fstats {
+import java.io.Serializable;
+
+public class Fstats implements Serializable {
     private double wheight_min;
     private double wheight_max;
     private double bathy_min;

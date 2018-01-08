@@ -2,7 +2,9 @@ package it.uniparthenope;
 
 import it.uniparthenope.Parser.MyJSONParser;
 
-public class Optim {
+import java.io.Serializable;
+
+public class Optim implements Serializable {
     //from settings.m
     private long relocAnlsCode;//code of the "analysis" of the  relocatable wave model
 

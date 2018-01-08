@@ -1,6 +1,8 @@
 package it.uniparthenope;
 
-public class SpatialGrid {
+import java.io.Serializable;
+
+public class SpatialGrid implements Serializable {
     private long numberOfNeighbors;
     private long numberOfShortestPaths;
     private double nodesLargeN;

@@ -2,9 +2,10 @@ package it.uniparthenope;
 
 import it.uniparthenope.Parser.MyJSONParser;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class SafetyParameters {
+public class SafetyParameters implements Serializable {
     private long par_rolling;
     private long pureLossStab;
     private long surfRiding;
