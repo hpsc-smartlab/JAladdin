@@ -1,6 +1,8 @@
 package it.uniparthenope.Boxing;
 
-public class Fields_regriddingResults {
+import java.io.Serializable;
+
+public class Fields_regriddingResults implements Serializable {
     private int[] time_steps;
     private double[][][] VTDH_Inset;
     private double[][][] VTPK_Inset;
