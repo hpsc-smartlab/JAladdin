@@ -423,6 +423,33 @@ public class Utility {
         return out;
     }
 
+    public static int[][] reshape(int[] A, int[] dim){//reshape 3 for Long Int
+        int nRows = dim[0];
+        int nCols = dim[1];
+        if(A.length != nRows*nCols){
+            System.out.println("A.length must be = to nRows*nCols!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("reshape: A.length must be = to nRows*nCols!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        int[][] out = new int[nRows][nCols];
+        int i=0;
+        int j=0;
+        int n_element = 0;
+        for(int k=0;k<A.length;k++){
+            out[i][j]=A[n_element];
+            n_element++;
+            i++;
+            if(i==nRows){
+                i=0;
+                j++;
+            }
+
+        }
+        return out;
+    }
+
     public static findResults find(double[] A, String condition1, double b, String condition2, double c){//TODO: implement other cases
         ArrayList<Integer> indexes = new ArrayList<>();
         ArrayList<Double> elements = new ArrayList<>();
@@ -556,6 +583,58 @@ public class Utility {
                 for(int i=0;i<A.length;i++){
                     if(A[i]<=threshold){
                         output = true;
+                    }
+                }
+                break;
+        }
+        return output;
+    }
+
+    public static boolean any(int[][] A, String condition, int threshold){
+        boolean output = false;
+        switch(condition){
+            case(">"):
+                for(int i=0;i<A.length;i++){
+                    for(int j=0;j<A[0].length;j++){
+                        if(A[i][j]>threshold){
+                            output = true;
+                        }
+                    }
+                }
+                break;
+            case("<"):
+                for(int i=0;i<A.length;i++){
+                    for(int j=0;j<A[0].length;j++){
+                        if(A[i][j]<threshold){
+                            output = true;
+                        }
+                    }
+                }
+                break;
+            case("=="):
+                for(int i=0;i<A.length;i++){
+                    for(int j=0;j<A[0].length;j++){
+                        if(A[i][j]==threshold){
+                            output = true;
+                        }
+                    }
+                }
+                break;
+            case(">="):
+                for(int i=0;i<A.length;i++){
+                    for(int j=0;j<A[0].length;j++){
+                        if(A[i][j]>=threshold){
+                            output = true;
+                        }
+                    }
+                }
+                break;
+            case("<="):
+                for(int i=0;i<A.length;i++){
+                    for(int j=0;j<A[0].length;j++){
+                        if(A[i][j]<=threshold){
+                            output = true;
+                        }
                     }
                 }
                 break;
