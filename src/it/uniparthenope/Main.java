@@ -11,7 +11,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
-        VisirModel v = new VisirModel(2,2);//Same input provided for testing .m files
+        VisirModel v = new VisirModel(2,2, 1);//Same input provided for testing .m files
         v.Start();
     }
 }

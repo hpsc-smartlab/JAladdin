@@ -22,6 +22,7 @@ public class VisirModel {
     //input data
     private long bar_flag;
     private long timedep_flag;
+    private int mode;
     private Fstats fstats;
     private Const constants;
     private Optim optim;
@@ -41,7 +42,7 @@ public class VisirModel {
 
 
     //Constructor
-    public VisirModel(long bar_flag, long timedep_flag){//Initialize with standard values defined in settings.m
+    public VisirModel(long bar_flag, long timedep_flag, int mode){//Initialize with standard values defined in settings.m
         this.logFile = new MyFileWriter("","",false);
         this.logFile.WriteLine("");
         this.logFile.WriteLog("System initialization...");
@@ -62,31 +63,86 @@ public class VisirModel {
         } else {
             this.timedep_flag = timedep_flag;
         }
-        this.fstats = new Fstats();
-        this.constants = new Const();
-        this.optim = new Optim();
-        this.ship = new Ship();
-        this.sGrid = new SpatialGrid();
-        this.tGrid = new TemporalGrid();
-        this.visualization = new Visualization();
+
+        //mode=0: normal execution without serialize objects
+        //mode=1: normal execution serializing objects
+        //mode=2: debugging mode: load data deserializing objects
+        this.mode = mode;
+        if(this.mode==0 || this.mode==1){
+            if(this.mode==1){
+                this.logFile.WriteLog("\t[mode flag=1]: normal execution with serialization...");
+                this.logFile.CloseFile();
+            }
+            this.fstats = new Fstats();
+            this.constants = new Const();
+            this.optim = new Optim();
+            this.ship = new Ship();
+            this.sGrid = new SpatialGrid();
+            this.tGrid = new TemporalGrid();
+            this.visualization = new Visualization();
+        } else if(this.mode==2){
+            this.logFile = new MyFileWriter("","",false);
+            this.logFile.WriteLog("\t[DEBUG MODE] loading serialized objects...");
+            this.logFile.CloseFile();
+            this.fstats = (Fstats) ObjectSerializer.Deserialize("fstats");
+            this.constants = (Const) ObjectSerializer.Deserialize("constants");
+            this.optim = (Optim) ObjectSerializer.Deserialize("optim");
+            this.ship = (Ship) ObjectSerializer.Deserialize("ship");
+            this.sGrid = (SpatialGrid) ObjectSerializer.Deserialize("sGrid");
+            this.tGrid = (TemporalGrid) ObjectSerializer.Deserialize("tGrid");
+            this.visualization = (Visualization) ObjectSerializer.Deserialize("visualization");
+        } else {
+            this.mode=0;
+            this.fstats = new Fstats();
+            this.constants = new Const();
+            this.optim = new Optim();
+            this.ship = new Ship();
+            this.sGrid = new SpatialGrid();
+            this.tGrid = new TemporalGrid();
+            this.visualization = new Visualization();
+        }
 
     }
 
     public void Start(){
-        LoadData();
-        CalculateParameters();
-        /******DEBUG PURPOSE ONLY: Loading serialized object******/
-//        vessel_ResponseResults vesselResponse = vessel_Response();
-//        Grid_definitionResults gridDefinitionResults = Grid_definition();
-//        Fields_regriddingResults fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
-//                gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
-        vessel_ResponseResults vesselResponse =(vessel_ResponseResults) ObjectSerializer.Deserialize("vesselResponse");
-        Grid_definitionResults gridDefinitionResults = (Grid_definitionResults) ObjectSerializer.Deserialize("gridDefinitionResults");
-        Fields_regriddingResults fieldsRegriddingResults = (Fields_regriddingResults) ObjectSerializer.Deserialize("fieldsRegriddingResults");
-        /************END DEBUGGING**************/
+        vessel_ResponseResults vesselResponse;
+        Grid_definitionResults gridDefinitionResults;
+        Fields_regriddingResults fieldsRegriddingResults;
+        if(this.mode!=2){
+            LoadData();
+            CalculateParameters();
+            vesselResponse = vessel_Response();
+            gridDefinitionResults = Grid_definition();
+            fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
+                    gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
+            if(this.mode==1){
+                SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults);
+            }
+        } else { //Loading serialized
+            vesselResponse =(vessel_ResponseResults) ObjectSerializer.Deserialize("vesselResponse");
+            gridDefinitionResults = (Grid_definitionResults) ObjectSerializer.Deserialize("gridDefinitionResults");
+            fieldsRegriddingResults = (Fields_regriddingResults) ObjectSerializer.Deserialize("fieldsRegriddingResults");
+        }
+        /****DEVELOPING METHOD WORK IN PROGRESS*****/
         Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
                 fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
                 gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+    }
+
+    private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults){
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Saving state...");
+        this.logFile.CloseFile();
+        ObjectSerializer.Serialize("fstats", this.fstats);
+        ObjectSerializer.Serialize("constants", this.constants);
+        ObjectSerializer.Serialize("optim",this.optim);
+        ObjectSerializer.Serialize("ship", this.ship);
+        ObjectSerializer.Serialize("sGrid", this.sGrid);
+        ObjectSerializer.Serialize("tGrid", this.tGrid);
+        ObjectSerializer.Serialize("visualization", this.visualization);
+        ObjectSerializer.Serialize("vesselResponse", vesselResponse);
+        ObjectSerializer.Serialize("gridDefinitionResults", gridDefinitionResults);
+        ObjectSerializer.Serialize("fieldsRegriddingResults", fieldsRegriddingResults);
     }
 
     private void Edges_definition(double[][] xg, double[] xg_array, double[] yg_array, double[][][] VTDH_Inset, double[][][] VTPK_Inset,
