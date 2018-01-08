@@ -9,6 +9,7 @@ import java.util.*;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
+import it.uniparthenope.Debug.ObjectSerializer;
 import it.uniparthenope.Parser.MyBinaryParser;
 import it.uniparthenope.Parser.MyCSVParser;
 import it.uniparthenope.Parser.MyNetCDFParser;
@@ -74,11 +75,59 @@ public class VisirModel {
     public void Start(){
         LoadData();
         CalculateParameters();
-        vessel_ResponseResults vesselResponse = vessel_Response();
-        Grid_definitionResults gridDefinitionResults = Grid_definition();
-        Fields_regriddingResults fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
-                gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
+        /******DEBUG PURPOSE ONLY: Loading serialized object******/
+//        vessel_ResponseResults vesselResponse = vessel_Response();
+//        Grid_definitionResults gridDefinitionResults = Grid_definition();
+//        Fields_regriddingResults fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
+//                gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
+        vessel_ResponseResults vesselResponse =(vessel_ResponseResults) ObjectSerializer.Deserialize("vesselResponse");
+        Grid_definitionResults gridDefinitionResults = (Grid_definitionResults) ObjectSerializer.Deserialize("gridDefinitionResults");
+        Fields_regriddingResults fieldsRegriddingResults = (Fields_regriddingResults) ObjectSerializer.Deserialize("fieldsRegriddingResults");
+        /************END DEBUGGING**************/
+//        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
+//                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
+//                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
     }
+
+    private void Edges_definition(double[][] xg, double[] xg_array, double[] yg_array, double[][][] VTDH_Inset, double[][][] VTPK_Inset,
+                                  double[][][] VDIR_Inset, double[][][] windMAGN_Inset, double[][][] windDIR_Inset, double[][] bathy_Inset,
+                                  double[][] J_mask, double[][] ship_v_LUT, ArrayList<Double>... varargin){
+
+        /* readout DB:
+        *  remapping free edges:
+        *  pointers:
+        *  edge lengths and angles:
+        *  edge weights:
+        *  edge delays:
+        *  */
+        boolean motorboat = false;
+        if(varargin.length == 1) {
+            motorboat = true; //so, varargin = H_array_m
+            //else sailboat, so varargin(0) = twa_array, varargin(1) = tws_array
+        }
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Defining edges...\n");
+        this.logFile.WriteLog("\tReading out free edges from DB...");
+        this.logFile.CloseFile();
+        MyBinaryParser edgesDBParser = new MyBinaryParser("inputFiles/graph/freeedges_DB.dat");
+        //long[] free_edges_DB_array = edgesDBParser.readAsUInt32();
+        int[] free_edges_DB_array = edgesDBParser.readAsUInt16();
+        int[] free_edges_DB_size = new int[2];
+        free_edges_DB_size[0]=(int) Math.floor(free_edges_DB_array.length/2);
+        free_edges_DB_size[1]=2;
+        int[][] free_edges_DB = Utility.reshape(free_edges_DB_array,free_edges_DB_size);
+
+        //remapping free edges:
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tremapping free edges to inset Sgrid...");
+        this.logFile.CloseFile();
+        long ll = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
+        long mm =  Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
+        int[][] free_edges_extended = idx_ref2inset_gridV2(free_edges_DB, this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(), this.sGrid.getInset_Nx(), this.sGrid.getInset_Ny(), ll, mm);
+
+        System.out.println("CIAO");
+    }
+
 
 
     private void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
@@ -186,7 +235,7 @@ public class VisirModel {
         ship_ModelResults tmp = this.ship_Model();
         this.ship.setMaxWind(Double.NaN);
         this.ship.setMinWind(Double.NaN);
-        return new vessel_ResponseResults(tmp.getShip_v_LUT(), tmp.getH_array_m(), Double.NaN, Double.NaN);
+        return new vessel_ResponseResults(tmp.getShip_v_LUT(), tmp.getH_array_m(), new ArrayList<Double>(), new ArrayList<Double>());
     }
 
     private Grid_definitionResults Grid_definition(){//Grid_definition.m implementation
@@ -892,6 +941,69 @@ public class VisirModel {
         }
 
         return  new idx_ref2inset_gridResults(row, col, idx);
+    }
+
+
+    private int[][] idx_ref2inset_gridV2(int[][] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
+        // % remap grid index
+        // % from a nx_big columns grid (reference) to a nx columns grid (inset).
+        // % (lambda, mu) are the offset coordinates of idx=1 gridpoint of the inset grid.
+        // % (row, col) are Cartesian coordinates in the inset grid.
+        // %
+        // % --> Rectangular and equally spaced grids are assumed! <--
+        // % In picture below, indexes between brackets refer to the inset grid.
+        // %
+        // % WARNING: idx outside inset grid are set to -1!
+        // %   ny_big- -------------------------------------------------
+        // %           |                                               |
+        // %           |     reference grid                            |
+        // %           |                                               |
+        // %           |                                               |
+        // %           |                                               |
+        // %           |                                               |
+        // %    (ny) - |..   .....    ......    .. |----------|        |
+        // %           |                           |          |        |
+        // %           |                           |  inset   |        |
+        // %           |                           |          |        |
+        // %(1) 1+mu - |..   .....    ......    .. |----------|        |
+        // %           |                           .          .        |
+        // %           |                           .          .        |
+        // %       1 - ------------------------------------------------|
+        // %           |                           |          .        .
+        // %
+        // %           1                      (1) 1+lambda   (nx)     nx_big
+        // %
+        //checks:
+        if(nx > nx_big || ny> ny_big || lambda+nx > nx_big || mu+ny > ny_big){
+            System.out.println("inset grid not within reference grid!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("idx_ref2inset_grid: inset grid not within reference grid!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        if((Utility.any(idx_big,"<",1)) || Utility.any(idx_big,">",(int)(nx_big*ny_big))){
+            System.out.println("grid index not within reference grid!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("idx_ref2inset_grid: grid index not within reference grid!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        int[][] idx = new int[idx_big.length][idx_big[0].length];
+        for(int i=0;i<idx_big.length;i++){
+            for(int j=0;j<idx_big[0].length;j++){
+                int _col_big = (int)Math.floorMod(idx_big[i][j],nx_big);
+                if(_col_big == 0)
+                    _col_big = (int)nx_big;
+                int _row_big = Math.round(1+(idx_big[i][j]-_col_big)/nx_big);
+                int _col = _col_big-(int)lambda;
+                int _row = _row_big-(int)mu;
+                idx[i][j] = _col+(int)nx*(_row-1);
+                if( _col < 1 || _col > nx || _row < 1 || _row > ny){
+                    idx[i][j] = -1;
+                }
+            }
+        }
+        return idx;
     }
 
     private mdata_gridResults mdata_grid(ArrayList<Double> lat, ArrayList<Double> lon){
