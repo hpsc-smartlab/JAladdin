@@ -46,4 +46,13 @@ public class MyBinaryParser {
         }
         return output;
     }
+
+    public int[] readAsUInt16(){
+        int[] values = readAsInt32();
+        int[] output = new int[values.length];
+        for(int i=0;i<values.length;i++){
+            output[i]=(int) Utility.getUnsignedInt(Utility.BigToLittleEndian(values[i]));
+        }
+        return output;
+    }
 }
