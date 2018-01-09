@@ -128,9 +128,9 @@ public class VisirModel {
             this.logFile.CloseFile();
         }
         /****DEVELOPING METHOD WORK IN PROGRESS*****/
-//        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
-//                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
-//                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
+                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
+                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
     }
 
     private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults){
@@ -183,11 +183,16 @@ public class VisirModel {
         this.logFile.CloseFile();
         long ll = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
         long mm =  Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
-        int[][] free_edges_extended = idx_ref2inset_gridV2(free_edges_DB, this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(), this.sGrid.getInset_Nx(), this.sGrid.getInset_Ny(), ll, mm);
+        int[][] free_edges = idx_ref2inset_gridCompact(free_edges_DB, this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(), this.sGrid.getInset_Nx(), this.sGrid.getInset_Ny(), ll, mm);
+        int free_edges_Number = free_edges.length;
+        if(free_edges_Number==0){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("Edges_definition: no free edges found in graph!");
+            debug.CloseFile();
+            System.exit(0);
+        }
 
-        System.out.println("CIAO");
     }
-
 
 
     private void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
@@ -1041,8 +1046,24 @@ public class VisirModel {
 //        return  new idx_ref2inset_gridResults(row, col, idx);
     }
 
+    private int[][] idx_ref2inset_gridCompact(int[][] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
+        idx_ref2inset_gridV2Results res = idx_ref2inset_gridV2(idx_big, nx_big, ny_big, nx, ny, lambda, mu);
+        int[][] idx= new int[res.getNewDim()][2];
+        int counter = 0;
+        //removeing elements from free_edges_extended
+        for(int i=0;i<res.getIdx().length;i++){
 
-    private int[][] idx_ref2inset_gridV2(int[][] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
+            if(res.getIdx()[i][0]!=-1 && res.getIdx()[i][1] != -1){
+                idx[counter][0] = res.getIdx()[i][0];
+                idx[counter][1] = res.getIdx()[i][1];
+                counter++;
+            }
+        }
+        return idx;
+    }
+
+
+    private idx_ref2inset_gridV2Results idx_ref2inset_gridV2(int[][] idx_big, long nx_big, long ny_big, long nx, long ny, long lambda, long mu){
         // % remap grid index
         // % from a nx_big columns grid (reference) to a nx columns grid (inset).
         // % (lambda, mu) are the offset coordinates of idx=1 gridpoint of the inset grid.
@@ -1087,6 +1108,7 @@ public class VisirModel {
             System.exit(0);
         }
         int[][] idx = new int[idx_big.length][idx_big[0].length];
+        int minusOne=0;
         for(int i=0;i<idx_big.length;i++){
             for(int j=0;j<idx_big[0].length;j++){
                 int _col_big = (int)Math.floorMod(idx_big[i][j],nx_big);
@@ -1100,8 +1122,16 @@ public class VisirModel {
                     idx[i][j] = -1;
                 }
             }
+            boolean found=false;
+            for(int j=0;j<idx_big[0].length;j++){
+                if(idx[i][j]==-1)
+                    found=true;
+            }
+            if(found)
+                minusOne++;
         }
-        return idx;
+        int newDim = idx.length-minusOne;
+        return new idx_ref2inset_gridV2Results(idx, newDim);
     }
 
     private mdata_gridResults mdata_grid(ArrayList<Double> lat, ArrayList<Double> lon){
