@@ -819,6 +819,25 @@ public class Utility {
         return  indexes;
     }
 
+    public static int[] removeElements(int[] array, int element){
+        ArrayList<Integer> indexes = find(array,element);
+        int[] out = new int[indexes.size()];
+        for(int i=0;i<indexes.size();i++){
+            out[i]=array[indexes.get(i)];
+        }
+        return out;
+    }
+
+    private static ArrayList<Integer> find(int[] array, int NotElement){
+        ArrayList<Integer> indexes = new ArrayList<>();
+        for(int i=0;i<array.length;i++){
+            if(array[i]!=NotElement){
+                indexes.add(i);
+            }
+        }
+        return indexes;
+    }
+
 
     public static double[][] interp1(double[] x, double[][] y, double[] xi){
         //wrapper for the interp1 method
@@ -1017,6 +1036,16 @@ public class Utility {
                 }
             }
         }
+    }
+
+    public static int max(int[][] matrix, int colID){
+        //returns the max element of the column colID
+        int max = matrix[0][colID];
+        for(int i=1;i<matrix.length;i++){
+            if(matrix[i][colID]>max)
+                max = matrix[i][colID];
+        }
+        return max;
     }
 
     public static minResults minWithIndex(double[] array){
@@ -1248,6 +1277,35 @@ public class Utility {
         }
     }
 
+    public static boolean[] ismember(int[] elements, int[] array){
+        boolean[] out = new boolean[elements.length];
+        for(int i=0;i<out.length;i++)
+            out[i]=ismebmer(elements[i],array);
+        return out;
+    }
+
+    public static boolean ismebmer(int element, int[] array){
+        boolean found = false;
+        int i=0;
+        while(!found && i<array.length){
+            if(array[i]==element)
+                found=true;
+            i++;
+        }
+        return found;
+    }
+
+    public static int[] cumsum(boolean[] array){
+        int value = 0;
+        int[] out = new int[array.length];
+        for(int i=0;i<out.length;i++){
+            if(array[i])
+                value++;
+            out[i]=value;
+        }
+        return out;
+    }
+
     public static long numel(double[][][] mat){
         return mat.length*mat[0].length*mat[0][0].length;
     }
@@ -1439,6 +1497,15 @@ public class Utility {
 
     public static int fix(double a){
         return (int) a;
+    }
+
+
+    public static int[] deepCopy(int[] in, int until){
+        int[] out = new int[in.length+until];
+        for(int i=0;i<out.length;i++){
+            out[i]=in[i];
+        }
+        return out;
     }
 
     public static double[] deepCopy(double[] in){
