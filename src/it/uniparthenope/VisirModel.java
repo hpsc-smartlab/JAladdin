@@ -128,7 +128,7 @@ public class VisirModel {
             this.logFile.CloseFile();
         }
         /****DEVELOPING METHOD WORK IN PROGRESS*****/
-        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
+        Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
                 fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
                 gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
     }
@@ -149,50 +149,6 @@ public class VisirModel {
         ObjectSerializer.Serialize("fieldsRegriddingResults", fieldsRegriddingResults);
     }
 
-    private void Edges_definition(double[][] xg, double[] xg_array, double[] yg_array, double[][][] VTDH_Inset, double[][][] VTPK_Inset,
-                                  double[][][] VDIR_Inset, double[][][] windMAGN_Inset, double[][][] windDIR_Inset, double[][] bathy_Inset,
-                                  double[][] J_mask, double[][] ship_v_LUT, ArrayList<Double>... varargin){
-
-        /* readout DB:
-        *  remapping free edges:
-        *  pointers:
-        *  edge lengths and angles:
-        *  edge weights:
-        *  edge delays:
-        *  */
-        boolean motorboat = false;
-        if(varargin.length == 1) {
-            motorboat = true; //so, varargin = H_array_m
-            //else sailboat, so varargin(0) = twa_array, varargin(1) = tws_array
-        }
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Defining edges...\n");
-        this.logFile.WriteLog("\tReading out free edges from DB...");
-        this.logFile.CloseFile();
-        MyBinaryParser edgesDBParser = new MyBinaryParser("inputFiles/graph/freeedges_DB.dat");
-        //long[] free_edges_DB_array = edgesDBParser.readAsUInt32();
-        int[] free_edges_DB_array = edgesDBParser.readAsUInt16();
-        int[] free_edges_DB_size = new int[2];
-        free_edges_DB_size[0]=(int) Math.floor(free_edges_DB_array.length/2);
-        free_edges_DB_size[1]=2;
-        int[][] free_edges_DB = Utility.reshape(free_edges_DB_array,free_edges_DB_size);
-
-        //remapping free edges:
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tremapping free edges to inset Sgrid...");
-        this.logFile.CloseFile();
-        long ll = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
-        long mm =  Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
-        int[][] free_edges = idx_ref2inset_gridCompact(free_edges_DB, this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(), this.sGrid.getInset_Nx(), this.sGrid.getInset_Ny(), ll, mm);
-        int free_edges_Number = free_edges.length;
-        if(free_edges_Number==0){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
-            debug.WriteLog("Edges_definition: no free edges found in graph!");
-            debug.CloseFile();
-            System.exit(0);
-        }
-
-    }
 
 
     private void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
@@ -836,6 +792,41 @@ public class VisirModel {
         return outField;
     }
 
+    private double[] hor_distanceForEdges(String method, double[][]xy, int[][]free_edges, double... varargin){
+        /****
+         //              P_1(:,1)                    P_2(:,1)
+         xm[i] = (xy[ free_edges[i][0] ][0] + xy[ free_edges[i][1] ][0])/2;
+         //              P_1(:,2)                    P_2(:,2)
+         ym[i] = (xy[ free_edges[i][0] ][1] + xy[ free_edges[i][1] ][1])/2;
+         ***/
+        this.constants.setDeg2rad(Math.PI/180);
+        double grid_step_in_NM = varargin.length > 0 ? varargin[0] : 1.0;
+        //P_a = P_1
+        //P_b = P_2
+        double[] dd = new double[free_edges.length];
+        if(method=="plane"||method=="p"){
+            for(int i=0;i<free_edges.length;i++){
+                dd[i]=grid_step_in_NM*Math.sqrt(Math.pow(xy[ free_edges[i][0] ][0] - xy[ free_edges[0][1] ][0], 2) +
+                        Math.pow(xy[ free_edges[i][0] ][1] - xy[ free_edges[0][1] ][1], 2));
+            }
+        } else{
+            if(method=="sphere" || method=="s"){
+                double E_radius = 3444.0; //NM
+                for(int i=0;i<free_edges.length;i++){
+                    /*
+                    * dd1[i]=E_radius * Math.acos(Math.cos(this.constants.getDeg2rad()*P_a[i][1])*Math.cos(this.constants.getDeg2rad()*P_b[0][1])*
+                        Math.cos(this.constants.getDeg2rad()*(P_a[i][0]-P_b[0][0]))+Math.sin(this.constants.getDeg2rad()*P_a[i][1])*
+                        Math.sin(this.constants.getDeg2rad()*P_b[0][1]));
+                    * */
+                    dd[i]=E_radius * Math.acos( Math.cos(this.constants.getDeg2rad()*xy[ free_edges[i][0] ][1])*Math.cos(this.constants.getDeg2rad()*xy[ free_edges[0][1] ][1])*
+                            Math.cos(this.constants.getDeg2rad()*(xy[ free_edges[i][0] ][0]-xy[ free_edges[0][1] ][0]))+Math.sin(this.constants.getDeg2rad()*xy[ free_edges[i][0] ][1])*
+                            Math.sin(this.constants.getDeg2rad()*xy[ free_edges[0][1] ][1]) );
+                }
+            }
+        }
+        return dd;
+    }
+
     private double[] hor_distance(String method, double[][] P_a, double[][] P_b, double... varargin){
         // % horizontal distance between pair of points (expressed in NM)
         // % either on the plane or the sphere
@@ -878,7 +869,7 @@ public class VisirModel {
             // % output in Nautical Miles (NM)
             double E_radius = 3444.0; //NM
             for(int i=0;i<P_a.length;i++){
-                dd1[i]=E_radius * Math.acos(Math.cos(this.constants.getDeg2rad()*P_a[i][1])*Math.cos(this.constants.getDeg2rad()*P_b[0][1])*
+                dd1[i]=E_radius * Math.acos( Math.cos( this.constants.getDeg2rad()*P_a[i][1])*Math.cos(this.constants.getDeg2rad()*P_b[0][1])*
                         Math.cos(this.constants.getDeg2rad()*(P_a[i][0]-P_b[0][0]))+Math.sin(this.constants.getDeg2rad()*P_a[i][1])*
                         Math.sin(this.constants.getDeg2rad()*P_b[0][1]));
             }
@@ -2708,6 +2699,234 @@ public class VisirModel {
         this.fstats.setWheight_min((1-smallFract)*Utility.min3d(VTDH_b));
         this.fstats.setWheight_max((1+smallFract)*Utility.max3d(VTDH_b));
         return new prepare_sqrtY_fieldResults(VTDH_b, VDIR_b);
+    }
+
+    private void Edges_definition(double[][] xy, double[] xg_array, double[] yg_array, double[][][] VTDH_Inset, double[][][] VTPK_Inset,
+                                  double[][][] VDIR_Inset, double[][][] windMAGN_Inset, double[][][] windDIR_Inset, double[][] bathy_Inset,
+                                  double[][] J_mask, double[][] ship_v_LUT, ArrayList<Double>... varargin){
+
+        /* readout DB:
+         *  remapping free edges:
+         *  pointers:
+         *  edge lengths and angles:
+         *  edge weights:
+         *  edge delays:
+         *  */
+        boolean motorboat = false;
+        if(varargin.length == 1) {
+            motorboat = true; //so, varargin = H_array_m
+            //else sailboat, so varargin(0) = twa_array, varargin(1) = tws_array
+        }
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Defining edges...\n");
+        this.logFile.WriteLog("\tReading out free edges from DB...");
+        this.logFile.CloseFile();
+        MyBinaryParser edgesDBParser = new MyBinaryParser("inputFiles/graph/freeedges_DB.dat");
+        //long[] free_edges_DB_array = edgesDBParser.readAsUInt32();
+        int[] free_edges_DB_array = edgesDBParser.readAsUInt16();
+        int[] free_edges_DB_size = new int[2];
+        free_edges_DB_size[0]=(int) Math.floor(free_edges_DB_array.length/2);
+        free_edges_DB_size[1]=2;
+        int[][] free_edges_DB = Utility.reshape(free_edges_DB_array,free_edges_DB_size);
+
+        //remapping free edges:
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tremapping free edges to inset Sgrid...");
+        this.logFile.CloseFile();
+        long ll = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
+        long mm =  Math.round((this.sGrid.getYi()-this.sGrid.getDB_yi())*this.sGrid.getInv_step());
+        int[][] free_edges = idx_ref2inset_gridCompact(free_edges_DB, this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(), this.sGrid.getInset_Nx(), this.sGrid.getInset_Ny(), ll, mm);
+        int free_edges_Number = free_edges.length;
+        if(free_edges_Number==0){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("Edges_definition: no free edges found in graph!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("\tnumber of free nodes: "+this.sGrid.getFreenodes());
+        this.logFile.WriteLog("\tnumber of free edges: "+free_edges_Number);
+        this.logFile.CloseFile();
+        doPointerResults ptrResults = doPointer(free_edges);
+        edge__lenghts_anglesResults edgeResults = edge__lenghts_angles(xy,free_edges);
+        System.out.println("ciao");
+    }
+
+    private doPointerResults doPointer(int[][] head){
+        //Considering only first column
+//      % (values of "head" array must be nonnull integer numbers)
+//      % head_bool: logical index of j-th node  (1/0: present/absent in "head" array)
+//      % head_ord: ordinal position of head nodes in head array (may contain repetions if not
+//                       % all head_bool = 1)
+//      % pointer: first position of j-th node in head array
+
+        int Nhead = head.length;
+        int[] pointer = new int[Nhead+1];
+        for(int i=0;i<pointer.length;i++){
+            pointer[i]=-1;
+        }
+
+        //initialization
+        int ip=0;
+        pointer[ip]=0;
+        int ic=0; // generic counter
+        int head_val = head[ic][0];
+
+        //iteration:
+        while(ic<(Nhead-1)){//length of array to be pointicized
+            ic++;
+            if(head[ic][0] > head_val){
+                ip++;
+                pointer[ip] = ic;
+                head_val = head[ic][0];
+            }
+        }
+        pointer[Nhead]=Nhead;
+
+        //post-proc:
+        pointer = Utility.removeElements(pointer,-1);
+        //int[] pointer_short = Utility.deepCopy(pointer, -1);
+        int[] head_vals = getElements(head,Utility.deepCopy(pointer, -1));
+        int max = Utility.max(head,0);
+        int[] head_argm = new int[max];
+        int counter=0;
+        for(int i=0;i<max;i++){
+            head_argm[i]=counter;
+            counter++;
+        }
+
+        boolean[] head_bool = Utility.ismember(head_argm, head_vals);
+        int[] head_ord = Utility.cumsum(head_bool);
+        return new doPointerResults(head_bool, head_ord, pointer);
+    }
+
+    private int[] getElements(int[][] array, int[] indexes){
+        int[] out = new int[indexes.length];
+        for(int i=0;i<out.length;i++)
+            out[i]=array[indexes[i]][0];
+        return out;
+    }
+
+    private edge__lenghts_anglesResults edge__lenghts_angles(double[][] xy, int[][] free_edges){
+        //free_edges[:][0]= free_I_nodes
+        //free_edges[:][1]=free_J_nodes
+
+//        double[][] P_1 = new double[free_edges.length][xy[0].length];
+//        double[][] P_2 = new double[free_edges.length][xy[0].length];
+//        for(int i=0;i<free_edges.length;i++){
+//            for(int j=0;j<xy[0].length;j++){
+//                P_1[i][j]=xy[free_edges[i][0]][j];
+//                P_2[i][j]=xy[free_edges[i][1]][j];
+//            }
+//        }
+//        //coordinates of baricenter of edges:
+//        double[] xm = new double[P_1.length];//x column
+//        double[] ym = new double[P_1.length];//y column
+//        for(int i=0;i<P_1.length;i++){
+//            xm[i]=(P_1[i][0] + P_2[i][0])/2;
+//            ym[i]=(P_1[i][1] + P_2[i][1])/2;
+//        }
+//        //dipending on number og neighbors, we can call dir_on_grid(this.sGrid.numberOfNeighbors); for now, we have numberOfNeighbors=24
+//        double[] theta_grid = dir_on_grid24n(free_edges);
+//
+//        double[] edge_lenght = hor_distance("s",P_1, P_2);
+//
+//        return new edge__lenghts_anglesResults(theta_grid, edge_lenght, xm, ym);
+        //coordinates of baricenter of edges:
+        double[] xm = new double[free_edges.length];
+        double[] ym = new double[free_edges.length];
+        for(int i=0;i<free_edges.length;i++){
+            //              P_1(:,1)                    P_2(:,1)
+            xm[i] = (xy[ free_edges[i][0] ][0] + xy[ free_edges[i][1] ][0])/2;
+            //              P_1(:,2)                    P_2(:,2)
+            ym[i] = (xy[ free_edges[i][0] ][1] + xy[ free_edges[i][1] ][1])/2;
+        }
+        //dipending on number og neighbors, we can call dir_on_grid(this.sGrid.numberOfNeighbors); for now, we have numberOfNeighbors=24
+        double[] theta_grid = dir_on_grid24n(free_edges);
+        double[] edge_lenght = hor_distanceForEdges("s",xy,free_edges);
+        return new edge__lenghts_anglesResults(theta_grid,edge_lenght,xm,ym);
+    }
+
+
+
+    private double[] dir_on_grid24n(int[][] free_edges){
+        double[] theta = new double[free_edges.length];
+        double theta_27= Math.atan(1/2)/this.constants.getDeg2rad();
+        int Nx =(int) this.sGrid.getInset_Nx();
+        for(int ie=0;ie<free_edges.length;ie++){
+            int J_I = free_edges[ie][1] - free_edges[ie][0];
+            double angolo=0;
+            if((J_I == Nx) || J_I==(2*Nx))
+                angolo=0.0;
+            else{
+                if((J_I == (Nx+1)) || J_I == (2*Nx+2))
+                    angolo=45.0;
+                else{
+                    if((J_I == 1) || (J_I == 2))
+                        angolo=90.0;
+                    else{
+                        if((J_I == (-Nx+1)) || (J_I == ((-2*Nx)+2)))
+                            angolo=135.0;
+                        else{
+                            if((J_I == (-Nx)) || J_I == (-2*Nx))
+                                angolo=180.0;
+                            else{
+                                if((J_I == (-Nx-1)) || J_I == (-2*Nx)-2)
+                                    angolo=225.0;
+                                else{
+                                    if((J_I == (-1)) || J_I == -2)
+                                        angolo=270.0;
+                                    else{
+                                        if((J_I == (Nx-1)) || J_I == (2*Nx)-2)
+                                            angolo=315.0;
+                                        else{
+                                            if(J_I == (2*Nx+1))
+                                                angolo=theta_27;
+                                            else{
+                                                if(J_I == Nx+2)
+                                                    angolo=90-theta_27;
+                                                else{
+                                                    if(J_I == (-Nx + 2))
+                                                        angolo=90+theta_27;
+                                                    else{
+                                                        if(J_I==(-2*Nx + 1))
+                                                            angolo=180.0-theta_27;
+                                                        else{
+                                                            if(J_I == (-2*Nx) -1)
+                                                                angolo=180.0+theta_27;
+                                                            else{
+                                                                if(J_I == -Nx-2)
+                                                                    angolo=270.0-theta_27;
+                                                                else{
+                                                                    if(J_I == -2+Nx)
+                                                                        angolo = 270.0+theta_27;
+                                                                    else{
+                                                                        if(J_I == (2*Nx)-1)
+                                                                            angolo=360.0-theta_27;
+                                                                        else{
+                                                                            MyFileWriter debug = new MyFileWriter("","debug",false);
+                                                                            debug.WriteLog("dirOnGrid24N: I and J ("+free_edges[ie][0]+" and "+free_edges[ie][1]+") are not next or second next neighbours of a squared grid with "+Nx+" horizontal nodes!");
+                                                                            debug.CloseFile();
+                                                                            System.exit(0);
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            theta[ie]=angolo;
+        }
+        return theta;
     }
 
     private degzone2utmResults degzone2utm(double[] Lat, double[] Lon, int[] utmzone_number){
