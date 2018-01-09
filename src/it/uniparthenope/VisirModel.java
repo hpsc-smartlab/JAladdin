@@ -818,8 +818,11 @@ public class VisirModel {
                         Math.cos(this.constants.getDeg2rad()*(P_a[i][0]-P_b[0][0]))+Math.sin(this.constants.getDeg2rad()*P_a[i][1])*
                         Math.sin(this.constants.getDeg2rad()*P_b[0][1]));
                     * */
-                    dd[i]=E_radius * Math.acos( Math.cos(this.constants.getDeg2rad()*xy[ free_edges[i][0] ][1])*Math.cos(this.constants.getDeg2rad()*xy[ free_edges[0][1] ][1])*
-                            Math.cos(this.constants.getDeg2rad()*(xy[ free_edges[i][0] ][0]-xy[ free_edges[0][1] ][0]))+Math.sin(this.constants.getDeg2rad()*xy[ free_edges[i][0] ][1])*
+                    dd[i]=E_radius *
+                            Math.acos( Math.cos(this.constants.getDeg2rad()*xy[ free_edges[i][0] ][1]) *
+                            Math.cos(this.constants.getDeg2rad()*xy[ free_edges[0][1] ][1]) *
+                            Math.cos(this.constants.getDeg2rad()*(xy[ free_edges[i][0] ][0]-xy[ free_edges[0][1] ][0])) +
+                            Math.sin(this.constants.getDeg2rad()*xy[ free_edges[i][0] ][1]) *
                             Math.sin(this.constants.getDeg2rad()*xy[ free_edges[0][1] ][1]) );
                 }
             }
@@ -2749,6 +2752,9 @@ public class VisirModel {
         this.logFile.CloseFile();
         doPointerResults ptrResults = doPointer(free_edges);
         edge__lenghts_anglesResults edgeResults = edge__lenghts_angles(xy,free_edges);
+        /***NOTE:
+         * edge_length, coming from edge__lenghts_angles has a problem because of xy matrix. This is because xy is provided by the interp2 method
+         * that is not precise like the matlab one.*/
         System.out.println("ciao");
     }
 
@@ -2808,31 +2814,6 @@ public class VisirModel {
     }
 
     private edge__lenghts_anglesResults edge__lenghts_angles(double[][] xy, int[][] free_edges){
-        //free_edges[:][0]= free_I_nodes
-        //free_edges[:][1]=free_J_nodes
-
-//        double[][] P_1 = new double[free_edges.length][xy[0].length];
-//        double[][] P_2 = new double[free_edges.length][xy[0].length];
-//        for(int i=0;i<free_edges.length;i++){
-//            for(int j=0;j<xy[0].length;j++){
-//                P_1[i][j]=xy[free_edges[i][0]][j];
-//                P_2[i][j]=xy[free_edges[i][1]][j];
-//            }
-//        }
-//        //coordinates of baricenter of edges:
-//        double[] xm = new double[P_1.length];//x column
-//        double[] ym = new double[P_1.length];//y column
-//        for(int i=0;i<P_1.length;i++){
-//            xm[i]=(P_1[i][0] + P_2[i][0])/2;
-//            ym[i]=(P_1[i][1] + P_2[i][1])/2;
-//        }
-//        //dipending on number og neighbors, we can call dir_on_grid(this.sGrid.numberOfNeighbors); for now, we have numberOfNeighbors=24
-//        double[] theta_grid = dir_on_grid24n(free_edges);
-//
-//        double[] edge_lenght = hor_distance("s",P_1, P_2);
-//
-//        return new edge__lenghts_anglesResults(theta_grid, edge_lenght, xm, ym);
-        //coordinates of baricenter of edges:
         double[] xm = new double[free_edges.length];
         double[] ym = new double[free_edges.length];
         for(int i=0;i<free_edges.length;i++){
