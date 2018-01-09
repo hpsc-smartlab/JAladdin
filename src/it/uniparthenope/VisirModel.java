@@ -70,6 +70,7 @@ public class VisirModel {
         this.mode = mode;
         if(this.mode==0 || this.mode==1){
             if(this.mode==1){
+                this.logFile = new MyFileWriter("","",true);
                 this.logFile.WriteLog("\t[mode flag=1]: normal execution with serialization...");
                 this.logFile.CloseFile();
             }
@@ -81,7 +82,7 @@ public class VisirModel {
             this.tGrid = new TemporalGrid();
             this.visualization = new Visualization();
         } else if(this.mode==2){
-            this.logFile = new MyFileWriter("","",false);
+            this.logFile = new MyFileWriter("","",true);
             this.logFile.WriteLog("\t[DEBUG MODE] loading serialized objects...");
             this.logFile.CloseFile();
             this.fstats = (Fstats) ObjectSerializer.Deserialize("fstats");
@@ -122,11 +123,14 @@ public class VisirModel {
             vesselResponse =(vessel_ResponseResults) ObjectSerializer.Deserialize("vesselResponse");
             gridDefinitionResults = (Grid_definitionResults) ObjectSerializer.Deserialize("gridDefinitionResults");
             fieldsRegriddingResults = (Fields_regriddingResults) ObjectSerializer.Deserialize("fieldsRegriddingResults");
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("Done.");
+            this.logFile.CloseFile();
         }
         /****DEVELOPING METHOD WORK IN PROGRESS*****/
-        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
-                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
-                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+//        Edges_definition(gridDefinitionResults.getXg(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
+//                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
+//                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
     }
 
     private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults){
@@ -844,25 +848,24 @@ public class VisirModel {
         this.constants.setDeg2rad(Math.PI/180);
         double grid_step_in_NM = varargin.length > 0 ? varargin[0] : 1.0;
 
-        double[] xa = new double[P_a.length];
-        double[] ya = new double[P_a.length];
-        for(int i=0;i<P_a.length;i++){
-            xa[i]=P_a[i][0];
-            ya[i]=P_a[i][1];
-        }
+//        double[] xa = new double[P_a.length];
+//        double[] ya = new double[P_a.length];
+//        for(int i=0;i<P_a.length;i++){
+//            xa[i]=P_a[i][0];
+//            ya[i]=P_a[i][1];
+//        }
+//
+//        double[] xb = new double[P_b.length];
+//        double[] yb = new double[P_b.length];
+//        for(int i=0;i<P_b.length;i++){
+//            xb[i]=P_b[i][0];
+//            yb[i]=P_b[i][1];
+//        }
 
-        double[] xb = new double[P_b.length];
-        double[] yb = new double[P_b.length];
-        for(int i=0;i<P_b.length;i++){
-            xb[i]=P_b[i][0];
-            yb[i]=P_b[i][1];
-        }
-
-
-        double[] dd=new double[P_a.length];
+        double[] dd1=new double[P_a.length];
         if(method=="plane"||method=="p"){
             for(int i=0;i<P_a.length;i++){
-                dd[i]=grid_step_in_NM*Math.sqrt(Math.pow((xa[i]-xb[0]),2) + Math.pow((ya[i]-yb[0]),2));
+                dd1[i]=grid_step_in_NM*Math.sqrt(Math.pow((P_a[i][0]-P_b[0][0]),2) + Math.pow((P_a[i][1]-P_b[0][1]),2));
             }
         } else if(method=="sphere" || method=="s"){
             // % from : http://mathworld.wolfram.com/GreatCircle.html
@@ -870,13 +873,30 @@ public class VisirModel {
             // % output in Nautical Miles (NM)
             double E_radius = 3444.0; //NM
             for(int i=0;i<P_a.length;i++){
-                dd[i]=E_radius * Math.acos(Math.cos(this.constants.getDeg2rad()*ya[i])*Math.cos(this.constants.getDeg2rad()*yb[0])*
-                        Math.cos(this.constants.getDeg2rad()*(xa[i]-xb[0]))+Math.sin(this.constants.getDeg2rad()*ya[i])*
-                        Math.sin(this.constants.getDeg2rad()*yb[0]));
+                dd1[i]=E_radius * Math.acos(Math.cos(this.constants.getDeg2rad()*P_a[i][1])*Math.cos(this.constants.getDeg2rad()*P_b[0][1])*
+                        Math.cos(this.constants.getDeg2rad()*(P_a[i][0]-P_b[0][0]))+Math.sin(this.constants.getDeg2rad()*P_a[i][1])*
+                        Math.sin(this.constants.getDeg2rad()*P_b[0][1]));
             }
         }
 
-        return dd;
+//        double[] dd=new double[P_a.length];
+//        if(method=="plane"||method=="p"){
+//            for(int i=0;i<P_a.length;i++){
+//                dd[i]=grid_step_in_NM*Math.sqrt(Math.pow((xa[i]-xb[0]),2) + Math.pow((ya[i]-yb[0]),2));
+//            }
+//        } else if(method=="sphere" || method=="s"){
+//            // % from : http://mathworld.wolfram.com/GreatCircle.html
+//            // % x and y must be in degree.
+//            // % output in Nautical Miles (NM)
+//            double E_radius = 3444.0; //NM
+//            for(int i=0;i<P_a.length;i++){
+//                dd[i]=E_radius * Math.acos(Math.cos(this.constants.getDeg2rad()*ya[i])*Math.cos(this.constants.getDeg2rad()*yb[0])*
+//                        Math.cos(this.constants.getDeg2rad()*(xa[i]-xb[0]))+Math.sin(this.constants.getDeg2rad()*ya[i])*
+//                        Math.sin(this.constants.getDeg2rad()*yb[0]));
+//            }
+//        }
+
+        return dd1;
     }
 
     private double hor_distance(String method, double[] P_a, double[] P_b, double... varargin){
@@ -963,40 +983,62 @@ public class VisirModel {
             debug.CloseFile();
             System.exit(0);
         }
-        //col idx (ref):
-        long[] col_big = new long[idx_big.length];
-        for(int i =0; i<idx_big.length;i++){
-            col_big[i]=Math.floorMod(idx_big[i],nx_big);
-            if(col_big[i]==0){
-                col_big[i]=nx_big;
-            }
-        }
-        //row idx (ref):
-        long[] row_big = new long[idx_big.length];
-        for(int i =0;i<idx_big.length;i++){
-            row_big[i] =Math.round(1+(idx_big[i]-col_big[i])/nx_big);
-        }
-        //col idx (inset):
-        long[] col = new long[col_big.length];
-        for(int i=0;i<col.length;i++){
-            col[i]=col_big[i]-lambda;
-        }
-        //row idx (inset):
-        long[] row = new long[row_big.length];
-        for(int i=0;i<row.length;i++){
-            row[i]=row_big[i]-mu;
-        }
-        //idx (inset grid):
-        // and pad with zero indexes out of inset grid:
-        long[] idx = new long[col.length];
-        for(int i=0;i<idx.length;i++){
+
+        long[] col = new long[idx_big.length];
+        long[] row = new long[idx_big.length];
+        long[] idx = new long[idx_big.length];
+        for(int i=0;i<idx_big.length;i++){
+            //col idx (ref):
+            long col_big = Math.floorMod(idx_big[i],nx_big);
+            if(col_big==0)
+                col_big=0;
+            //row idx (ref):
+            long row_big = Math.round(1+(idx_big[i]-col_big)/nx_big);
+            //col idx (inset):
+            col[i] = col_big-lambda;
+            //row idx (inset):
+            row[i] = row_big-mu;
+            //idx (inset grid):
+            // and pad with zero indexes out of inset grid:
             idx[i]=col[i]+nx*(row[i]-1);
             if( col[i] < 1 || col[i] > nx || row[i] < 1 || row[i] > ny){
                 idx[i] = -1;
             }
         }
-
         return  new idx_ref2inset_gridResults(row, col, idx);
+//        //col idx (ref):
+//        long[] col_big = new long[idx_big.length];
+//        for(int i =0; i<idx_big.length;i++){
+//            col_big[i]=Math.floorMod(idx_big[i],nx_big);
+//            if(col_big[i]==0){
+//                col_big[i]=nx_big;
+//            }
+//        }
+//        //row idx (ref):
+//        long[] row_big = new long[idx_big.length];
+//        for(int i =0;i<idx_big.length;i++){
+//            row_big[i] =Math.round(1+(idx_big[i]-col_big[i])/nx_big);
+//        }
+//        //col idx (inset):
+//        long[] col = new long[col_big.length];
+//        for(int i=0;i<col.length;i++){
+//            col[i]=col_big[i]-lambda;
+//        }
+//        //row idx (inset):
+//        long[] row = new long[row_big.length];
+//        for(int i=0;i<row.length;i++){
+//            row[i]=row_big[i]-mu;
+//        }
+//        //idx (inset grid):
+//        // and pad with zero indexes out of inset grid:
+//        long[] idx = new long[col.length];
+//        for(int i=0;i<idx.length;i++){
+//            idx[i]=col[i]+nx*(row[i]-1);
+//            if( col[i] < 1 || col[i] > nx || row[i] < 1 || row[i] > ny){
+//                idx[i] = -1;
+//            }
+//        }
+//        return  new idx_ref2inset_gridResults(row, col, idx);
     }
 
 
