@@ -32,6 +32,8 @@ public class Ship implements Serializable {
     ArrayList<Double> R_aw;
     private double maxWind;
     private double minWind;
+    private double min_lambda_L;
+    private double max_lambda_L;
 
     public Ship(){
         this.sailType = 4; //sailboats
@@ -296,6 +298,22 @@ public class Ship implements Serializable {
         }
         double Delta = S*Sxx - Math.pow(Sx,2);
         return (S*Sxx*Sy/Sx - Sx*Sy)/Delta;
+    }
+
+    public double getMin_lambda_L() {
+        return min_lambda_L;
+    }
+
+    public void setMin_lambda_L(double min_lambda_L) {
+        this.min_lambda_L = min_lambda_L;
+    }
+
+    public double getMax_lambda_L() {
+        return max_lambda_L;
+    }
+
+    public void setMax_lambda_L(double max_lambda_L) {
+        this.max_lambda_L = max_lambda_L;
     }
 
     public double getFn_max(){
