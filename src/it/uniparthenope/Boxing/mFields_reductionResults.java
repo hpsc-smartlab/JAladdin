@@ -6,9 +6,7 @@ public class mFields_reductionResults {
     private double[] lat_red;
     private double[] lon_red;
     private ArrayList<double[][][]> outs = new ArrayList<>();
-//    private double[][][] out1;
-//    private double[][][] out2;
-//    private double[][][] out3;
+
 
     public double[] getLat_red() {
         return lat_red;
@@ -54,5 +52,19 @@ public class mFields_reductionResults {
 
     public double[][][] getOut(int index){
         return this.outs.get(index);
+    }
+
+    public void setOut(int index, double[][][] mat){
+        this.outs.set(index, mat);
+    }
+
+    public void multiplyElementFor(int index, double factor){
+        for(int k=0;k<this.outs.get(index).length;++k){
+            for(int i=0;i<this.outs.get(index)[0].length;++i){
+                for(int j=0;j<this.outs.get(index)[0][0].length;++j){
+                    this.outs.get(index)[k][i][j] = this.outs.get(index)[k][i][j] * factor;
+                }
+            }
+        }
     }
 }
