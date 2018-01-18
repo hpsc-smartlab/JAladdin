@@ -19,6 +19,13 @@ import org.joda.time.Days;
 
 public class Utility {
 
+    public static double[] arrayfy(ArrayList<Double> in){
+        double[] out = new double[in.size()];
+        for(int i=0;i<out.length;i++)
+            out[i] = in.get(i);
+        return out;
+    }
+
     public static long Tic(){
         return System.nanoTime();
     }
@@ -60,7 +67,29 @@ public class Utility {
         return matrix;
     }
 
+    public static double[] NaN(int dim){
+        double[] out = new double[dim];
+        for(int i=0;i<dim;i++)
+            out[i]=Double.NaN;
+        return out;
+    }
 
+    public static double[][] NaN(int rows, int cols){
+        double[][] out = new double[rows][cols];
+        for(int i=0;i<rows;i++)
+            for(int j=0;j<cols;j++)
+                out[i][j]=Double.NaN;
+        return out;
+    }
+
+    public static double[][][] NaN(int rows, int cols, int zDim){
+        double[][][] out = new double[zDim][rows][cols];
+        for(int k=0;k<zDim;k++)
+            for(int i=0;i<rows;i++)
+                for(int j=0;j<cols;j++)
+                    out[k][i][j] = Double.NaN;
+        return out;
+    }
 
     public static double[][] ones(int size){
         return ones(size,size);
@@ -86,6 +115,47 @@ public class Utility {
             }
         }
         return matrix3d;
+    }
+
+    public static double[][] NaN2Dmatrix(int x, int y){
+        double[][] out = new double[x][y];
+        for(int i=0;i<x;i++){
+            for(int j=0;j<y;j++){
+                out[i][j] = Double.NaN;
+            }
+        }
+        return out;
+    }
+
+    public static double[] nthroot(double[] x, int n){
+        double[] out = new double[x.length];
+        for(int i=0;i<out.length;i++)
+            out[i] = nthroot(x[i], n);
+        return out;
+    }
+
+    public static double nthroot(double x, int n)
+    {
+        double threshold = 0.0001;
+        if(x < 0)
+        {
+            System.err.println("nthroot: Negative!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("nthroot: Negative!");
+            debug.CloseFile();
+            System.exit(0);
+            return -1;
+        }
+        if(x == 0)
+            return 0;
+        double x1 = x;
+        double x2 = x / n;
+        while (Math.abs(x1 - x2) > threshold)
+        {
+            x1 = x2;
+            x2 = ((n - 1.0) * x2 + x / Math.pow(x2, n - 1.0)) / n;
+        }
+        return x2;
     }
 
     public static double[][][] ones3Dmatrix(int x, int y, int z){
@@ -242,6 +312,13 @@ public class Utility {
        return ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN).putInt(x).order(ByteOrder.LITTLE_ENDIAN).getInt(0);
     }
 
+    public static double[] abs(double[] in){
+        double[] out = new double[in.length];
+        for(int i=0;i<out.length; ++i)
+            out[i] = Math.abs(in[i]);
+        return out;
+    }
+
     public static meshgridResults meshgrid(double[][] x, double[][] y){
         //[X, Y] =meshgrid(x,y) returns 2-D grid coordinates based on the coordinates contained
         // in vectors x and y. X is a matrix where each row is a copy of x,
@@ -314,6 +391,36 @@ public class Utility {
             }
         }
         return new meshgridResults(X,Y);
+    }
+
+    public static double[][] reshape(double[][][] A, int[] dim){
+        int rows = dim[0];
+        int cols = dim[1];
+        if(A.length*A[0].length*A[0][0].length != rows*cols){
+            System.out.println("size(A) must be = dim!");
+            System.exit(0);
+        }
+        int contaRighe2D = 0;
+        int contaCol2D = 0;
+        double[][] out = new double[rows][cols];
+        for(int k=0;k<A.length;k++){
+            int contaRighe3D = 0;
+            int contaCol3D = 0;
+            for(int u=0;u<(A[0].length*A[0][0].length);u++){
+                out[contaRighe2D][contaCol2D] = A[k][contaRighe3D][contaCol3D];
+                contaRighe2D++;
+                contaRighe3D++;
+                if(contaRighe2D==rows){
+                    contaRighe2D=0;
+                    contaCol2D++;
+                }
+                if(contaRighe3D==A[0].length){
+                    contaRighe3D=0;
+                    contaCol3D++;
+                }
+            }
+        }
+        return out;
     }
 
 
@@ -491,7 +598,36 @@ public class Utility {
 
     }
 
+    public static ArrayList<Integer> find(boolean[] in){
+        ArrayList<Integer> _indexes = new ArrayList<>();
+        for(int i=0;i<in.length;++i){
+            if(in[i])
+                _indexes.add(i);
+        }
+        return _indexes;
+    }
 
+    public static ArrayList<Integer> findNaNs(double[][] A){
+        ArrayList<Integer> _indexes = new ArrayList<>();//if i%2 =0 row index, else col index
+        for(int i=0;i<A.length;i++){
+            for(int j=0;j<A[0].length;j++){
+                if(Double.isNaN(A[i][j])){
+                    _indexes.add(i);
+                    _indexes.add(j);
+                }
+            }
+        }
+        return _indexes;
+    }
+
+    public static ArrayList<Integer> findNaNs(double[] A){
+        ArrayList<Integer> _indexes = new ArrayList<>();
+        for(int i=0;i<A.length;i++){
+            if(Double.isNaN(A[i]))
+                _indexes.add(i);
+        }
+        return _indexes;
+    }
 
     public static findResults find(double[] A, String condition, double b){
         ArrayList<Integer> indexes = new ArrayList<>();
@@ -899,6 +1035,136 @@ public class Utility {
         return out;
     }
 
+
+    public static double[] interp1(double[] x, double[] y, double[] xi, double extrapolation){
+        //interp1 MATLAB function porting
+        if(x.length != y.length){
+            System.out.println("interp1: X and Y must be the same length!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("interp1: X and Y must be the same length!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        if(x.length == 1){
+            System.out.println("interp1: X must contain more than one value");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("interp1: X must contain more than one value");
+            debug.CloseFile();
+            System.exit(0);
+        }
+
+        double[] dx = new double[x.length - 1];
+        double[] dy = new double[x.length - 1];
+        double[] slope = new double[x.length - 1];
+        double[] intercept = new double[x.length - 1];
+
+        // Calculate the line equation (i.e. slope and intercept) between each point
+        for (int i = 0; i < x.length - 1; i++) {
+            dx[i] = x[i + 1] - x[i];
+            if (dx[i] == 0) {
+                System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
+                debug.CloseFile();
+                System.exit(0);
+            }
+            if (dx[i] < 0) {
+                System.out.println("interp1: X must be sorted");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("interp1: X must be sorted");
+                debug.CloseFile();
+                System.exit(0);
+            }
+            dy[i] = y[i + 1] - y[i];
+            slope[i] = dy[i] / dx[i];
+            intercept[i] = y[i] - x[i] * slope[i];
+        }
+
+        // Perform the interpolation here
+        double[] yi = new double[xi.length];
+        for (int i = 0; i < xi.length; i++) {
+            if ((xi[i] > x[x.length - 1]) || (xi[i] < x[0])) {
+                yi[i] = Double.NaN;
+            }
+            else {
+                int loc = Arrays.binarySearch(x, xi[i]);
+                if (loc < -1) {
+                    loc = -loc - 2;
+                    yi[i] = slope[loc] * xi[i] + intercept[loc];
+                }
+                else {
+                    yi[i] = y[loc];
+                }
+            }
+        }
+        return yi;
+    }
+
+    public static double[] interp1(double[] x, double[][] y,int yColIdx, double[][] xi, int xiColIdx){
+        //interp1 MATLAB function porting
+        if(x.length != y.length){
+            System.out.println("interp1: X and Y must be the same length!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("interp1: X and Y must be the same length!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        if(x.length == 1){
+            System.out.println("interp1: X must contain more than one value");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("interp1: X must contain more than one value");
+            debug.CloseFile();
+            System.exit(0);
+        }
+
+        double[] dx = new double[x.length - 1];
+        double[] dy = new double[x.length - 1];
+        double[] slope = new double[x.length - 1];
+        double[] intercept = new double[x.length - 1];
+
+        // Calculate the line equation (i.e. slope and intercept) between each point
+        for (int i = 0; i < x.length - 1; i++) {
+            dx[i] = x[i + 1] - x[i];
+            if (dx[i] == 0) {
+                System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
+                debug.CloseFile();
+                System.exit(0);
+            }
+            if (dx[i] < 0) {
+                System.out.println("interp1: X must be sorted");
+                MyFileWriter debug = new MyFileWriter("","debug",false);
+                debug.WriteLog("interp1: X must be sorted");
+                debug.CloseFile();
+                System.exit(0);
+            }
+            dy[i] = y[i + 1][yColIdx] - y[i][yColIdx];
+            slope[i] = dy[i] / dx[i];
+            intercept[i] = y[i][yColIdx] - x[i] * slope[i];
+        }
+
+        // Perform the interpolation here
+        double[] yi = new double[xi.length];
+        for (int i = 0; i < xi.length; i++) {
+            if ((xi[i][xiColIdx] > x[x.length - 1]) || (xi[i][xiColIdx] < x[0])) {
+                yi[i] = Double.NaN;
+            }
+            else {
+                int loc = Arrays.binarySearch(x, xi[i][xiColIdx]);
+                if (loc < -1) {
+                    loc = -loc - 2;
+                    yi[i] = slope[loc] * xi[i][xiColIdx] + intercept[loc];
+                }
+                else {
+                    yi[i] = y[loc][yColIdx];
+                }
+            }
+        }
+        return yi;
+    }
+
+
     public static double[] interp1(double[] x, double[] y, double[] xi){
         //interp1 MATLAB function porting
         if(x.length != y.length){
@@ -963,24 +1229,86 @@ public class Utility {
         return yi;
     }
 
-    public static double[][] interp2(double[][] X, double[][] Y, double[][] Z, double[] Xq, double[] Yq){
+
+    public static double[][] interp2(double[][] X, double[][] Y, double[][] Z, double[] Xq, double[] Yq){//wrapper for interp2 method
         double[] Xarray = new double[X[0].length];
         for(int i=0;i<X[0].length;i++)
             Xarray[i]=X[0][i];
         double[] Yarray = new double[Y.length];
         for(int i=0;i<Y.length;i++)
             Yarray[i]=Y[i][0];
+        return interp2(Xarray, Yarray, Z, Xq, Yq);
+    }
 
-        double[][] Zt = transposeMatrix(Z);
-        BiCubicSplineFast bcs = new BiCubicSplineFast(Xarray,Yarray, Zt);
+
+    public static double[][] interp2(double[] X, double[] Y, double[][] Z, double[] Xq, double[] Yq){//interp2 method implemented with 'linear'
+
         double[][] out = new double[Yq.length][Xq.length];
-        for(int i=0;i<Yq.length;i++){
-            for(int j=0;j<Xq.length;j++){
-                out[i][j] = bcs.interpolate(Xq[j],Yq[i]);
+        double[][] Zt = Utility.transposeMatrix(Z);
+        for(int i=0;i<Yq.length;++i){
+            for(int j=0;j<Xq.length;++j){
+                int x_idx=0, x1_idx=0, x2_idx=0 , y_idx=0, y1_idx=0, y2_idx=0;
+                if( (Xq[j] > X[X.length-1]) || (Xq[j] < X[0]) || (Yq[i] > Y[Y.length-1]) || (Yq[i] < Y[0]) ){ //Xq o Yq > max o < min
+                    out[i][j] = Double.NaN;
+                } else {
+                    x_idx = Arrays.binarySearch(X, Xq[j]);
+                    if(x_idx < -1){ //element not found
+                        x1_idx = -x_idx-2;
+                        x2_idx = -x_idx-1;
+                    } else{ //element found
+                        if(x_idx==0){//1st element of the array
+                            x1_idx = x_idx;
+                            x2_idx = x_idx +1;
+                        } else {//last element of the array (or between)
+                            x1_idx = x_idx - 1;
+                            x2_idx = x_idx;
+                        }
+                    }
+                    y_idx = Arrays.binarySearch(Y, Yq[i]);
+                    if(y_idx < -1){ //element not found
+                        y1_idx = -y_idx -2;
+                        y2_idx = -y_idx -1;
+                    } else{ //element found
+                        if(y_idx == 0){ //1st element of the array
+                            y1_idx = y_idx;
+                            y2_idx = y_idx +1;
+                            //last element of the array (or between)
+                        } else {
+                            y1_idx = y_idx -1;
+                            y2_idx = y_idx;
+                        }
+                    }
+                }
+
+                double fx_y1 = (( (X[x2_idx] - Xq[j])/(X[x2_idx] - X[x1_idx]) ) * Zt[x1_idx][y1_idx]) + (( (Xq[j] - X[x1_idx])/(X[x2_idx] - X[x1_idx]) ) * Zt[x2_idx][y1_idx]);
+                double fx_y2 = (( (X[x2_idx] - Xq[j])/(X[x2_idx] - X[x1_idx]) ) * Zt[x1_idx][y2_idx]) + (( (Xq[j] - X[x1_idx])/(X[x2_idx] - X[x1_idx]) ) * Zt[x2_idx][y2_idx]);
+
+                out[i][j] = ((Y[y2_idx] - Yq[i])/(Y[y2_idx] - Y[y1_idx]) * fx_y1) + ((Yq[i] - Y[y1_idx])/(Y[y2_idx] - Y[y1_idx]) * fx_y2);
             }
         }
         return out;
     }
+
+    //OLD INTERP2, 'cubic' implemented with Flangan's Math library
+
+//    public static double[][] interp2(double[][] X, double[][] Y, double[][] Z, double[] Xq, double[] Yq){
+//        double[] Xarray = new double[X[0].length];
+//        for(int i=0;i<X[0].length;i++)
+//            Xarray[i]=X[0][i];
+//        double[] Yarray = new double[Y.length];
+//        for(int i=0;i<Y.length;i++)
+//            Yarray[i]=Y[i][0];
+//
+//        double[][] Zt = transposeMatrix(Z);
+//        BiCubicSplineFast bcs = new BiCubicSplineFast(Xarray,Yarray, Zt);
+//        double[][] out = new double[Yq.length][Xq.length];
+//        for(int i=0;i<Yq.length;i++){
+//            for(int j=0;j<Xq.length;j++){
+//                out[i][j] = bcs.interpolate(Xq[j],Yq[i]);
+//            }
+//        }
+//        return out;
+//    }
 
     public static double[][] transposeMatrix(double[][] matrix){
         double[][] output = new double[matrix[0].length][matrix.length];
@@ -990,6 +1318,26 @@ public class Utility {
             }
         }
         return output;
+    }
+
+    public static double[][][] transpose3DMatrix(double[][][] in){//inverts rows with cols
+        double[][][] out = new double[in.length][in[0][0].length][in[0].length];
+        for(int i=0;i<in.length;i++){
+            out[i]=transposeMatrix(in[i]);
+        }
+        return out;
+    }
+
+    public static double[][][] permute3DColsWithZdim(double[][][] in){
+        double[][][] out = new double[in[0][0].length][in[0].length][in.length];
+        for(int i=0;i<out[0].length;++i){
+            for(int z=0;z<out.length;++z){
+                for(int j=0;j<out[0][0].length;++j){
+                    out[z][i][j] = in[j][i][z];
+                }
+            }
+        }
+        return out;
     }
 
     public static double[][] MatrixComponentXcomponent(double[][] a, double[][] b){
@@ -1257,6 +1605,7 @@ public class Utility {
         }
     }
 
+
     public static int sign(long x){
         if(x>0){
             return 1;
@@ -1309,6 +1658,8 @@ public class Utility {
     public static long numel(double[][][] mat){
         return mat.length*mat[0].length*mat[0][0].length;
     }
+
+    public static int numel(double[][] mat){ return mat.length* mat[0].length;}
 
     //MATLAB inpolygon implementation
     // Given three colinear points p, q, r, the function checks if
@@ -1410,6 +1761,23 @@ public class Utility {
         return  result;
     }
 
+    public static double[][] atan2(double[][] a, double[][] b){
+        if((a.length != b.length) || (a[0].length != b[0].length)){
+            System.out.println("Utility.atan2: A and B must have same size!");
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("Utility.atan2: A and B must have same size!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        double[][] out = new double[a.length][a[0].length];
+        for(int i =0 ;i<a.length;i++){
+            for(int j=0; j<a[0].length;j++){
+                out[i][j] = Math.atan2(a[i][j],b[i][j]);
+            }
+        }
+        return out;
+    }
+
     public static long datenum(String dateString, String format){
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         try {
@@ -1425,6 +1793,43 @@ public class Utility {
             debug.CloseFile();
             return 0;
         }
+    }
+
+    public static double[] min(double[] x, double[] y){//excluding NaNs
+        if(x.length!=y.length){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("Utility.min(): x.length and y.lenght must be equals!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        double[] out = new double[x.length];
+        for(int i=0;i<out.length;i++){
+            if(Double.isNaN(x[i])){
+                if(Double.isNaN(y[i]))
+                    out[i]=Double.NaN;
+                else
+                    out[i]= y[i];
+            } else {
+                if(Double.isNaN(y[i]))
+                    out[i]=x[i];
+                else{
+                    out[i] = (x[i]<y[i]) ? x[i] : y[i];
+                }
+            }
+        }
+        return out;
+    }
+    public static double[] mean(double[] x, double[] y){
+        double[] out = new double[x.length];
+        if(x.length!=y.length){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("Utility.mean(): x.length and y.lenght must be equals!");
+            debug.CloseFile();
+            System.exit(0);
+        }
+        for(int i=0;i<x.length;i++)
+            out[i]=(x[i]+y[i])/2;
+        return out;
     }
 
     public static long datenum(long year, long month, long day, long hour, long min){
