@@ -132,7 +132,6 @@ public class JVisirModel {
         edgeDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
                 fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
                 gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
-        System.out.println("CIAO");
     }
 
     private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults){
@@ -3090,12 +3089,14 @@ public class JVisirModel {
                 //wave direction
                 DangerIndexes danger_idx = new DangerIndexes();
                 double[] alpha = wave2ship_reldir(theta_grid, waveDir_edges, it);
-                ArrayList<Boolean> follseas_bol = new ArrayList<>();
+                boolean[] follseas_bol = new boolean[alpha.length];
                 double[] IMO_secans = new double[alpha.length];
-                for(int i=0;i<alpha.length;i++){
+                for(int i=0;i<alpha.length;++i){
                     double tmp = Math.abs(Math.abs(alpha[i])-180);
                     if(tmp <= 45)
-                        follseas_bol.add(true);
+                        follseas_bol[i] = true;
+                    else
+                        follseas_bol[i] = false;
                     tmp = 1.0/Math.abs(Math.cos(this.constants.getDeg2rad()*(180.0-alpha[i])));
                     IMO_secans[i] = Math.min(Math.sqrt(2.0), tmp);
                 }
@@ -3134,6 +3135,7 @@ public class JVisirModel {
 
                     steepness[i]=waveHeight_edges[i][it]/waveLenght_edges[i];
                 }
+
                 double[] Fr_crit = Utility.interp1(do_fr_crit_lutRes.getSteep_var(), do_fr_crit_lutRes.getFr_LUT(), steepness, Double.POSITIVE_INFINITY);
                 //-------------------------------------------------------------------------------------------------
                 //ship speed and ship edge delays:
@@ -3193,7 +3195,7 @@ public class JVisirModel {
                             vTw_bol[i]=true;
                         else
                             vTw_bol[i] = false;
-                        if(lambda_bol2[i] && HL_bol2[i] && follseas_bol.get(i) && vTw_bol[i])
+                        if(lambda_bol2[i] && HL_bol2[i] && follseas_bol[i] && vTw_bol[i])
                             pureLossStab_bol[i] = true;
                         else
                             pureLossStab_bol[i] = false;
@@ -3213,7 +3215,7 @@ public class JVisirModel {
                             Fr_bol[i] = true;
                         else
                             Fr_bol[i] = false;
-                        if(lambda_bol[i] && follseas_bol.get(i) && Fr_bol[i])
+                        if(lambda_bol[i] && follseas_bol[i] && Fr_bol[i])
                             surfRid_bol[i] = true;
                         else
                             surfRid_bol[i] = false;
