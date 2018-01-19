@@ -1084,21 +1084,33 @@ public class Utility {
         double[] yi = new double[xi.length];
         for (int i = 0; i < xi.length; i++) {
             if ((xi[i] > x[x.length - 1]) || (xi[i] < x[0])) {
-                yi[i] = Double.NaN;
+                yi[i] = extrapolation;
             }
             else {
-                int loc = Arrays.binarySearch(x, xi[i]);
-                if (loc < -1) {
-                    loc = -loc - 2;
-                    yi[i] = slope[loc] * xi[i] + intercept[loc];
-                }
-                else {
-                    yi[i] = y[loc];
+                if(Double.isNaN(xi[i])){
+                    yi[i] = Double.NaN;
+                } else {
+                    int loc = Arrays.binarySearch(x, xi[i]);
+                    if (loc < -1) {
+                        loc = -loc - 2;
+                        try {
+                            yi[i] = slope[loc] * xi[i] + intercept[loc];
+                        } catch (Exception e) {
+                            System.exit(-1);
+                        }
+                    } else {
+                        yi[i] = y[loc];
+                    }
                 }
             }
         }
         return yi;
     }
+
+    /**NOTE:
+     * Arrays.binarySearch method returns:
+     * index -> if the item is present in the collection
+     * -(index) -1 -> otherwise*/
 
     public static double[] interp1(double[] x, double[][] y,int yColIdx, double[][] xi, int xiColIdx){
         //interp1 MATLAB function porting
@@ -1151,13 +1163,16 @@ public class Utility {
                 yi[i] = Double.NaN;
             }
             else {
-                int loc = Arrays.binarySearch(x, xi[i][xiColIdx]);
-                if (loc < -1) {
-                    loc = -loc - 2;
-                    yi[i] = slope[loc] * xi[i][xiColIdx] + intercept[loc];
-                }
-                else {
-                    yi[i] = y[loc][yColIdx];
+                if(Double.isNaN(xi[i][xiColIdx])){
+                    yi[i] = Double.NaN;
+                } else {
+                    int loc = Arrays.binarySearch(x, xi[i][xiColIdx]);
+                    if (loc < -1) {
+                        loc = -loc - 2;
+                        yi[i] = slope[loc] * xi[i][xiColIdx] + intercept[loc];
+                    } else {
+                        yi[i] = y[loc][yColIdx];
+                    }
                 }
             }
         }
@@ -1216,13 +1231,16 @@ public class Utility {
                 yi[i] = Double.NaN;
             }
             else {
-                int loc = Arrays.binarySearch(x, xi[i]);
-                if (loc < -1) {
-                    loc = -loc - 2;
-                    yi[i] = slope[loc] * xi[i] + intercept[loc];
-                }
-                else {
-                    yi[i] = y[loc];
+                if(Double.isNaN(xi[i])){
+                    yi[i] = Double.NaN;
+                } else {
+                    int loc = Arrays.binarySearch(x, xi[i]);
+                    if (loc < -1) {
+                        loc = -loc - 2;
+                        yi[i] = slope[loc] * xi[i] + intercept[loc];
+                    } else {
+                        yi[i] = y[loc];
+                    }
                 }
             }
         }
@@ -1251,43 +1269,48 @@ public class Utility {
                 if( (Xq[j] > X[X.length-1]) || (Xq[j] < X[0]) || (Yq[i] > Y[Y.length-1]) || (Yq[i] < Y[0]) ){ //Xq o Yq > max o < min
                     out[i][j] = Double.NaN;
                 } else {
-                    x_idx = Arrays.binarySearch(X, Xq[j]);
-                    if(x_idx < -1){ //element not found
-                        x1_idx = -x_idx-2;
-                        x2_idx = -x_idx-1;
-                    } else{ //element found
-                        if(x_idx==0){//1st element of the array
-                            x1_idx = x_idx;
-                            x2_idx = x_idx +1;
-                        } else {//last element of the array (or between)
-                            x1_idx = x_idx - 1;
-                            x2_idx = x_idx;
+                    if(Double.isNaN(Xq[j]) || Double.isNaN(Yq[i])){
+                        out[i][j] = Double.NaN;
+                    } else {
+                        x_idx = Arrays.binarySearch(X, Xq[j]);
+                        if (x_idx < -1) { //element not found
+                            x1_idx = -x_idx - 2;
+                            x2_idx = -x_idx - 1;
+                        } else { //element found
+                            if (x_idx == 0) {//1st element of the array
+                                x1_idx = x_idx;
+                                x2_idx = x_idx + 1;
+                            } else {//last element of the array (or between)
+                                x1_idx = x_idx - 1;
+                                x2_idx = x_idx;
+                            }
                         }
-                    }
-                    y_idx = Arrays.binarySearch(Y, Yq[i]);
-                    if(y_idx < -1){ //element not found
-                        y1_idx = -y_idx -2;
-                        y2_idx = -y_idx -1;
-                    } else{ //element found
-                        if(y_idx == 0){ //1st element of the array
-                            y1_idx = y_idx;
-                            y2_idx = y_idx +1;
-                            //last element of the array (or between)
-                        } else {
-                            y1_idx = y_idx -1;
-                            y2_idx = y_idx;
+                        y_idx = Arrays.binarySearch(Y, Yq[i]);
+                        if (y_idx < -1) { //element not found
+                            y1_idx = -y_idx - 2;
+                            y2_idx = -y_idx - 1;
+                        } else { //element found
+                            if (y_idx == 0) { //1st element of the array
+                                y1_idx = y_idx;
+                                y2_idx = y_idx + 1;
+                                //last element of the array (or between)
+                            } else {
+                                y1_idx = y_idx - 1;
+                                y2_idx = y_idx;
+                            }
                         }
+
+                        double fx_y1 = (((X[x2_idx] - Xq[j]) / (X[x2_idx] - X[x1_idx])) * Zt[x1_idx][y1_idx]) + (((Xq[j] - X[x1_idx]) / (X[x2_idx] - X[x1_idx])) * Zt[x2_idx][y1_idx]);
+                        double fx_y2 = (((X[x2_idx] - Xq[j]) / (X[x2_idx] - X[x1_idx])) * Zt[x1_idx][y2_idx]) + (((Xq[j] - X[x1_idx]) / (X[x2_idx] - X[x1_idx])) * Zt[x2_idx][y2_idx]);
+
+                        out[i][j] = ((Y[y2_idx] - Yq[i]) / (Y[y2_idx] - Y[y1_idx]) * fx_y1) + ((Yq[i] - Y[y1_idx]) / (Y[y2_idx] - Y[y1_idx]) * fx_y2);
                     }
                 }
-
-                double fx_y1 = (( (X[x2_idx] - Xq[j])/(X[x2_idx] - X[x1_idx]) ) * Zt[x1_idx][y1_idx]) + (( (Xq[j] - X[x1_idx])/(X[x2_idx] - X[x1_idx]) ) * Zt[x2_idx][y1_idx]);
-                double fx_y2 = (( (X[x2_idx] - Xq[j])/(X[x2_idx] - X[x1_idx]) ) * Zt[x1_idx][y2_idx]) + (( (Xq[j] - X[x1_idx])/(X[x2_idx] - X[x1_idx]) ) * Zt[x2_idx][y2_idx]);
-
-                out[i][j] = ((Y[y2_idx] - Yq[i])/(Y[y2_idx] - Y[y1_idx]) * fx_y1) + ((Yq[i] - Y[y1_idx])/(Y[y2_idx] - Y[y1_idx]) * fx_y2);
             }
         }
         return out;
     }
+
 
     //OLD INTERP2, 'cubic' implemented with Flangan's Math library
 
