@@ -132,7 +132,6 @@ public class JVisirModel {
         edgeDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
                 fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
                 gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
-        System.out.println("CIAOOOO");
     }
 
     private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults){
@@ -2919,7 +2918,8 @@ public class JVisirModel {
         //              twa_array= varargin{1};
         //              tws_array= varargin{2};
         //          end
-        ArrayList<DangerIndexes> tdep_danger_idx = new ArrayList<>();
+        //ArrayList<DangerIndexes> tdep_danger_idx = new ArrayList<>();
+        edge_delaysResults out = new edge_delaysResults();
         double[] H_array_m = new double[0];
         //double[] twa_array = new double[0];
         //double[] tws_array = new double[0];
@@ -3043,14 +3043,6 @@ public class JVisirModel {
                         for(int i=0;i<waveHeight_edges.length;++i)
                             sh_vel[i]=waveHeight_edges[i][0];
                     }
-//                    if(this.forcing.getAnalytic() == 1){
-//                        sh_vel = new double[waveHeight_edges.length];
-//                        for(int i=0;i<waveHeight_edges.length;++i)
-//                            sh_vel[i]=waveHeight_edges[i][0];
-//                    }
-//                    else{
-//                        sh_vel = Utility.interp1(H_array_m, ship_v_LUT, jv, waveHeight_edges, it);
-//                    }
                     for(int j=0;j<edge_length.length;++j)
                         sh_delay_gear[it][jv][j] = edge_length[j]/sh_vel[j];
                     //-------------------------------------------------------------------------------------------------
@@ -3131,7 +3123,8 @@ public class JVisirModel {
                     //-------------------------------------------------------------------------------------------------
 
                     if(jv==0)
-                        tdep_danger_idx.add(danger_idx);
+                        out.addDangerIdx(danger_idx);
+                        //tdep_danger_idx.add(danger_idx);
 
                     if (this.safety.getCriteria().get(0)==0){//parametric rolling means checking for both Te=Tr and 2*Te=Tr conditions:
                         danger_idx.setResonance1(new ArrayList<>());
@@ -3193,23 +3186,11 @@ public class JVisirModel {
             }//tgrid.nt
         } else {//sailboat
             /** TODO: SAILBOAT*/
-//            meshgridResults mg = Utility.meshgrid(twa_array, tws_array);
-//            sh_delay = new double[0][(int) this.tGrid.getNt()];
-//            for(int it=0;it<(int) this.tGrid.getNt(); ++it){
-//                //TWA - wind direction relative to ship course
-//                double[] TWA = wave2ship_reldir(theta_grid, windDir_edges,it);//deg
-//
-//                //TWS - wind magnitude { TWS= windMAGN_edges(:,it); % kts}
-//                double[] TWS = new double[windMAGN_edges.length];
-//                for(int i=0;i<TWS.length;i++)
-//                    TWS[i]=windDir_edges[i][it];
-//
-//                double[][] sh_vel = Utility.interp2(mg.getX(), mg.getY(), Utility.transposeMatrix(ship_v_LUT), Utility.abs(TWA), TWS);
-//
-//
-//            }
+
         }
-        edge_delaysResults out = new edge_delaysResults(sh_delay,safe_indexes,tdep_danger_idx);
+        //edge_delaysResults out = new edge_delaysResults(sh_delay,safe_indexes,tdep_danger_idx);
+        out.setSh_delay(sh_delay);
+        out.setSafe_indexes(safe_indexes);
         if(motorboat){
             out.AddVarargout(gear_idx);
         }
