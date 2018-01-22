@@ -2,7 +2,7 @@ package it.uniparthenope;
 
 import java.util.ArrayList;
 
-public class DangerIndexes {
+public class DangerIndexes implements Cloneable {
     private ArrayList<Integer> resonance1;
     private ArrayList<Integer> resonance2;
     private ArrayList<Integer> surfRiding;
@@ -13,6 +13,20 @@ public class DangerIndexes {
         resonance2 = new ArrayList<>();
         surfRiding = new ArrayList<>();
         pureLossStab = new ArrayList<>();
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Object obj = super.clone();
+
+        DangerIndexes idx = (DangerIndexes) obj;
+
+        //deep cloning
+        idx.setResonance1(resonance1);
+        idx.setResonance2(resonance2);
+        idx.setSurfRiding(surfRiding);
+        idx.setPureLossStab(pureLossStab);
+        return idx;
     }
 
     public ArrayList<Integer> getResonance1() {
