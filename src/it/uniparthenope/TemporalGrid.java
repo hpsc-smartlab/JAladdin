@@ -17,6 +17,7 @@ public class TemporalGrid implements Serializable {
     private long wave_dep_TS;
     private long wind_dep_TS;
     private double maxNt;
+    private double[] dayHrs;
 
 
 
@@ -75,6 +76,14 @@ public class TemporalGrid implements Serializable {
 
     public double getMaxNt() {
         return maxNt;
+    }
+
+    public double[] getDayHrs() {
+        return dayHrs;
+    }
+
+    public void setDayHrs(double[] dayHrs) {
+        this.dayHrs = dayHrs;
     }
 
     public void setMaxNt(double maxNt) {

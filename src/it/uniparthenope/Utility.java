@@ -16,6 +16,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.Period;
 
 public class Utility {
 
@@ -1804,7 +1805,7 @@ public class Utility {
     public static long datenum(String dateString, String format){
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         try {
-            Date data = sdf.parse("000001000000");
+            Date data = sdf.parse("000001010000");
             DateTime from = new DateTime(data.getTime());
             data = sdf.parse(dateString);
             DateTime to = new DateTime(data.getTime());
@@ -1816,6 +1817,28 @@ public class Utility {
             debug.CloseFile();
             return 0;
         }
+    }
+
+    public static long hoursBetween(String format, String fromString, String toString){
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        long hoursBetween = 0;
+        try{
+            Date data = sdf.parse(fromString);
+            DateTime fromTime = new DateTime(data.getTime());
+            data = sdf.parse(toString);
+            DateTime toTime = new DateTime(data.getTime());
+            Period p = new Period(fromTime, toTime);
+            long days = p.getDays();
+            long hours = p.getHours();
+            long minutes = p.getMinutes();
+            hoursBetween = (days*24)+hours+minutes;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("hoursBetween: "+ex.getMessage());
+            debug.CloseFile();
+        }
+        return  hoursBetween;
     }
 
     public static double[] min(double[] x, double[] y){//excluding NaNs
@@ -1854,6 +1877,7 @@ public class Utility {
             out[i]=(x[i]+y[i])/2;
         return out;
     }
+
 
     public static long datenum(long year, long month, long day, long hour, long min){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
