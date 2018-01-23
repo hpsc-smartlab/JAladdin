@@ -29,8 +29,9 @@ public class JVisirModel {
     private MyFileWriter logFile;
 
     //approssimating computation time
-    private long startTime;
-    private long estimatedTime;
+    private double seconds;
+//    private long startTime;
+//    private long estimatedTime;
 
 
     //Constructor
@@ -39,7 +40,8 @@ public class JVisirModel {
         this.logFile.WriteLine("");
         this.logFile.WriteLog("System initialization...");
         this.logFile.CloseFile();
-        this.startTime = Utility.Tic();//Start the "timer"
+        long tic = Utility.Tic();
+        //this.startTime = Utility.Tic();//Start the "timer"
 
         //bar_flag = 1: fresh compution of edges not crossing coastline (mode 1 of GMD-D paper)
         //bar_flag = 2: edges not crossing coastline read out from DB   (mode 2 of GMD-D paper)
@@ -88,16 +90,18 @@ public class JVisirModel {
             this.tGrid = new TemporalGrid();
             this.visualization = new Visualization();
         }
-
+        this.seconds = Utility.nanosecToSec(Utility.Toc(tic));
     }
 
     public void Start(){
+        long tic = Utility.Tic();
         LoadData();
         CalculateParameters();
         vessel_ResponseResults vesselResponse;
         Grid_definitionResults gridDefinitionResults;
         Fields_regriddingResults fieldsRegriddingResults;
         Edges_definitionResults edgesDefinitionResults;
+        this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
         if(this.mode == 2){//Loading serialized data
             try{
                 vesselResponse = new vessel_ResponseResults(true);
@@ -112,18 +116,41 @@ public class JVisirModel {
                 e.printStackTrace();
             }
         } else {
+            double stopTime;
+            tic = Utility.Tic();
             vesselResponse = vessel_Response();
+            this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
+            tic = Utility.Tic();
             gridDefinitionResults = Grid_definition();
+            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+            seconds += stopTime;
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("Done. Grid definition tooks "+stopTime+" sec.");
+            this.logFile.CloseFile();
+            tic = Utility.Tic();
             fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
                     gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
+            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+            seconds += stopTime;
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("Done. Fields regridding tooks "+stopTime+" sec.");
+            this.logFile.CloseFile();
+            tic = Utility.Tic();
             edgesDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
                 fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
                 gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+            seconds += stopTime;
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
+            this.logFile.CloseFile();
             if(this.mode==1){//Serialize data
                 this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
             }
         }
-        System.out.println("CIAO");
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Done. Total execution time: "+Utility.secondsToMins(seconds)+" Min.");
+        this.logFile.CloseFile();
     }
 
     private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults, Edges_definitionResults edgesDefinitionResults){
@@ -699,9 +726,6 @@ public class JVisirModel {
         GridOut.setY_islands(readoutCoastResults.getLat_int());
         GridOut.setX_continent(readoutCoastResults.getLon_ext());
         GridOut.setY_continent(readoutCoastResults.getLat_ext());
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Done.");
-        this.logFile.CloseFile();
         return GridOut;
     }
 
@@ -1870,9 +1894,6 @@ public class JVisirModel {
 //                    }
 //                }
 //            }
-            this.logFile = new MyFileWriter("","",true);
-            this.logFile.WriteLog("Done.");
-            this.logFile.CloseFile();
 
             return new Fields_regriddingResults(time_steps, seaOverLand_3stepsOut.get(0),
                     seaOverLand_3stepsOut.get(1), VDIR_out, windMAGN_out, windDIR_out);
@@ -2917,9 +2938,6 @@ public class JVisirModel {
                     fields_node2edgeRes.getWaveHeight_edges(), fields_node2edgeRes.getWavePeriod_edges(), waveDir_edges,
                     fields_node2edgeRes.getWindMAGN_edges(), windDir_edges, nogo_edges, fields_node2edgeRes.getBathy_edges(),
                     ship_v_LUT, varargin[0]);
-            this.logFile = new MyFileWriter("","",true);
-            this.logFile.WriteLog("Done.");
-            this.logFile.CloseFile();
             return new Edges_definitionResults(free_edges, nogo_edges, edgeResults.getTheta_grid(), edgeResults.getEdge_lenght(),
                     edge_delays.getSh_delay(), edge_delays.getVarargout().get(0), edge_delays.getSafe_indexes(), edge_delays.getTdep_danger_idx(),
                     fields_node2edgeRes.getWaveHeight_edges(), fields_node2edgeRes.getWavePeriod_edges(), fields_node2edgeRes.getWaveLenght_edges(),

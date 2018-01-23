@@ -1979,5 +1979,13 @@ public class Utility {
         }
         return out;
     }
+
+    public static double nanosecToSec(long nanosec){
+        return (nanosec+0.0)*Math.pow(10,-9);
+    }
+
+    public static double secondsToMins(double seconds){
+        return seconds * 0.01666667;
+    }
 }
 
