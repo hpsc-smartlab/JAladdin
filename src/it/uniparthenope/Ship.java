@@ -43,7 +43,7 @@ public class Ship implements Serializable {
         this.etaEngine = 0.7;
     }
 
-    public Ship(boolean flag) throws IOException, ParseException{
+    public Ship(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag == true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/Ship.json");
@@ -75,7 +75,7 @@ public class Ship implements Serializable {
         }
     }
 
-    public void saveState() throws IOException {
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/Ship.json");
         writer.putLong("sailType", sailType);

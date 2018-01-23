@@ -41,6 +41,7 @@ public class JVisirModel {
         this.logFile.WriteLog("System initialization...");
         this.logFile.CloseFile();
         long tic = Utility.Tic();
+        //Locale.setDefault(new Locale("en", "US"));
         //this.startTime = Utility.Tic();//Start the "timer"
 
         //bar_flag = 1: fresh compution of edges not crossing coastline (mode 1 of GMD-D paper)
@@ -144,6 +145,7 @@ public class JVisirModel {
             this.logFile = new MyFileWriter("","",true);
             this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
             this.logFile.CloseFile();
+
             if(this.mode==1){//Serialize data
                 this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
             }
@@ -168,10 +170,10 @@ public class JVisirModel {
             this.dep_datetime.saveState();
             this.safety.saveState();
             this.forcing.saveState();
-            vesselResponse.saveState();
-            gridDefinitionResults.saveState();
-            fieldsRegriddingResults.saveState();
-            edgesDefinitionResults.saveState();
+//            vesselResponse.saveState();
+//            gridDefinitionResults.saveState();
+//            fieldsRegriddingResults.saveState();
+//            edgesDefinitionResults.saveState();
         } catch (Exception e){
             MyFileWriter debug = new MyFileWriter("","debug",false);
             debug.WriteLog("SaveState: "+e.getMessage());

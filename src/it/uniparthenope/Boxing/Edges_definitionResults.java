@@ -27,10 +27,10 @@ public class Edges_definitionResults {
     int[] I_ord;
     int[] I_point;
 
-    public Edges_definitionResults(boolean flag) throws IOException, ParseException {
+    public Edges_definitionResults(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag == true){
             JSONManager reader = new JSONManager();
-            reader.initReading("SerializedObjects/Edges_Definition.json");
+            reader.initReading("SerializedObjects/Edges_Definition_1.json");
             free_edges = reader.retrieveInt2D("free_edges");
             nogo_edges = reader.retrieveIntegerArrayList("nogo_edges");
             theta_grid = reader.retrieveDoubleArray("theta_grid");
@@ -38,13 +38,17 @@ public class Edges_definitionResults {
             sh_delay = reader.retrieveDouble2D("sh_delay");
             gear_idx = reader.retrieveInt2D("gear_idx");
             safe_indexes = reader.retrieveInt3D("safe_indexes");
-
-            tdep_danger_idx = new ArrayList<>();
             int n_danger_idxs = reader.retrieveInteger("DangerIndexesNumber");
+            reader.dispose();
+            tdep_danger_idx = new ArrayList<>();
             for(int i=0;i<n_danger_idxs;++i)
                 tdep_danger_idx.add(new DangerIndexes(i));
-
+            reader = new JSONManager();
+            reader.initReading("SerializedObjects/Edges_Definition_2.json");
             waveHeight_edges = reader.retrieveDouble2D("waveHeight_edges");
+            reader.dispose();
+            reader = new JSONManager();
+            reader.initReading("SerializedObjects/Edges_Definition_3.json");
             wavePeriod_edges = reader.retrieveDouble2D("wavePeriod_edges");
             waveLength_edges = reader.retrieveDouble2D("waveLength_edges");
             waveDir_edges = reader.retrieveDouble2D("waveDir_edges");
@@ -59,9 +63,11 @@ public class Edges_definitionResults {
         }
     }
 
-    public void saveState() throws IOException{
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
-        writer.initWriting("SerializedObjects/Edges_definition.json");
+        for(int i=0;i<tdep_danger_idx.size();++i)
+            tdep_danger_idx.get(i).saveState(i);
+        writer.initWriting("SerializedObjects/Edges_definition_1.json");
         writer.putInt2D("free_edges", free_edges);
         writer.putIntegerArrayList("nogo_edges", nogo_edges);
         writer.putDoubleArray("theta_grid", theta_grid);
@@ -70,12 +76,16 @@ public class Edges_definitionResults {
         writer.putInt2D("gear_idx", gear_idx);
         writer.putInt3D("safe_indexes", safe_indexes);
         writer.putInteger("DangerIndexesNumber",tdep_danger_idx.size());
-        for(int i=0;i<tdep_danger_idx.size();++i)
-            tdep_danger_idx.get(i).saveState(i);
+        writer.dispose();
+        writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Edges_definition_2.json");
         writer.putDouble2D("waveHeight_edges", waveHeight_edges);
+        writer.dispose();
         writer.putDouble2D("wavePeriod_edges", wavePeriod_edges);
         writer.putDouble2D("waveLength_edges", waveLength_edges);
         writer.putDouble2D("waveDir_edges", waveDir_edges);
+        writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Edges_definition_3.json");
         writer.putDouble2D("windMAGN_edges", windMAGN_edges);
         writer.putDouble2D("windDIR_edges", windDIR_edges);
         writer.putDoubleArray("bathy_edges", bathy_edges);

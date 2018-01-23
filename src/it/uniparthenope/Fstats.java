@@ -18,7 +18,7 @@ public class Fstats {
 
     public Fstats(){}
 
-    public Fstats(boolean flag) throws IOException, ParseException {
+    public Fstats(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/Fstats.json");
@@ -35,12 +35,13 @@ public class Fstats {
         }
     }
 
-    public void saveState() throws IOException {
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/Fstats.json");
         writer.putDouble("wheight_min", wheight_min);
         writer.putDouble("wheight_max", wheight_max);
         writer.putDouble("bathy_min", bathy_min);
+        writer.putDouble("bathy_max", bathy_max);
         writer.putDouble("wperiod_min", wperiod_min);
         writer.putDouble("wperiod_max", wperiod_max);
         writer.putDouble("wheight_avg", wheight_avg);

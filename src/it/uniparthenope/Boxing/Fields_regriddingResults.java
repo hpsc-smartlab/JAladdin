@@ -24,7 +24,7 @@ public class Fields_regriddingResults {
         this.windDIR_Inset = windDIR_Inset;
     }
 
-    public Fields_regriddingResults(boolean flag) throws IOException, ParseException {
+    public Fields_regriddingResults(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/Fields_regridding.json");
@@ -38,7 +38,7 @@ public class Fields_regriddingResults {
         }
     }
 
-    public void saveState() throws IOException {
+    public void saveState() throws IOException, java.text.ParseException {
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/Fields_regridding.json");
         writer.putIntArray("time_steps", time_steps);

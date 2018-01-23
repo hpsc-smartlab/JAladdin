@@ -12,7 +12,7 @@ public class vessel_ResponseResults{
     private ArrayList<Double> polar_twa;
     private ArrayList<Double> polar_tws;
 
-    public vessel_ResponseResults(boolean flag) throws IOException, ParseException{
+    public vessel_ResponseResults(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true) {
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/vesselResponse.json");
@@ -50,7 +50,7 @@ public class vessel_ResponseResults{
         return polar_tws;
     }
 
-    public void saveState() throws IOException{
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/vesselResponse.json");
         writer.putDouble2D("ship_v_LUT", this.ship_v_LUT);

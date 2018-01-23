@@ -33,7 +33,7 @@ public class Grid_definitionResults {
         y_continent = new ArrayList<>();
     }
 
-    public Grid_definitionResults(boolean flag) throws IOException, ParseException {
+    public Grid_definitionResults(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/Grid_definition.json");
@@ -57,7 +57,7 @@ public class Grid_definitionResults {
         }
     }
 
-    public void saveState() throws IOException{
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/Grid_definition.json");
         writer.putDouble2D("xy", xy);

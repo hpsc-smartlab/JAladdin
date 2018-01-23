@@ -29,7 +29,7 @@ public class ExtremePoints{
     private String cycType;
     private double pseudoG;
 
-    public ExtremePoints(boolean flag) throws IOException, ParseException{
+    public ExtremePoints(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/ExtremePoints.json");
@@ -98,7 +98,7 @@ public class ExtremePoints{
         return integrityCheck;
     }
 
-    public void saveState() throws IOException {
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/ExtremePoints.json");
         writer.putDouble("start_lat", start_lat);

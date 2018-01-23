@@ -24,7 +24,7 @@ public class TemporalGrid{
         this.minNt = 24;
     }
 
-    public TemporalGrid(boolean flag) throws IOException, ParseException{
+    public TemporalGrid(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/TemporalGrid.json");
@@ -41,7 +41,7 @@ public class TemporalGrid{
         }
     }
 
-    public void saveState() throws IOException {
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/TemporalGrid.json");
         writer.putDouble("Dt", Dt);

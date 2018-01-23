@@ -34,7 +34,7 @@ public class Visualization {
         this.resamp_factor = 24;//from settings.m. GDM paper (can be = 8. in this case, reference to IEEE paper)
     }
 
-    public Visualization(boolean flag) throws IOException, ParseException {
+    public Visualization(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/Visualization.json");
@@ -62,7 +62,7 @@ public class Visualization {
         }
     }
 
-    public void saveState() throws IOException {
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/Visualization.json");
         writer.putCharacter("encounter_TF", encounter_TF);

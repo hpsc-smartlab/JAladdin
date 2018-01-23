@@ -53,7 +53,7 @@ public class SpatialGrid {
         this.minNoGridPoints = 4; //minimum number of grid points along either direction (meridional or zonal) - TWA inconsistencies may result from tto small such a value
     }
 
-    public SpatialGrid(boolean flag) throws IOException, ParseException {
+    public SpatialGrid(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag==true){
             JSONManager reader = new JSONManager();
             reader.initReading("SerializedObjects/SpatialGrid.json");
@@ -98,7 +98,7 @@ public class SpatialGrid {
         }
     }
 
-    public void saveState() throws IOException {
+    public void saveState() throws IOException, java.text.ParseException{
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/SpatialGrid.json");
         writer.putLong("numberOfNeighbors", numberOfNeighbors);

@@ -44,7 +44,7 @@ public class Optim {
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/Optim.json");
         writer.putLong("relocAnlsCode", relocAnlsCode);
-        writer.putLong("intentional_speed_res", intentional_speed_red);
+        writer.putLong("intentional_speed_red", intentional_speed_red);
         writer.putLong("windModel", windModel);
         writer.putLong("waveModel", waveModel);
         writer.dispose();
