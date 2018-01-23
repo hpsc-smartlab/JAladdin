@@ -1,10 +1,13 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Parser.JSONManager;
 import it.uniparthenope.Parser.MyJSONParser;
+import org.json.simple.parser.ParseException;
 
-import java.io.Serializable;
+import java.io.IOException;
 
-public class DepartureParameters implements Serializable {
+
+public class DepartureParameters {
     private long year;
     private long month;
     private long day;
@@ -12,6 +15,21 @@ public class DepartureParameters implements Serializable {
     private long min;
     private long now_flag;
     private String depDateTime;
+
+    public DepartureParameters(boolean flag) throws IOException, ParseException{
+        if(flag == true){
+            JSONManager reader = new JSONManager();
+            reader.initReading("SerializedObjects/DepartureParameters.json");
+            year = reader.retrieveLong("year");
+            month = reader.retrieveLong("month");
+            day = reader.retrieveLong("day");
+            hour = reader.retrieveLong("hour");
+            min = reader.retrieveLong("min");
+            now_flag = reader.retrieveLong("now_flag");
+            depDateTime = reader.retrieveString("depDateTime");
+            reader.dispose();
+        }
+    }
 
     public DepartureParameters(){
         //getting data from datetime_pars.json parsing
@@ -23,6 +41,19 @@ public class DepartureParameters implements Serializable {
         this.min = parser.getValueAsLong("min");
         this.now_flag = 0;
         setDepDateTime();
+    }
+
+    public void saveState() throws IOException {
+        JSONManager writer = new JSONManager();
+        writer.initWriting("SerializedObjects/DepartureParameters.json");
+        writer.putLong("year", year);
+        writer.putLong("month", month);
+        writer.putLong("day", day);
+        writer.putLong("hour", hour);
+        writer.putLong("min", min);
+        writer.putLong("now_flag", now_flag);
+        writer.putString("depDateTime", depDateTime);
+        writer.dispose();
     }
 
     public long getYear() {

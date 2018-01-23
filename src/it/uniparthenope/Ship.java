@@ -1,8 +1,11 @@
 package it.uniparthenope;
 
 import it.uniparthenope.Debug.MyFileWriter;
+import it.uniparthenope.Parser.JSONManager;
 import it.uniparthenope.Parser.MyJSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +41,68 @@ public class Ship implements Serializable {
     public Ship(){
         this.sailType = 4; //sailboats
         this.etaEngine = 0.7;
+    }
+
+    public Ship(boolean flag) throws IOException, ParseException{
+        if(flag == true){
+            JSONManager reader = new JSONManager();
+            reader.initReading("SerializedObjects/Ship.json");
+            sailType = reader.retrieveLong("sailType");
+            etaEngine = reader.retrieveDouble("etaEngine");
+            vessType = reader.retrieveLong("vessType");
+            sailClass = reader.retrieveLong("sailClass");
+            P_max_hp = reader.retrieveLong("P_max_hp");
+            maxv = reader.retrieveDouble("maxv");
+            length = reader.retrieveDouble("length");
+            beam = reader.retrieveDouble("beam");
+            draught = reader.retrieveDouble("draught");
+            obs_roll_period = reader.retrieveDouble("obs_roll_period");
+            roll_period = reader.retrieveDouble("roll_period");
+            bottomDraughtfactor = reader.retrieveDouble("bottomDraughtfactor");
+            TEsaturFactor = reader.retrieveDouble("TEsaturFactor");
+            Rspectrum = reader.retrieveDouble("Rspectrum");
+            Nvel = reader.retrieveDouble("Nvel");
+            P_level_hp = reader.retrieveDoubleArrayList("P_level_hp");
+            Fn_max = reader.retrieveDouble("Fn_max");
+            v_out_kts = reader.retrieveDoubleArrayList("v_out_kts");
+            R_c = reader.retrieveDoubleArrayList("R_c");
+            R_aw = reader.retrieveDoubleArrayList("R_aw");
+            maxWind = reader.retrieveDouble("maxWind");
+            minWind = reader.retrieveDouble("minWind");
+            min_lambda_L = reader.retrieveDouble("min_lambda_L");
+            max_lambda_L = reader.retrieveDouble("max_lambda_L");
+            reader.dispose();
+        }
+    }
+
+    public void saveState() throws IOException {
+        JSONManager writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Ship.json");
+        writer.putLong("sailType", sailType);
+        writer.putDouble("etaEngine", etaEngine);
+        writer.putLong("vessType", vessType);
+        writer.putLong("sailClass", sailClass);
+        writer.putLong("P_max_hp", P_max_hp);
+        writer.putDouble("maxv", maxv);
+        writer.putDouble("length", length);
+        writer.putDouble("beam", beam);
+        writer.putDouble("draught", draught);
+        writer.putDouble("obs_roll_period", obs_roll_period);
+        writer.putDouble("roll_period", roll_period);
+        writer.putDouble("bottomDraughtfactor", bottomDraughtfactor);
+        writer.putDouble("TEsaturFactor", TEsaturFactor);
+        writer.putDouble("Rspectrum", Rspectrum);
+        writer.putDouble("Nvel", Nvel);
+        writer.putDoubleArrayList("P_level_hp", P_level_hp);
+        writer.putDouble("Fn_max", Fn_max);
+        writer.putDoubleArrayList("v_out_kts", v_out_kts);
+        writer.putDoubleArrayList("R_c", R_c);
+        writer.putDoubleArrayList("R_aw",R_aw);
+        writer.putDouble("maxWind", maxWind);
+        writer.putDouble("minWind", minWind);
+        writer.putDouble("min_lambda_L", min_lambda_L);
+        writer.putDouble("max_lambda_L", max_lambda_L);
+        writer.dispose();
     }
 
     public void LoadVesselParameters(){

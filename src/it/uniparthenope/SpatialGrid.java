@@ -1,8 +1,11 @@
 package it.uniparthenope;
 
-import java.io.Serializable;
+import it.uniparthenope.Parser.JSONManager;
+import org.json.simple.parser.ParseException;
 
-public class SpatialGrid implements Serializable {
+import java.io.IOException;
+
+public class SpatialGrid {
     private long numberOfNeighbors;
     private long numberOfShortestPaths;
     private double nodesLargeN;
@@ -48,6 +51,94 @@ public class SpatialGrid implements Serializable {
         this.nodesLargeN = 1.0 * Math.pow(10,5);//Limited by ram availability
         this.invStepFields = 4;//inverse grid size [deg^{-1}] of original wind forecast fields
         this.minNoGridPoints = 4; //minimum number of grid points along either direction (meridional or zonal) - TWA inconsistencies may result from tto small such a value
+    }
+
+    public SpatialGrid(boolean flag) throws IOException, ParseException {
+        if(flag==true){
+            JSONManager reader = new JSONManager();
+            reader.initReading("SerializedObjects/SpatialGrid.json");
+            numberOfNeighbors = reader.retrieveLong("numberOfNeighbors");
+            numberOfShortestPaths = reader.retrieveLong("numberOfShortestPaths");
+            nodesLargeN = reader.retrieveDouble("nodesLargeN");
+            invStepFields = reader.retrieveLong("invStepFields");
+            inv_step = reader.retrieveDouble("inv_step");
+            minNoGridPoints = reader.retrieveLong("minNoGridPoints");
+            DB_bbox__lat_max = reader.retrieveDouble("DB_bbox__lat_max");
+            DB_bbox__lat_min = reader.retrieveDouble("DB_bbox__lat_min");
+            DB_bbox__lon_max = reader.retrieveDouble("DB_bbox__lon_max");
+            DB_bbox__lon_min = reader.retrieveDouble("DB_bbox__lon_min");
+            bbox__lat_max = reader.retrieveDouble("bbox__lat_max");
+            bbox__lat_min = reader.retrieveDouble("bbox__lat_min");
+            bbox__lon_max = reader.retrieveDouble("bbox__lon_max");
+            bbox__lon_min = reader.retrieveDouble("bbox__lon_min");
+            DB_xi = reader.retrieveDouble("DB_xi");
+            DB_yi = reader.retrieveDouble("DB_yi");
+            DB_xf = reader.retrieveDouble("DB_xf");
+            DB_yf = reader.retrieveDouble("DB_yf");
+            DB_Nx = reader.retrieveLong("DB_Nx");
+            DB_Ny = reader.retrieveLong("DB_Ny");
+            xi = reader.retrieveDouble("xi");
+            yi = reader.retrieveDouble("yi");
+            xf = reader.retrieveDouble("xf");
+            yf = reader.retrieveDouble("yf");
+            inset_area = reader.retrieveDouble("inset_area");
+            inset_Nx = reader.retrieveLong("inset_Nx");
+            inset_Ny = reader.retrieveLong("inset_Ny");
+            freenodes = reader.retrieveLong("freenodes");
+            min_start_dist = reader.retrieveDouble("min_start_dist");
+            min_end_dist = reader.retrieveDouble("min_end_dist");
+            node_start = reader.retrieveLong("node_start");
+            node_end = reader.retrieveLong("node_end");
+            node_start_lat = reader.retrieveLong("node_start_lat");
+            node_end_lat = reader.retrieveLong("node_end_lat");
+            node_start_lon = reader.retrieveLong("node_start_lon");
+            node_end_lon = reader.retrieveLong("node_end_lon");
+            theta_gdt = reader.retrieveDouble("theta_gdt");
+            reader.dispose();
+        }
+    }
+
+    public void saveState() throws IOException {
+        JSONManager writer = new JSONManager();
+        writer.initWriting("SerializedObjects/SpatialGrid.json");
+        writer.putLong("numberOfNeighbors", numberOfNeighbors);
+        writer.putLong("numberOfShortestPaths",numberOfShortestPaths);
+        writer.putDouble("nodesLargeN", nodesLargeN);
+        writer.putLong("invStepFields", invStepFields);
+        writer.putDouble("inv_step", inv_step);
+        writer.putLong("minNoGridPoints", minNoGridPoints);
+        writer.putDouble("DB_bbox__lat_max", DB_bbox__lat_max);
+        writer.putDouble("DB_bbox__lat_min", DB_bbox__lat_min);
+        writer.putDouble("DB_bbox__lon_max", DB_bbox__lon_max);
+        writer.putDouble("DB_bbox__lon_min", DB_bbox__lon_min);
+        writer.putDouble("bbox__lat_max", bbox__lat_max);
+        writer.putDouble("bbox__lat_min", bbox__lat_min);
+        writer.putDouble("bbox__lon_max", bbox__lon_max);
+        writer.putDouble("bbox__lon_min", bbox__lon_min);
+        writer.putDouble("DB_xi", DB_xi);
+        writer.putDouble("DB_yi", DB_yi);
+        writer.putDouble("DB_xf", DB_xf);
+        writer.putDouble("DB_yf", DB_yf);
+        writer.putLong("DB_Nx", DB_Nx);
+        writer.putLong("DB_Ny", DB_Ny);
+        writer.putDouble("xi", xi);
+        writer.putDouble("yi", yi);
+        writer.putDouble("xf", xf);
+        writer.putDouble("yf", yf);
+        writer.putDouble("inset_area", inset_area);
+        writer.putLong("inset_Nx", inset_Nx);
+        writer.putLong("inset_Ny", inset_Ny);
+        writer.putLong("freenodes", freenodes);
+        writer.putDouble("min_start_dist", min_start_dist);
+        writer.putDouble("min_end_dist", min_end_dist);
+        writer.putLong("node_start", node_start);
+        writer.putLong("node_end", node_end);
+        writer.putDouble("node_start_lon", node_start_lon);
+        writer.putDouble("node_start_lat", node_start_lat);
+        writer.putDouble("node_end_lon", node_end_lon);
+        writer.putDouble("node_end_lat", node_end_lat);
+        writer.putDouble("theta_gdt", theta_gdt);
+        writer.dispose();
     }
 
     public void setInvStepFields(long flag){//relocatable model input fields

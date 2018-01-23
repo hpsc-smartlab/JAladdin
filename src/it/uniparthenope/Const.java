@@ -1,8 +1,6 @@
 package it.uniparthenope;
 
-import java.io.Serializable;
-
-public class Const implements Serializable {
+public class Const {
     private double deg2rad;
     private double m2ft;
     private double ms2kts;

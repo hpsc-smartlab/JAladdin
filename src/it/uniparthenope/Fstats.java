@@ -1,8 +1,11 @@
 package it.uniparthenope;
 
-import java.io.Serializable;
+import it.uniparthenope.Parser.JSONManager;
+import org.json.simple.parser.ParseException;
 
-public class Fstats implements Serializable {
+import java.io.IOException;
+
+public class Fstats {
     private double wheight_min;
     private double wheight_max;
     private double bathy_min;
@@ -12,6 +15,39 @@ public class Fstats implements Serializable {
     private double wheight_avg;
     private double wlength_min;
     private double wlenght_max;
+
+    public Fstats(){}
+
+    public Fstats(boolean flag) throws IOException, ParseException {
+        if(flag==true){
+            JSONManager reader = new JSONManager();
+            reader.initReading("SerializedObjects/Fstats.json");
+            wheight_min = reader.retrieveDouble("wheight_min");
+            wheight_max = reader.retrieveDouble("wheight_max");
+            bathy_min = reader.retrieveDouble("bathy_min");
+            bathy_max = reader.retrieveDouble("bathy_max");
+            wperiod_min = reader.retrieveDouble("wperiod_min");
+            wperiod_max = reader.retrieveDouble("wperiod_max");
+            wheight_avg = reader.retrieveDouble("wheight_avg");
+            wlength_min = reader.retrieveDouble("wlength_min");
+            wlenght_max = reader.retrieveDouble("wlenght_max");
+            reader.dispose();
+        }
+    }
+
+    public void saveState() throws IOException {
+        JSONManager writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Fstats.json");
+        writer.putDouble("wheight_min", wheight_min);
+        writer.putDouble("wheight_max", wheight_max);
+        writer.putDouble("bathy_min", bathy_min);
+        writer.putDouble("wperiod_min", wperiod_min);
+        writer.putDouble("wperiod_max", wperiod_max);
+        writer.putDouble("wheight_avg", wheight_avg);
+        writer.putDouble("wlength_min", wlength_min);
+        writer.putDouble("wlenght_max", wlenght_max);
+        writer.dispose();
+    }
 
     public double getWheight_min() {
         return wheight_min;

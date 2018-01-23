@@ -1,9 +1,12 @@
 package it.uniparthenope.Boxing;
 
-import java.io.Serializable;
+import it.uniparthenope.Parser.JSONManager;
+import org.json.simple.parser.ParseException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
-public class Grid_definitionResults implements Serializable {
+public class Grid_definitionResults {
     private double[][] xy;
     private double[][] xg;
     private double[][] yg;
@@ -20,6 +23,61 @@ public class Grid_definitionResults implements Serializable {
     private ArrayList<Double> x_continent;
     private ArrayList<Double> y_continent;
     private double estGdtDist;
+
+    public Grid_definitionResults(){
+        lat_bathy_Inset = new ArrayList<>();
+        lon_bathy_Inset = new ArrayList<>();
+        x_islands = new ArrayList<>();
+        y_islands = new ArrayList<>();
+        x_continent = new ArrayList<>();
+        y_continent = new ArrayList<>();
+    }
+
+    public Grid_definitionResults(boolean flag) throws IOException, ParseException {
+        if(flag==true){
+            JSONManager reader = new JSONManager();
+            reader.initReading("SerializedObjects/Grid_definition.json");
+            xy = reader.retrieveDouble2D("xy");
+            xg = reader.retrieveDouble2D("xg");
+            yg = reader.retrieveDouble2D("yg");
+            xg_array = reader.retrieveDoubleArray("xg_array");
+            yg_array = reader.retrieveDoubleArray("yg_array");
+            xy_DB = reader.retrieveDouble2D("xy_DB");
+            lat_bathy_Inset = reader.retrieveDoubleArrayList("lat_bathy_Inset");
+            lon_bathy_Inset = reader.retrieveDoubleArrayList("lon_bathy_Inset");
+            bathy_Inset = reader.retrieveDouble2D("bathy_Inset");
+            lsm_mask = reader.retrieveDouble2D("lsm_mask");
+            J_mask = reader.retrieveDouble2D("J_mask");
+            x_islands = reader.retrieveDoubleArrayList("x_islands");
+            y_islands = reader.retrieveDoubleArrayList("y_islands");
+            x_continent = reader.retrieveDoubleArrayList("x_continent");
+            y_continent = reader.retrieveDoubleArrayList("y_continent");
+            estGdtDist = reader.retrieveDouble("estGdtDist");
+            reader.dispose();
+        }
+    }
+
+    public void saveState() throws IOException{
+        JSONManager writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Grid_definition.json");
+        writer.putDouble2D("xy", xy);
+        writer.putDouble2D("xg", xg);
+        writer.putDouble2D("yg", yg);
+        writer.putDouble2D("xy_DB", xy_DB);
+        writer.putDouble2D("bathy_Inset", bathy_Inset);
+        writer.putDouble2D("lsm_mask", lsm_mask);
+        writer.putDouble2D("J_mask", J_mask);
+        writer.putDoubleArray("xg_array", xg_array);
+        writer.putDoubleArray("yg_array", yg_array);
+        writer.putDoubleArrayList("lat_bathy_Inset", lat_bathy_Inset);
+        writer.putDoubleArrayList("lon_bathy_Inset", lon_bathy_Inset);
+        writer.putDoubleArrayList("x_islands", x_islands);
+        writer.putDoubleArrayList("y_islands", y_islands);
+        writer.putDoubleArrayList("x_continent", x_continent);
+        writer.putDoubleArrayList("y_continent", y_continent);
+        writer.putDouble("estGdtDist", estGdtDist);
+        writer.dispose();
+    }
 
     public double[][] getXy() {
         return xy;

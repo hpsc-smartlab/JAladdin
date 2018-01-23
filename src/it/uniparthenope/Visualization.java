@@ -1,10 +1,13 @@
 package it.uniparthenope;
 
+import it.uniparthenope.Parser.JSONManager;
 import it.uniparthenope.Parser.MyJSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
 import java.io.Serializable;
 
-public class Visualization implements Serializable {
+public class Visualization {
     private long resamp_factor;
     private long env_fields;
     private long waypoint_info;
@@ -29,6 +32,60 @@ public class Visualization implements Serializable {
 
     public Visualization(){
         this.resamp_factor = 24;//from settings.m. GDM paper (can be = 8. in this case, reference to IEEE paper)
+    }
+
+    public Visualization(boolean flag) throws IOException, ParseException {
+        if(flag==true){
+            JSONManager reader = new JSONManager();
+            reader.initReading("SerializedObjects/Visualization.json");
+            encounter_TF = reader.retrieveChar("encounter_TF");
+            customMax = reader.retrieveDouble("customMax");
+            resamp_factor = reader.retrieveLong("resamp_factor");
+            env_fields = reader.retrieveLong("env_fields");
+            waypoint_info = reader.retrieveLong("waypoint_info");
+            safegram = reader.retrieveLong("safegram");
+            shipSpeedLUT = reader.retrieveLong("shipSpeedLUT");
+            scientific_mode = reader.retrieveLong("scientific_mode");
+            edgedelay_timedep = reader.retrieveLong("edgedelay_timedep");
+            FnTilde_fitPlot = reader.retrieveLong("FnTilde_fitPlot");
+            waveDisp = reader.retrieveLong("waveDisp");
+            bathy = reader.retrieveLong("bathy");
+            epsOutput = reader.retrieveLong("epsOutput");
+            H_s = reader.retrieveLong("H_s");
+            T_w = reader.retrieveLong("T_w");
+            lambda = reader.retrieveLong("lambda");
+            wind = reader.retrieveLong("wind");
+            graphData = reader.retrieveLong("graphData");
+            fig_x = reader.retrieveLong("fig_x");
+            env_forcing = reader.retrieveLong("env_forcing");
+            reader.dispose();
+        }
+    }
+
+    public void saveState() throws IOException {
+        JSONManager writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Visualization.json");
+        writer.putCharacter("encounter_TF", encounter_TF);
+        writer.putDouble("customMax", customMax);
+        writer.putLong("resamp_factor", resamp_factor);
+        writer.putLong("env_fields", env_fields);
+        writer.putLong("waypoint_info", waypoint_info);
+        writer.putLong("safegram", safegram);
+        writer.putLong("shipSpeedLUT", shipSpeedLUT);
+        writer.putLong("scientific_mode", scientific_mode);
+        writer.putLong("edgedelay_timedep", edgedelay_timedep);
+        writer.putLong("FnTilde_fitPlot", FnTilde_fitPlot);
+        writer.putLong("waveDisp", waveDisp);
+        writer.putLong("bathy", bathy);
+        writer.putLong("epsOutput", epsOutput);
+        writer.putLong("H_s", H_s);
+        writer.putLong("T_w", T_w);
+        writer.putLong("lambda", lambda);
+        writer.putLong("wind", wind);
+        writer.putLong("graphData", graphData);
+        writer.putLong("fig_x", fig_x);
+        writer.putLong("env_forcing", env_forcing);
+        writer.dispose();
     }
 
     public void VisualizationParameters(){

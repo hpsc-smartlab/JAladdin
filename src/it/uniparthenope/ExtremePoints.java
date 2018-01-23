@@ -1,15 +1,17 @@
 package it.uniparthenope;
 
 import it.uniparthenope.Debug.MyFileWriter;
+import it.uniparthenope.Parser.JSONManager;
 import it.uniparthenope.Parser.MyCSVParser;
 import it.uniparthenope.Parser.MyJSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ExtremePoints implements Serializable {
+public class ExtremePoints{
     //Route extreme points
     private double start_lat;
     private double start_lon;
@@ -27,6 +29,28 @@ public class ExtremePoints implements Serializable {
     private String cycType;
     private double pseudoG;
 
+    public ExtremePoints(boolean flag) throws IOException, ParseException{
+        if(flag==true){
+            JSONManager reader = new JSONManager();
+            reader.initReading("SerializedObjects/ExtremePoints.json");
+            start_lat = reader.retrieveDouble("start_lat");
+            start_lon = reader.retrieveDouble("start_lon");
+            end_lat = reader.retrieveDouble("end_lat");
+            end_lon = reader.retrieveDouble("end_lon");
+            bbox_deltaLat_u = reader.retrieveDouble("bbox_deltaLat_u");
+            bbox_deltaLon_l = reader.retrieveDouble("bbox_deltaLon_l");
+            bbox_deltaLat_d = reader.retrieveDouble("bbox_deltaLat_d");
+            bbox_deltaLon_r = reader.retrieveDouble("bbox_deltaLon_r");
+            minCoastDist = reader.retrieveLong("minCoastDist");
+            UL_lat = reader.retrieveDouble("UL_lat");
+            UL_lon = reader.retrieveDouble("UL_lon");
+            DR_lat = reader.retrieveDouble("DR_lat");
+            DR_lon = reader.retrieveDouble("DR_lon");
+            cycType = reader.retrieveString("cycType");
+            pseudoG = reader.retrieveDouble("pseudoG");
+            reader.dispose();
+        }
+    }
 
     public ExtremePoints(){
         //getting data from extrema_pars.json parsing
@@ -72,6 +96,27 @@ public class ExtremePoints implements Serializable {
             e.printStackTrace();
         }
         return integrityCheck;
+    }
+
+    public void saveState() throws IOException {
+        JSONManager writer = new JSONManager();
+        writer.initWriting("SerializedObjects/ExtremePoints.json");
+        writer.putDouble("start_lat", start_lat);
+        writer.putDouble("start_lon", start_lon);
+        writer.putDouble("end_lat", end_lat);
+        writer.putDouble("end_lon", end_lon);
+        writer.putDouble("bbox_deltaLat_u", bbox_deltaLat_u);
+        writer.putDouble("bbox_deltaLon_l", bbox_deltaLon_l);
+        writer.putDouble("bbox_deltaLat_d", bbox_deltaLat_d);
+        writer.putDouble("bbox_deltaLon_r", bbox_deltaLon_r);
+        writer.putLong("minCoastDist", minCoastDist);
+        writer.putDouble("UL_lat", UL_lat);
+        writer.putDouble("UL_lon", UL_lon);
+        writer.putDouble("DR_lat", DR_lat);
+        writer.putDouble("DR_lon", DR_lon);
+        writer.putString("cycType", cycType);
+        writer.putDouble("pseudoG", pseudoG);
+        writer.dispose();
     }
 
     public double getStart_lat() {
