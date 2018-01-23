@@ -3,11 +3,8 @@ package it.uniparthenope;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
-import flanagan.interpolation.BiCubicSplineFast;
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
 import org.apache.commons.math3.complex.Complex;
@@ -22,7 +19,7 @@ public class Utility {
 
     public static double[] arrayfy(ArrayList<Double> in){
         double[] out = new double[in.size()];
-        for(int i=0;i<out.length;i++)
+        for(int i=0;i<out.length;++i)
             out[i] = in.get(i);
         return out;
     }
@@ -39,7 +36,7 @@ public class Utility {
         ArrayList<Double> v = new ArrayList<Double>();
         double delta = (max - min) / (n-1);
         double accDelta = 0.0;
-        for(long i = 0; i<n; i++){
+        for(long i = 0; i<n; ++i){
             v.add(min+accDelta);
             accDelta +=delta;
         }
@@ -60,8 +57,8 @@ public class Utility {
 
     public static double[][] zeros(int rows, int cols){
         double[][] matrix = new double[rows][cols];
-        for(int i = 0; i< rows; i++){
-            for(int j = 0; j< cols; j++){
+        for(int i = 0; i< rows; ++i){
+            for(int j = 0; j< cols; ++j){
                 matrix[i][j] = 0.0;
             }
         }
@@ -70,24 +67,24 @@ public class Utility {
 
     public static double[] NaN(int dim){
         double[] out = new double[dim];
-        for(int i=0;i<dim;i++)
+        for(int i=0;i<dim;++i)
             out[i]=Double.NaN;
         return out;
     }
 
     public static double[][] NaN(int rows, int cols){
         double[][] out = new double[rows][cols];
-        for(int i=0;i<rows;i++)
-            for(int j=0;j<cols;j++)
+        for(int i=0;i<rows;++i)
+            for(int j=0;j<cols;++j)
                 out[i][j]=Double.NaN;
         return out;
     }
 
     public static double[][][] NaN(int rows, int cols, int zDim){
         double[][][] out = new double[zDim][rows][cols];
-        for(int k=0;k<zDim;k++)
-            for(int i=0;i<rows;i++)
-                for(int j=0;j<cols;j++)
+        for(int k=0;k<zDim;++k)
+            for(int i=0;i<rows;++i)
+                for(int j=0;j<cols;++j)
                     out[k][i][j] = Double.NaN;
         return out;
     }
@@ -98,8 +95,8 @@ public class Utility {
 
     public static double[][] ones(int rows, int cols){
         double[][] matrix = new double[rows][cols];
-        for(int i = 0; i< rows; i++){
-            for(int j = 0; j< cols; j++){
+        for(int i = 0; i< rows; ++i){
+            for(int j = 0; j< cols; ++j){
                 matrix[i][j] = 1.0;
             }
         }
@@ -108,9 +105,9 @@ public class Utility {
 
     public static double[][][] NaN3Dmatrix(int x, int y, int z){
         double[][][] matrix3d = new double[x][y][z];
-        for(int i=0;i<x;i++){
-            for(int j=0;j<y;j++){
-                for(int k=0; k<z; k++){
+        for(int i=0;i<x;++i){
+            for(int j=0;j<y;++j){
+                for(int k=0; k<z; ++k){
                     matrix3d[i][j][k] = Double.NaN;
                 }
             }
@@ -120,8 +117,8 @@ public class Utility {
 
     public static double[][] NaN2Dmatrix(int x, int y){
         double[][] out = new double[x][y];
-        for(int i=0;i<x;i++){
-            for(int j=0;j<y;j++){
+        for(int i=0;i<x;++i){
+            for(int j=0;j<y;++j){
                 out[i][j] = Double.NaN;
             }
         }
@@ -130,7 +127,7 @@ public class Utility {
 
     public static double[] nthroot(double[] x, int n){
         double[] out = new double[x.length];
-        for(int i=0;i<out.length;i++)
+        for(int i=0;i<out.length;++i)
             out[i] = nthroot(x[i], n);
         return out;
     }
@@ -161,9 +158,9 @@ public class Utility {
 
     public static double[][][] ones3Dmatrix(int x, int y, int z){
         double[][][] matrix3d = new double[x][y][z];
-        for(int i=0;i<x;i++){
-            for(int j=0;j<y;j++){
-                for(int k=0; k<z; k++){
+        for(int i=0;i<x;++i){
+            for(int j=0;j<y;++j){
+                for(int k=0; k<z; ++k){
                     matrix3d[i][j][k] = 1.0;
                 }
             }
@@ -174,8 +171,8 @@ public class Utility {
 
     public static double[][] NaNmatrix(int rows, int cols){
         double[][] matrix = new double[rows][cols];
-        for(int i=0;i<rows;i++){
-            for(int j=0;j<cols;j++){
+        for(int i=0;i<rows;++i){
+            for(int j=0;j<cols;++j){
                 matrix[i][j]=Double.NaN;
             }
         }
@@ -184,7 +181,7 @@ public class Utility {
 
     public static double[] NaNarray(int dim){
         double[] array = new double[dim];
-        for(int i=0;i<dim;i++){
+        for(int i=0;i<dim;++i){
             array[i]=Double.NaN;
         }
         return array;
@@ -330,8 +327,8 @@ public class Utility {
         double[][] X = new double[nRows][nCols];
         double[][] Y = new double[nRows][nCols];
         int nElem =0;
-        for(int j=0;j<X[0].length;j++){
-            for(int i=0;i<X.length;i++){
+        for(int j=0;j<X[0].length;++j){
+            for(int i=0;i<X.length;++i){
                 X[i][j] = getElementById(x, nElem);
             }
             nElem++;
@@ -367,8 +364,8 @@ public class Utility {
         int nCols = x.size();
         double[][] X = new double[nRows][nCols];
         double[][] Y = new double[nRows][nCols];
-        for(int i =0;i<nRows;i++){
-            for(int j=0;j<nCols; j++){
+        for(int i =0;i<nRows; ++i){
+            for(int j=0;j<nCols; ++j){
                 X[i][j] = x.get(j);
                 Y[i][j] = y.get(i);
             }
@@ -385,8 +382,8 @@ public class Utility {
         int nCols = x.length;
         double[][] X = new double[nRows][nCols];
         double[][] Y = new double[nRows][nCols];
-        for(int i =0;i<nRows;i++){
-            for(int j=0;j<nCols; j++){
+        for(int i =0;i<nRows; ++i){
+            for(int j=0;j<nCols; ++j){
                 X[i][j] = x[j];
                 Y[i][j] = y[i];
             }
@@ -407,7 +404,7 @@ public class Utility {
         for(int k=0;k<A.length;k++){
             int contaRighe3D = 0;
             int contaCol3D = 0;
-            for(int u=0;u<(A[0].length*A[0][0].length);u++){
+            for(int u=0;u<(A[0].length*A[0][0].length);++u){
                 out[contaRighe2D][contaCol2D] = A[k][contaRighe3D][contaCol3D];
                 contaRighe2D++;
                 contaRighe3D++;
@@ -461,7 +458,7 @@ public class Utility {
         double[][] out = new double[nRows][nCols];
         int i=0;
         int j=0;
-        for(int k=0;k<A.size();k++){
+        for(int k=0;k<A.size();++k){
             out[i][j]=A.get(k);
             i++;
             if(i==nRows){
@@ -487,7 +484,7 @@ public class Utility {
         int i=0;
         int j=0;
         int n_element = 0;
-        for(int k=0;k<A.length;k++){
+        for(int k=0;k<A.length;++k){
             out[i][j]=A[n_element];
             n_element++;
             i++;
@@ -515,7 +512,7 @@ public class Utility {
         int j=0;
         int k=0;
         int l=0;
-        for(int u=0;u<nRows*nCols;u++){
+        for(int u=0;u<nRows*nCols;++u){
             out[k][l]=A[i][j];
             i++;
             k++;
@@ -545,7 +542,7 @@ public class Utility {
         int i=0;
         int j=0;
         int n_element = 0;
-        for(int k=0;k<A.length;k++){
+        for(int k=0;k<A.length;++k){
             out[i][j]=A[n_element];
             n_element++;
             i++;
@@ -566,7 +563,7 @@ public class Utility {
             case("<="):
                 switch(condition2){
                     case("<="):
-                        for(int i=0;i<A.length;i++){
+                        for(int i=0;i<A.length;++i){
                             if(b <= A[i] && A[i] <= c){
                                 elements.add(A[i]);
                                 indexes.add(i);
@@ -578,7 +575,7 @@ public class Utility {
             case(">="):
                 switch(condition2){
                     case("<="):
-                        for(int i=0;i<A.length;i++){
+                        for(int i=0;i<A.length;++i){
                             if(b >= A[i] && A[i] <= c){
                                 elements.add(A[i]);
                                 indexes.add(i);
@@ -591,7 +588,7 @@ public class Utility {
 
         int[] ind = new int[indexes.size()];
         double[] elem = new double[elements.size()];
-        for(int i=0;i<indexes.size();i++){
+        for(int i=0;i<indexes.size();++i){
             ind[i] = indexes.get(i);
             elem[i] = elements.get(i);
         }
@@ -610,8 +607,8 @@ public class Utility {
 
     public static ArrayList<Integer> findNaNs(double[][] A){
         ArrayList<Integer> _indexes = new ArrayList<>();//if i%2 =0 row index, else col index
-        for(int i=0;i<A.length;i++){
-            for(int j=0;j<A[0].length;j++){
+        for(int i=0;i<A.length;++i){
+            for(int j=0;j<A[0].length;++j){
                 if(Double.isNaN(A[i][j])){
                     _indexes.add(i);
                     _indexes.add(j);
@@ -623,7 +620,7 @@ public class Utility {
 
     public static ArrayList<Integer> findNaNs(double[] A){
         ArrayList<Integer> _indexes = new ArrayList<>();
-        for(int i=0;i<A.length;i++){
+        for(int i=0;i<A.length;++i){
             if(Double.isNaN(A[i]))
                 _indexes.add(i);
         }
@@ -635,7 +632,7 @@ public class Utility {
         ArrayList<Double> elements = new ArrayList<>();
         switch (condition){
             case(">"):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]>b){
                         elements.add(A[i]);
                         indexes.add(i);
@@ -643,7 +640,7 @@ public class Utility {
                 }
             break;
             case("<"):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]<b){
                         elements.add(A[i]);
                         indexes.add(i);
@@ -651,7 +648,7 @@ public class Utility {
                 }
                 break;
             case("=="):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]==b){
                         elements.add(A[i]);
                         indexes.add(i);
@@ -659,7 +656,7 @@ public class Utility {
                 }
                 break;
             case(">="):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]>=b){
                         elements.add(A[i]);
                         indexes.add(i);
@@ -667,7 +664,7 @@ public class Utility {
                 }
                 break;
             case("<="):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]<=b){
                         elements.add(A[i]);
                         indexes.add(i);
@@ -678,7 +675,7 @@ public class Utility {
 
         int[] ind = new int[indexes.size()];
         double[] elem = new double[elements.size()];
-        for(int i=0;i<indexes.size();i++){
+        for(int i=0;i<indexes.size();++i){
             ind[i] = indexes.get(i);
             elem[i] = elements.get(i);
         }
@@ -703,21 +700,21 @@ public class Utility {
                 }
                 break;
             case("=="):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]==threshold){
                         output = true;
                     }
                 }
                 break;
             case(">="):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]>=threshold){
                         output = true;
                     }
                 }
                 break;
             case("<="):
-                for(int i=0;i<A.length;i++){
+                for(int i=0;i<A.length;++i){
                     if(A[i]<=threshold){
                         output = true;
                     }
@@ -731,8 +728,8 @@ public class Utility {
         boolean output = false;
         switch(condition){
             case(">"):
-                for(int i=0;i<A.length;i++){
-                    for(int j=0;j<A[0].length;j++){
+                for(int i=0;i<A.length;++i){
+                    for(int j=0;j<A[0].length;++j){
                         if(A[i][j]>threshold){
                             output = true;
                         }
@@ -740,8 +737,8 @@ public class Utility {
                 }
                 break;
             case("<"):
-                for(int i=0;i<A.length;i++){
-                    for(int j=0;j<A[0].length;j++){
+                for(int i=0;i<A.length;++i){
+                    for(int j=0;j<A[0].length;++j){
                         if(A[i][j]<threshold){
                             output = true;
                         }
@@ -749,8 +746,8 @@ public class Utility {
                 }
                 break;
             case("=="):
-                for(int i=0;i<A.length;i++){
-                    for(int j=0;j<A[0].length;j++){
+                for(int i=0;i<A.length;++i){
+                    for(int j=0;j<A[0].length;++j){
                         if(A[i][j]==threshold){
                             output = true;
                         }
@@ -758,8 +755,8 @@ public class Utility {
                 }
                 break;
             case(">="):
-                for(int i=0;i<A.length;i++){
-                    for(int j=0;j<A[0].length;j++){
+                for(int i=0;i<A.length;++i){
+                    for(int j=0;j<A[0].length;++j){
                         if(A[i][j]>=threshold){
                             output = true;
                         }
@@ -767,8 +764,8 @@ public class Utility {
                 }
                 break;
             case("<="):
-                for(int i=0;i<A.length;i++){
-                    for(int j=0;j<A[0].length;j++){
+                for(int i=0;i<A.length;++i){
+                    for(int j=0;j<A[0].length;++j){
                         if(A[i][j]<=threshold){
                             output = true;
                         }
@@ -795,8 +792,8 @@ public class Utility {
                     System.exit(0);
                 }
                 out = new double[rows][cols];
-                for(int i=0; i<mat3d[0].length; i++){
-                    for(int j=0; j<mat3d[0][0].length; j++){
+                for(int i=0; i<mat3d[0].length; ++i){
+                    for(int j=0; j<mat3d[0][0].length; ++j){
                         out[i][j] = mat3d[index][i][j];
                     }
                 }
@@ -811,8 +808,8 @@ public class Utility {
                     System.exit(0);
                 }
                 out = new double[cols][z_dim];
-                for(int i = 0; i<cols; i++){
-                    for(int j = 0; j<z_dim; j++){
+                for(int i = 0; i<cols; ++i){
+                    for(int j = 0; j<z_dim; ++j){
                         out[i][j] = mat3d[j][index][i];
                     }
                 }
@@ -827,8 +824,8 @@ public class Utility {
                     System.exit(0);
                 }
                 out = new double[rows][z_dim];
-                for(int i=0;i<rows;i++){
-                    for(int j=0;j<z_dim;j++){
+                for(int i=0;i<rows;++i){
+                    for(int j=0;j<z_dim;++j){
                         out[i][j] = mat3d[j][i][index];
                     }
                 }
@@ -854,8 +851,8 @@ public class Utility {
         if(z_dim==1){
             //3rd dimension singleton
             out = new double[rows][cols];
-            for(int i=0; i<mat3d[0].length; i++){
-                for(int j=0; j<mat3d[0][0].length; j++){
+            for(int i=0; i<mat3d[0].length; ++i){
+                for(int j=0; j<mat3d[0][0].length; ++j){
                     out[i][j] = mat3d[0][i][j];
                 }
             }
@@ -863,8 +860,8 @@ public class Utility {
             //rows singleton
             if(rows == 1){
                 out = new double[cols][z_dim];
-                for(int i = 0; i<cols; i++){
-                    for(int j = 0; j<z_dim; j++){
+                for(int i = 0; i<cols; ++i){
+                    for(int j = 0; j<z_dim; ++j){
                         out[i][j] = mat3d[j][0][i];
                     }
                 }
@@ -872,8 +869,8 @@ public class Utility {
                 //cols singleton
                 if(cols == 1){
                     out = new double[rows][z_dim];
-                    for(int i=0;i<rows;i++){
-                        for(int j=0;j<z_dim;j++){
+                    for(int i=0;i<rows;++i){
+                        for(int j=0;j<z_dim;++j){
                             out[i][j] = mat3d[j][i][0];
                         }
                     }
@@ -898,8 +895,8 @@ public class Utility {
 
     public static boolean[][] isnan(double[][] in){
         boolean[][] out = new boolean[in.length][in[0].length];
-        for(int i=0;i<in.length;i++){
-            for(int j=0;j<in[0].length; j++){
+        for(int i=0;i<in.length;++i){
+            for(int j=0;j<in[0].length; ++j){
                 if(Double.isNaN(in[i][j])){
                     out[i][j] = true;
                 } else{
@@ -912,8 +909,8 @@ public class Utility {
 
     public static double[][] convertDouble(boolean[][] in){
         double[][] out = new double[in.length][in[0].length];
-        for(int i=0;i<in.length;i++){
-            for(int j=0;j<in[0].length; j++){
+        for(int i=0;i<in.length;++i){
+            for(int j=0;j<in[0].length; ++j){
                 if(in[i][j]){
                     out[i][j] = 1.0;
                 } else{
@@ -926,8 +923,8 @@ public class Utility {
 
     public static double[] sum(double[][] in){
         double[] out = new double[in[0].length];
-        for(int i=0;i<in.length; i++){
-            for(int j=0;j<in[0].length;j++){
+        for(int i=0;i<in.length; ++i){
+            for(int j=0;j<in[0].length;++j){
                 out[j]+=in[i][j];
             }
         }
@@ -939,8 +936,8 @@ public class Utility {
         ArrayList<Integer> indexes = new ArrayList<>();
         int count=0;
         boolean checkNaN = Double.isNaN(element);
-        for(int i=0;i<mat[0].length;i++){
-            for(int j=0;j<mat.length;j++){
+        for(int i=0;i<mat[0].length;++i){
+            for(int j=0;j<mat.length;++j){
                 if(checkNaN){
                     if(Double.isNaN(mat[j][i])) {
                         indexes.add(count);
@@ -959,7 +956,7 @@ public class Utility {
     public static int[] removeElements(int[] array, int element){
         ArrayList<Integer> indexes = find(array,element);
         int[] out = new int[indexes.size()];
-        for(int i=0;i<indexes.size();i++){
+        for(int i=0;i<indexes.size();++i){
             out[i]=array[indexes.get(i)];
         }
         return out;
@@ -967,7 +964,7 @@ public class Utility {
 
     private static ArrayList<Integer> find(int[] array, int NotElement){
         ArrayList<Integer> indexes = new ArrayList<>();
-        for(int i=0;i<array.length;i++){
+        for(int i=0;i<array.length;++i){
             if(array[i]!=NotElement){
                 indexes.add(i);
             }
@@ -979,15 +976,15 @@ public class Utility {
     public static double[][] interp1(double[] x, double[][] y, double[] xi){
         //wrapper for the interp1 method
         double[][] yi = new double[y.length][y[0].length];
-        for(int row=0;row<y.length; row++){
+        for(int row=0;row<y.length; ++row){
             //splitting y in nRows arrays
             double[] Y = new double[y[0].length];
-            for(int i=0;i<y[0].length;i++){
+            for(int i=0;i<y[0].length; ++i){
                 Y[i]=y[row][i];
             }
             //calculating y-row and adding it to result
             double[] yirow = interp1(x,Y,xi);
-            for(int i=0;i<y[0].length;i++){
+            for(int i=0;i<y[0].length;++i){
                 yi[row][i]=yirow[i];
             }
         }
@@ -997,7 +994,7 @@ public class Utility {
     public static double[][][] interp1(double[] x, double[][][] y, int[] xi){
         //wrapper for the interp1 method
         double[] xiDouble = new double[xi.length];
-        for(int i=0;i<xiDouble.length;i++)
+        for(int i=0;i<xiDouble.length;++i)
             xiDouble[i]=xi[i]+0.0;
         return interp1(x, y, xiDouble);
     }
@@ -1005,7 +1002,7 @@ public class Utility {
     public static double interp1(ArrayList<Double> x, double[] y, double xi){
         //wrapper for the interp1 method
         double[] xArray = new double[x.size()];
-        for(int i=0;i<x.size();i++){
+        for(int i=0;i<x.size();++i){
             xArray[i]=x.get(i);
         }
         double[] xiArray = new double[1];
@@ -1021,14 +1018,14 @@ public class Utility {
         int cols = y[0][0].length;
         double[][][] out = new double[Z][xi.length][cols];
         //cols extraction:
-        for(int z=0;z<Z;z++){
-            for(int j=0;j<cols;j++){
+        for(int z=0;z<Z;++z){
+            for(int j=0;j<cols;++j){
                 double[] row = new double[rows];
-                for(int i=0;i<rows;i++){
+                for(int i=0;i<rows;++i){
                     row[i]=y[z][i][j];
                 }
                 double[] rowOut = interp1(x,row,xi);
-                for(int i=0;i<rowOut.length;i++){
+                for(int i=0;i<rowOut.length;++i){
                     out[z][i][j] = rowOut[i];
                 }
             }
@@ -1060,7 +1057,7 @@ public class Utility {
         double[] intercept = new double[x.length - 1];
 
         // Calculate the line equation (i.e. slope and intercept) between each point
-        for (int i = 0; i < x.length - 1; i++) {
+        for (int i = 0; i < x.length - 1; ++i) {
             dx[i] = x[i + 1] - x[i];
             if (dx[i] == 0) {
                 System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
@@ -1083,7 +1080,7 @@ public class Utility {
 
         // Perform the interpolation here
         double[] yi = new double[xi.length];
-        for (int i = 0; i < xi.length; i++) {
+        for (int i = 0; i < xi.length; ++i) {
             if ((xi[i] > x[x.length - 1]) || (xi[i] < x[0])) {
                 yi[i] = extrapolation;
             }
@@ -1159,7 +1156,7 @@ public class Utility {
 
         // Perform the interpolation here
         double[] yi = new double[xi.length];
-        for (int i = 0; i < xi.length; i++) {
+        for (int i = 0; i < xi.length; ++i) {
             if ((xi[i][xiColIdx] > x[x.length - 1]) || (xi[i][xiColIdx] < x[0])) {
                 yi[i] = Double.NaN;
             }
@@ -1204,7 +1201,7 @@ public class Utility {
         double[] intercept = new double[x.length - 1];
 
         // Calculate the line equation (i.e. slope and intercept) between each point
-        for (int i = 0; i < x.length - 1; i++) {
+        for (int i = 0; i < x.length - 1; ++i) {
             dx[i] = x[i + 1] - x[i];
             if (dx[i] == 0) {
                 System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
@@ -1227,7 +1224,7 @@ public class Utility {
 
         // Perform the interpolation here
         double[] yi = new double[xi.length];
-        for (int i = 0; i < xi.length; i++) {
+        for (int i = 0; i < xi.length; ++i) {
             if ((xi[i] > x[x.length - 1]) || (xi[i] < x[0])) {
                 yi[i] = Double.NaN;
             }
@@ -1251,7 +1248,7 @@ public class Utility {
 
     public static double[][] interp2(double[][] X, double[][] Y, double[][] Z, double[] Xq, double[] Yq){//wrapper for interp2 method
         double[] Xarray = new double[X[0].length];
-        for(int i=0;i<X[0].length;i++)
+        for(int i=0;i<X[0].length;++i)
             Xarray[i]=X[0][i];
         double[] Yarray = new double[Y.length];
         for(int i=0;i<Y.length;i++)
@@ -1336,21 +1333,14 @@ public class Utility {
 
     public static double[][] transposeMatrix(double[][] matrix){
         double[][] output = new double[matrix[0].length][matrix.length];
-        for(int i=0;i< matrix.length;i++){
-            for(int j=0;j<matrix[0].length;j++){
+        for(int i=0;i< matrix.length;++i){
+            for(int j=0;j<matrix[0].length;++j){
                 output[j][i]=matrix[i][j];
             }
         }
         return output;
     }
 
-    public static double[][][] transpose3DMatrix(double[][][] in){//inverts rows with cols
-        double[][][] out = new double[in.length][in[0][0].length][in[0].length];
-        for(int i=0;i<in.length;i++){
-            out[i]=transposeMatrix(in[i]);
-        }
-        return out;
-    }
 
     public static double[][][] permute3DColsWithZdim(double[][][] in){
         double[][][] out = new double[in[0][0].length][in[0].length][in.length];
@@ -1382,8 +1372,8 @@ public class Utility {
             System.exit(0);
         }
         double[][] output = new double[nRows][nCols];
-        for(int i=0;i<nRows;i++){
-            for(int j=0;j<nCols;j++){
+        for(int i=0;i<nRows;++i){
+            for(int j=0;j<nCols;++j){
                 output[i][j]=a[i][j]*b[i][j];
             }
         }
@@ -1413,7 +1403,7 @@ public class Utility {
     public static int max(int[][] matrix, int colID){
         //returns the max element of the column colID
         int max = matrix[0][colID];
-        for(int i=1;i<matrix.length;i++){
+        for(int i=1;i<matrix.length;++i){
             if(matrix[i][colID]>max)
                 max = matrix[i][colID];
         }
@@ -1422,7 +1412,7 @@ public class Utility {
 
     public static minResults minWithIndex(double[] array){
         //check for NaNs
-        for(int i=0;i<array.length; i++){
+        for(int i=0;i<array.length; ++i){
             if(Double.isNaN(array[i])){
                 array[i] = Double.MAX_VALUE;
             }
@@ -1430,7 +1420,7 @@ public class Utility {
         //found min and indexMin
         int index = 0;
         double min = array[0];
-        for(int i=1;i<array.length-1;i++){
+        for(int i=1;i<array.length-1;++i){
             if(array[i]<array[i+1]){
                 index = i;
                 min = array[i];
@@ -1460,10 +1450,10 @@ public class Utility {
         int dim1 = mat3d[0].length;
         int dim2 = mat3d[0][0].length;
         double[][] output = new double[dim0][dim1];
-        for(int i=0;i<mat3d.length;i++){
-            for(int j=0;j<mat3d[0].length; j++){
+        for(int i=0;i<mat3d.length;++i){
+            for(int j=0;j<mat3d[0].length; ++j){
                 double mean = 0.0;
-                for(int k=0;k<mat3d[0][0].length; k++){
+                for(int k=0;k<mat3d[0][0].length; ++k){
                     mean += mat3d[i][j][k];
                 }
                 mean = mean/dim2;
@@ -1475,9 +1465,9 @@ public class Utility {
 
     public static double min3d(double[][][] mat3d){
         double min = Double.MAX_VALUE;
-        for(int i=0;i<mat3d.length;i++){
-            for(int j=0;j<mat3d[0].length;j++){
-                for(int k=0; k<mat3d[0][0].length;k++){
+        for(int i=0;i<mat3d.length;++i){
+            for(int j=0;j<mat3d[0].length;++j){
+                for(int k=0; k<mat3d[0][0].length;++k){
                     if(mat3d[i][j][k]<min && !Double.isNaN(mat3d[i][j][k])){
                         min = mat3d[i][j][k];
                     }
@@ -1489,8 +1479,8 @@ public class Utility {
 
     public static double min2d(double[][] mat){
         double min = Double.MAX_VALUE;
-        for(int i=0;i<mat.length;i++){
-            for(int j=0;j<mat[0].length;j++){
+        for(int i=0;i<mat.length;++i){
+            for(int j=0;j<mat[0].length;++j){
                 if(mat[i][j]<min && !Double.isNaN(mat[i][j])){
                     min = mat[i][j];
                 }
@@ -1501,9 +1491,9 @@ public class Utility {
 
     public static double max3d(double[][][] mat3d){
         double max = Double.MIN_VALUE;
-        for(int i=0;i<mat3d.length;i++){
-            for(int j=0;j<mat3d[0].length;j++){
-                for(int k=0; k<mat3d[0][0].length;k++){
+        for(int i=0;i<mat3d.length;++i){
+            for(int j=0;j<mat3d[0].length;++j){
+                for(int k=0; k<mat3d[0][0].length;++k){
                     if(mat3d[i][j][k]>max && !Double.isNaN(mat3d[i][j][k])){
                         max = mat3d[i][j][k];
                     }
@@ -1515,8 +1505,8 @@ public class Utility {
 
     public static double max2d(double[][] mat){
         double max = Double.MIN_VALUE;
-        for(int i=0;i<mat.length;i++){
-            for(int j=0;j<mat[0].length;j++){
+        for(int i=0;i<mat.length;++i){
+            for(int j=0;j<mat[0].length;++j){
                 if(mat[i][j]>max && !Double.isNaN(mat[i][j])){
                     max = mat[i][j];
                 }
@@ -1527,8 +1517,8 @@ public class Utility {
 
     public static double max(double[][] matrix){
         double max = matrix[0][0];
-        for(int i=0;i<matrix.length;i++){
-            for(int j=0;j<matrix[0].length; j++){
+        for(int i=0;i<matrix.length;++i){
+            for(int j=0;j<matrix[0].length; ++j){
                 if(matrix[i][j]>max){
                     max = matrix[i][j];
                 }
@@ -1539,8 +1529,8 @@ public class Utility {
 
     public static double maxNotNaN(double[][] matrix){
         double max = Double.MIN_VALUE;
-        for(int i=0;i<matrix.length;i++){
-            for(int j=0;j<matrix[0].length; j++){
+        for(int i=0;i<matrix.length;++i){
+            for(int j=0;j<matrix[0].length; ++j){
                 if(matrix[i][j]>max && !Double.isNaN(matrix[i][j])){
                     max = matrix[i][j];
                 }
@@ -1551,7 +1541,7 @@ public class Utility {
 
     public static int max(int[] array){
         int max = array[0];
-        for(int i=1;i<array.length;i++){
+        for(int i=1;i<array.length;++i){
             if(array[i]> max){
                 max = array[i];
             }
@@ -1561,13 +1551,13 @@ public class Utility {
 
     private static double[] removeNaNs(double[] in){
         ArrayList<Double> notNaNs = new ArrayList<>();
-        for(int i=0;i<in.length;i++){
+        for(int i=0;i<in.length;++i){
             if(!Double.isNaN(in[i])){
                 notNaNs.add(in[i]);
             }
         }
         double[] out = new double[notNaNs.size()];
-        for(int i=0;i<notNaNs.size();i++){
+        for(int i=0;i<notNaNs.size();++i){
             out[i] = notNaNs.get(i);
         }
         return out;
@@ -1577,8 +1567,8 @@ public class Utility {
 
     public static double min(double[][] matrix){
         double min = matrix[0][0];
-        for(int i=0;i<matrix.length;i++){
-            for(int j=0;j<matrix[0].length; j++){
+        for(int i=0;i<matrix.length;++i){
+            for(int j=0;j<matrix[0].length; ++j){
                 if(matrix[i][j]<min){
                     min = matrix[i][j];
                 }
@@ -1588,8 +1578,8 @@ public class Utility {
     }
     public static double minNotNaN(double[][] matrix){
         double min = Double.MAX_VALUE;
-        for(int i=0;i<matrix.length;i++){
-            for(int j=0;j<matrix[0].length; j++){
+        for(int i=0;i<matrix.length;++i){
+            for(int j=0;j<matrix[0].length; ++j){
                 if(matrix[i][j]<min && !Double.isNaN(matrix[i][j])){
                     min = matrix[i][j];
                 }
@@ -1603,9 +1593,9 @@ public class Utility {
         if(flag==1){
             //min(matrix,[],1) (min cols)
             double[] out = new double[matrix[0].length];
-            for(int i=0;i<matrix[0].length;i++){
+            for(int i=0;i<matrix[0].length;++i){
                 double minTmp = matrix[0][i];
-                for(int j=1;j<matrix.length;j++){
+                for(int j=1;j<matrix.length;++j){
                     if(matrix[j][i]<minTmp){
                         minTmp = matrix[j][i];
                     }
@@ -1616,9 +1606,9 @@ public class Utility {
         } else {
             //min(matrix,[],2) (min rows)
             double[] out = new double[matrix.length];
-            for(int i=0;i<matrix.length;i++){
+            for(int i=0;i<matrix.length;++i){
                 double minTmp = matrix[i][0];
-                for(int j=1;j<matrix[0].length;j++){
+                for(int j=1;j<matrix[0].length;++j){
                     if(matrix[i][j]<minTmp){
                         minTmp=matrix[i][j];
                     }
@@ -1652,7 +1642,7 @@ public class Utility {
 
     public static boolean[] ismember(int[] elements, int[] array){
         boolean[] out = new boolean[elements.length];
-        for(int i=0;i<out.length;i++)
+        for(int i=0;i<out.length;++i)
             out[i]=ismebmer(elements[i],array);
         return out;
     }
@@ -1794,8 +1784,8 @@ public class Utility {
             System.exit(0);
         }
         double[][] out = new double[a.length][a[0].length];
-        for(int i =0 ;i<a.length;i++){
-            for(int j=0; j<a[0].length;j++){
+        for(int i =0 ;i<a.length;++i){
+            for(int j=0; j<a[0].length;++j){
                 out[i][j] = Math.atan2(a[i][j],b[i][j]);
             }
         }
@@ -1849,7 +1839,7 @@ public class Utility {
             System.exit(0);
         }
         double[] out = new double[x.length];
-        for(int i=0;i<out.length;i++){
+        for(int i=0;i<out.length;++i){
             if(Double.isNaN(x[i])){
                 if(Double.isNaN(y[i]))
                     out[i]=Double.NaN;
@@ -1873,7 +1863,7 @@ public class Utility {
             debug.CloseFile();
             System.exit(0);
         }
-        for(int i=0;i<x.length;i++)
+        for(int i=0;i<x.length;++i)
             out[i]=(x[i]+y[i])/2;
         return out;
     }
@@ -1954,7 +1944,7 @@ public class Utility {
 
     public static int[] deepCopy(int[] in, int until){
         int[] out = new int[in.length+until];
-        for(int i=0;i<out.length;i++){
+        for(int i=0;i<out.length;++i){
             out[i]=in[i];
         }
         return out;
@@ -1962,7 +1952,7 @@ public class Utility {
 
     public static double[] deepCopy(double[] in){
         double[] out = new double[in.length];
-        for(int i=0;i<in.length;i++){
+        for(int i=0;i<in.length;++i){
             out[i]=in[i];
         }
         return  out;
@@ -1970,8 +1960,8 @@ public class Utility {
 
     public static double[][] deepCopy(double[][] in){
         double[][] out = new double[in.length][in[0].length];
-        for(int i=0;i<in.length;i++){
-            for(int j=0;j<in[0].length;j++){
+        for(int i=0;i<in.length;++i){
+            for(int j=0;j<in[0].length;++j){
                 out[i][j] = in[i][j];
             }
         }
@@ -1980,9 +1970,9 @@ public class Utility {
 
     public static double[][][] deepCopy(double[][][] in){
         double[][][] out = new double[in.length][in[0].length][in[0][0].length];
-        for(int k=0;k<in.length;k++){
-            for(int i=0;i<in[0].length;i++){
-                for(int j=0;j<in[0][0].length;j++){
+        for(int k=0;k<in.length;++k){
+            for(int i=0;i<in[0].length;++i){
+                for(int j=0;j<in[0][0].length;++j){
                     out[k][i][j] = in[k][i][j];
                 }
             }
