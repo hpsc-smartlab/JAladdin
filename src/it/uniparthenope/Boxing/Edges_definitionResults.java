@@ -30,13 +30,16 @@ public class Edges_definitionResults {
     public Edges_definitionResults(boolean flag) throws IOException, ParseException, java.text.ParseException{
         if(flag == true){
             JSONManager reader = new JSONManager();
-            reader.initReading("SerializedObjects/Edges_Definition_1.json");
+            reader.initReading("SerializedObjects/Edges_definition_1.json");
             free_edges = reader.retrieveInt2D("free_edges");
             nogo_edges = reader.retrieveIntegerArrayList("nogo_edges");
             theta_grid = reader.retrieveDoubleArray("theta_grid");
             edge_lenght = reader.retrieveDoubleArray("edge_lenght");
             sh_delay = reader.retrieveDouble2D("sh_delay");
             gear_idx = reader.retrieveInt2D("gear_idx");
+            reader.dispose();
+            reader = new JSONManager();
+            reader.initReading("SerializedObjects/Edges_definition_2.json");
             safe_indexes = reader.retrieveInt3D("safe_indexes");
             int n_danger_idxs = reader.retrieveInteger("DangerIndexesNumber");
             reader.dispose();
@@ -44,21 +47,23 @@ public class Edges_definitionResults {
             for(int i=0;i<n_danger_idxs;++i)
                 tdep_danger_idx.add(new DangerIndexes(i));
             reader = new JSONManager();
-            reader.initReading("SerializedObjects/Edges_Definition_2.json");
+            reader.initReading("SerializedObjects/Edges_definition_3.json");
             waveHeight_edges = reader.retrieveDouble2D("waveHeight_edges");
             reader.dispose();
             reader = new JSONManager();
-            reader.initReading("SerializedObjects/Edges_Definition_3.json");
+            reader.initReading("SerializedObjects/Edges_definition_4.json");
             wavePeriod_edges = reader.retrieveDouble2D("wavePeriod_edges");
             waveLength_edges = reader.retrieveDouble2D("waveLength_edges");
             waveDir_edges = reader.retrieveDouble2D("waveDir_edges");
+            reader.dispose();
+            reader = new JSONManager();
+            reader.initReading("SerializedObjects/Edges_definition_5.json");
             windMAGN_edges = reader.retrieveDouble2D("windMAGN_edges");
             windDIR_edges = reader.retrieveDouble2D("windDIR_edges");
             bathy_edges = reader.retrieveDoubleArray("bathy_edges");
             I_bool = reader.retrieveBooleanArray("I_bool");
             I_ord = reader.retrieveIntArray("I_ord");
             I_point = reader.retrieveIntArray("I_point");
-
             reader.dispose();
         }
     }
@@ -74,18 +79,24 @@ public class Edges_definitionResults {
         writer.putDoubleArray("edge_lenght", edge_lenght);
         writer.putDouble2D("sh_delay", sh_delay);
         writer.putInt2D("gear_idx", gear_idx);
+        writer.dispose();
+        writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Edges_definition_2.json");
         writer.putInt3D("safe_indexes", safe_indexes);
         writer.putInteger("DangerIndexesNumber",tdep_danger_idx.size());
         writer.dispose();
         writer = new JSONManager();
-        writer.initWriting("SerializedObjects/Edges_definition_2.json");
+        writer.initWriting("SerializedObjects/Edges_definition_3.json");
         writer.putDouble2D("waveHeight_edges", waveHeight_edges);
         writer.dispose();
+        writer = new JSONManager();
+        writer.initWriting("SerializedObjects/Edges_definition_4.json");
         writer.putDouble2D("wavePeriod_edges", wavePeriod_edges);
         writer.putDouble2D("waveLength_edges", waveLength_edges);
         writer.putDouble2D("waveDir_edges", waveDir_edges);
+        writer.dispose();
         writer = new JSONManager();
-        writer.initWriting("SerializedObjects/Edges_definition_3.json");
+        writer.initWriting("SerializedObjects/Edges_definition_5.json");
         writer.putDouble2D("windMAGN_edges", windMAGN_edges);
         writer.putDouble2D("windDIR_edges", windDIR_edges);
         writer.putDoubleArray("bathy_edges", bathy_edges);

@@ -89,10 +89,10 @@ public class SpatialGrid {
             min_end_dist = reader.retrieveDouble("min_end_dist");
             node_start = reader.retrieveLong("node_start");
             node_end = reader.retrieveLong("node_end");
-            node_start_lat = reader.retrieveLong("node_start_lat");
-            node_end_lat = reader.retrieveLong("node_end_lat");
-            node_start_lon = reader.retrieveLong("node_start_lon");
-            node_end_lon = reader.retrieveLong("node_end_lon");
+            node_start_lat = reader.retrieveDouble("node_start_lat");
+            node_end_lat = reader.retrieveDouble("node_end_lat");
+            node_start_lon = reader.retrieveDouble("node_start_lon");
+            node_end_lon = reader.retrieveDouble("node_end_lon");
             theta_gdt = reader.retrieveDouble("theta_gdt");
             reader.dispose();
         }

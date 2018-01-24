@@ -170,10 +170,10 @@ public class JVisirModel {
             this.dep_datetime.saveState();
             this.safety.saveState();
             this.forcing.saveState();
-//            vesselResponse.saveState();
-//            gridDefinitionResults.saveState();
-//            fieldsRegriddingResults.saveState();
-//            edgesDefinitionResults.saveState();
+            vesselResponse.saveState();
+            gridDefinitionResults.saveState();
+            fieldsRegriddingResults.saveState();
+            edgesDefinitionResults.saveState();
         } catch (Exception e){
             MyFileWriter debug = new MyFileWriter("","debug",false);
             debug.WriteLog("SaveState: "+e.getMessage());
