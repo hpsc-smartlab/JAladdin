@@ -5,10 +5,7 @@ import java.util.*;
 //Boxing classes
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
-import it.uniparthenope.Parser.MyBinaryParser;
-import it.uniparthenope.Parser.MyCSVParser;
-import it.uniparthenope.Parser.MyNetCDFParser;
-import it.uniparthenope.Parser.MyTxtParser;
+import it.uniparthenope.Parser.*;
 
 public class JVisirModel {
     //input data
@@ -109,6 +106,8 @@ public class JVisirModel {
                 gridDefinitionResults = new Grid_definitionResults(true);
                 fieldsRegriddingResults = new Fields_regriddingResults(true);
                 edgesDefinitionResults = new Edges_definitionResults(true);
+
+
             }
             catch (Exception e){
                 MyFileWriter debug = new MyFileWriter("","debug",false);
@@ -146,6 +145,19 @@ public class JVisirModel {
             this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
             this.logFile.CloseFile();
 
+            //Dijkstra2DResults test = Algorithms.Dijkstra(gridDefinitionResults.getXy().length,edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
+            LinkedList<Integer> geoDist = Algorithms.Dijkstra(gridDefinitionResults.getXy().length,edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
+            double[][] coords = new double[geoDist.size()][2];
+            for(int i=0;i<geoDist.size();++i){
+                coords[i][0] = gridDefinitionResults.getXy()[geoDist.get(i)][0];
+                coords[i][1] = gridDefinitionResults.getXy()[geoDist.get(i)][1];
+            }
+            try {
+                GeoJsonFormatter.writeGeoJson("geodeticRoute", coords);
+            } catch (Exception ex){
+                ex.printStackTrace();
+            }
+            System.out.println("CIAO");
             if(this.mode==1){//Serialize data
                 this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
             }

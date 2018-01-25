@@ -1,13 +1,21 @@
 package it.uniparthenope.Boxing;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Dijkstra2DResults {
     double cost;
-    ArrayList<Integer> path;
+    LinkedList<Integer> path;
 
-    public Dijkstra2DResults(double cost, ArrayList<Integer> path){
+    public Dijkstra2DResults(double cost, LinkedList<Integer>  path){
         this.cost = cost;
-        this.path = (ArrayList<Integer>) path.clone();
+        this.path = path;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public LinkedList<Integer>  getPath() {
+        return path;
     }
 }
