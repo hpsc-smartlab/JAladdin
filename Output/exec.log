@@ -1,117 +1,117 @@
-Current timestamp: 2018/01/25 22:20:19
+Current timestamp: 2018/01/25 22:53:50
 
 ************************
-2018/01/25 22:20:19:	System initialization...
+2018/01/25 22:53:50:	System initialization...
 ************************
 ************************
-2018/01/25 22:20:19:	Processing namelists...
+2018/01/25 22:53:50:	Processing namelists...
 ************************
 ************************
-2018/01/25 22:20:20:	Ship model response (motorboat)...
+2018/01/25 22:53:50:	Ship model response (motorboat)...
 ************************
 ************************
-2018/01/25 22:20:31:	Bounding boxes and bathymetry postprocessing (grid definition): 
+2018/01/25 22:54:02:	Bounding boxes and bathymetry postprocessing (grid definition): 
 ************************
 ************************
-2018/01/25 22:20:31:		Loading coastline data...
+2018/01/25 22:54:02:		Loading coastline data...
 ************************
 ************************
-2018/01/25 22:20:32:		Creating target grid and loading bathymetry data...
+2018/01/25 22:54:03:		Creating target grid and loading bathymetry data...
 ************************
 ************************
-2018/01/25 22:20:32:		Calculating target grid and reduced bathy field...
+2018/01/25 22:54:03:		Calculating target grid and reduced bathy field...
 ************************
 ************************
-2018/01/25 22:20:32:			Grid size: 180x149 = 26820
+2018/01/25 22:54:03:			Grid size: 180x149 = 26820
 ************************
 ************************
-2018/01/25 22:20:32:			[min, max] grid depth (m): [2.0, 1523.0]
+2018/01/25 22:54:03:			[min, max] grid depth (m): [2.0, 1523.0]
 ************************
 ************************
-2018/01/25 22:20:32:		Calculating coastline excerpt within inset...
+2018/01/25 22:54:03:		Calculating coastline excerpt within inset...
 ************************
 ************************
-2018/01/25 22:20:33:		inset grid plaid coordinates...
+2018/01/25 22:54:04:		inset grid plaid coordinates...
 ************************
 ************************
-2018/01/25 22:20:33:		computation of a joint coast-vessel safety mask...
+2018/01/25 22:54:04:		computation of a joint coast-vessel safety mask...
 ************************
 ************************
-2018/01/25 22:20:33:		readout freenodes DB...
+2018/01/25 22:54:04:		readout freenodes DB...
 ************************
 ************************
-2018/01/25 22:20:33:		remapping free nodes...
+2018/01/25 22:54:04:		remapping free nodes...
 ************************
 ************************
-2018/01/25 22:20:33:		Creating lsm_mask using coastline DB...
+2018/01/25 22:54:04:		Creating lsm_mask using coastline DB...
 ************************
 ************************
-2018/01/25 22:20:33:		Calculating safe distance from coastline...
+2018/01/25 22:54:04:		Calculating safe distance from coastline...
 ************************
 ************************
-2018/01/25 22:21:06:		Calculating Joint safe mask...
+2018/01/25 22:54:37:		Calculating Joint safe mask...
 ************************
 ************************
-2018/01/25 22:21:06:		Calculating distances from start/end nodes...
+2018/01/25 22:54:37:		Calculating distances from start/end nodes...
 ************************
 ************************
-2018/01/25 22:21:06:		Calculating orientation of the geodetic route...
+2018/01/25 22:54:37:		Calculating orientation of the geodetic route...
 ************************
 ************************
-2018/01/25 22:21:06:	Done. Grid definition tooks 35.314820171 sec.
+2018/01/25 22:54:37:	Done. Grid definition tooks 35.467204344 sec.
 ************************
 ************************
-2018/01/25 22:21:06:	processing environmental fields...
+2018/01/25 22:54:37:	processing environmental fields...
 ************************
 ************************
-2018/01/25 22:21:07:		latest analysis date and time: 25-02-2015 12:00
+2018/01/25 22:54:37:		latest analysis date and time: 25-02-2015 12:00
 ************************
 ************************
-2018/01/25 22:21:07:		departure date and time: 27-02-2015 06:00
+2018/01/25 22:54:37:		departure date and time: 27-02-2015 06:00
 ************************
 ************************
-2018/01/25 22:21:07:		attempt reading WW3 wave forecast data...
+2018/01/25 22:54:37:		attempt reading WW3 wave forecast data...
 ************************
 ************************
-2018/01/25 22:21:10:		departure at time step #18 of hourly interpolated file
+2018/01/25 22:54:41:		departure at time step #18 of hourly interpolated file
 ************************
 ************************
-2018/01/25 22:21:10:			Data reduction: 1.5693509496091218%
+2018/01/25 22:54:41:			Data reduction: 1.5693509496091218%
 ************************
 ************************
-2018/01/25 22:21:11:		# time steps of forecast file employed: 24.0
+2018/01/25 22:54:42:		# time steps of forecast file employed: 24.0
 ************************
 ************************
-2018/01/25 22:21:11:		seaOverLand extrapolation...
+2018/01/25 22:54:42:		seaOverLand extrapolation...
 ************************
 ************************
-2018/01/25 22:21:12:	Done. Fields regridding tooks 5.641547309000001 sec.
+2018/01/25 22:54:43:	Done. Fields regridding tooks 5.646777411 sec.
 ************************
 ************************
-2018/01/25 22:21:12:	Defining edges...
+2018/01/25 22:54:43:	Defining edges...
 
 ************************
 ************************
-2018/01/25 22:21:12:		Reading out free edges from DB...
+2018/01/25 22:54:43:		Reading out free edges from DB...
 ************************
 ************************
-2018/01/25 22:21:19:		remapping free edges to inset Sgrid...
+2018/01/25 22:54:49:		remapping free edges to inset Sgrid...
 ************************
 ************************
-2018/01/25 22:21:24:		number of free nodes: 21730
+2018/01/25 22:54:52:		number of free nodes: 21730
 ************************
 ************************
-2018/01/25 22:21:24:		number of free edges: 509136
+2018/01/25 22:54:52:		number of free edges: 509136
 ************************
 ************************
-2018/01/25 22:21:25:		computing edge weights from model data
+2018/01/25 22:54:53:		computing edge weights from model data
 ************************
 ************************
-2018/01/25 22:21:31:		computing edge delays...
+2018/01/25 22:54:59:		computing edge delays...
 ************************
 ************************
-2018/01/25 22:22:22:	Done. Edges definition tooks 69.813349951 sec.
+2018/01/25 22:55:50:	Done. Edges definition tooks 66.83151796 sec.
 ************************
 ************************
-2018/01/25 22:22:22:	Done. Total execution time: 2.0406282677089056 Min.
+2018/01/25 22:55:50:	Done. Total execution time: 1.993324399381467 Min.
 ************************
