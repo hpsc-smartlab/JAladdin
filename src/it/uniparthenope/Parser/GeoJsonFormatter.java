@@ -15,7 +15,6 @@ public class GeoJsonFormatter {
         JSONObject feature = new JSONObject();
         feature.put("type", "Feature");
         feature.put("properties", new JSONObject());
-
         //geometry
         JSONObject geometry = new JSONObject();
         geometry.put("type", "LineString");
