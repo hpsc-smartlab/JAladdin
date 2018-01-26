@@ -27,8 +27,6 @@ public class JVisirModel {
 
     //approssimating computation time
     private double seconds;
-//    private long startTime;
-//    private long estimatedTime;
 
 
     //Constructor
@@ -145,19 +143,7 @@ public class JVisirModel {
             this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
             this.logFile.CloseFile();
 
-            //Dijkstra2DResults test = Algorithms.Dijkstra(gridDefinitionResults.getXy().length,edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
-            LinkedList<Integer> geoDist = Algorithms.Dijkstra(gridDefinitionResults.getXy().length,edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
-            double[][] coords = new double[geoDist.size()][2];
-            for(int i=0;i<geoDist.size();++i){
-                coords[i][0] = gridDefinitionResults.getXy()[geoDist.get(i)][0];
-                coords[i][1] = gridDefinitionResults.getXy()[geoDist.get(i)][1];
-            }
-            try {
-                GeoJsonFormatter.writeGeoJson("geodeticRoute", coords);
-            } catch (Exception ex){
-                ex.printStackTrace();
-            }
-            System.out.println("CIAO");
+            seconds += Utility.nanosecToSec(Gdt_route(gridDefinitionResults.getXy().length, gridDefinitionResults.getXy(),edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end()));
             if(this.mode==1){//Serialize data
                 this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
             }
@@ -165,6 +151,43 @@ public class JVisirModel {
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Done. Total execution time: "+Utility.secondsToMins(seconds)+" Min.");
         this.logFile.CloseFile();
+    }
+
+    private long Gdt_route(int Nnodes,double[][] nodes, int[][] free_edges, double[] edge_costs, boolean[] I_bool,
+                           int[] I_ord, int[] I_point, long SID, long FID){
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Calculating geodetic route...");
+        this.logFile.CloseFile();
+        long tic = Utility.Tic();
+        Dijkstra2DResults geoRoute = Algorithms.Dijkstra(Nnodes, free_edges, edge_costs, I_bool, I_ord, I_point, SID, FID);
+        long toc = Utility.Toc(tic);
+        tic = Utility.Tic();
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Done. geodetic route found in "+ Utility.nanosecToSec(toc)+" seconds with "+geoRoute.getCost()+" cost.");
+        this.logFile.CloseFile();
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Producing GeoJSON file...");
+        this.logFile.CloseFile();
+        try {
+            GeoJsonFormatter.writeGeoJson("geodeticRoute", getRouteCoords(nodes, geoRoute.getPath()));
+        } catch (Exception e){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("GeoJsonFormatter: "+e.getMessage());
+            debug.CloseFile();
+        }
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Done. You can find the file named \"geodeticRoute.geojson\" inside the \"Output\" directory.");
+        this.logFile.CloseFile();
+        return toc+Utility.Toc(tic);
+    }
+
+    private double[][] getRouteCoords(double[][] nodes, LinkedList<Integer> nodeIDX){
+        double[][] coords = new double[nodeIDX.size()][2];
+        for(int i=0; i<nodeIDX.size(); ++i){
+            coords[i][0] = nodes[nodeIDX.get(i)][0];
+            coords[i][1] = nodes[nodeIDX.get(i)][1];
+        }
+        return coords;
     }
 
     private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults, Edges_definitionResults edgesDefinitionResults){

@@ -8,7 +8,8 @@ import java.util.*;
 
 public class Algorithms {
 
-    public static LinkedList<Integer> Dijkstra(int Nnodes, int[][] free_edges, double[] edge_costs, boolean[] I_bool, int[] I_ord, int[] I_point, long SID, long FID){
+    public static Dijkstra2DResults Dijkstra(int Nnodes, int[][] free_edges, double[] edge_costs, boolean[] I_bool,
+                                             int[] I_ord, int[] I_point, long SID, long FID){
         /*
          * nodes = lon and lat for each node in graph
          * free_edges = free edges
@@ -31,7 +32,8 @@ public class Algorithms {
             unSettledNodes.remove(node);
             findMinimalDistances(node, (int) FID,I_bool, I_ord, I_point, distance,free_edges, edge_costs, predecessors, unSettledNodes);
         }
-        return getPath((int) FID, predecessors, free_edges, edge_costs);
+        return new Dijkstra2DResults(distance.get((int) FID), getPath((int) FID, predecessors, free_edges, edge_costs));
+        //return getPath((int) FID, predecessors, free_edges, edge_costs);
     }
 
     public static LinkedList<Integer> getPath(int target, Map<Integer, Integer> predecessors, int[][] free_edges, double[] edge_costs){
