@@ -8,7 +8,8 @@ import java.util.*;
 
 public class Algorithms {
 
-    public static Dijkstra2DResults Dijkstra(int Nnodes, int[][] free_edges, double[] edge_costs, boolean[] I_bool,
+    //For GDT route
+    public static Dijkstra2DResults Dijkstra(int[][] free_edges, double[] edge_costs, boolean[] I_bool,
                                              int[] I_ord, int[] I_point, long SID, long FID){
         /*
          * nodes = lon and lat for each node in graph
@@ -18,8 +19,6 @@ public class Algorithms {
          * SID = Starting node
          * FID = Ending node
          * */
-
-        //IDXs
         Set<Integer> unSettledNodes = new HashSet<>();
         Map<Integer, Integer> predecessors = new HashMap<>();
         Map<Integer, Double> distance = new HashMap<>();
@@ -32,26 +31,21 @@ public class Algorithms {
             unSettledNodes.remove(node);
             findMinimalDistances(node, (int) FID,I_bool, I_ord, I_point, distance,free_edges, edge_costs, predecessors, unSettledNodes);
         }
-        return new Dijkstra2DResults(distance.get((int) FID), getPath((int) FID, predecessors, free_edges, edge_costs));
-        //return getPath((int) FID, predecessors, free_edges, edge_costs);
+        return new Dijkstra2DResults(distance.get((int) FID), getPath((int) FID, predecessors));
     }
 
-    public static LinkedList<Integer> getPath(int target, Map<Integer, Integer> predecessors, int[][] free_edges, double[] edge_costs){
+    public static LinkedList<Integer> getPath(int target, Map<Integer, Integer> predecessors){
         LinkedList<Integer> path = new LinkedList<>();
-        double cost = 0.0;
         int step = target;
         if(predecessors.get(step) == null)
             return null;
         path.add(step);
         while(predecessors.get(step) != null){
             int next = predecessors.get(step);
-//            cost += edge_costs[free_edges[next][step]];
-            //step = predecessors.get(step);
             step = next;
             path.add(step);
         }
         Collections.reverse(path);
-//        System.out.println("COSTO: "+cost);
         return path;
     }
 
@@ -113,4 +107,41 @@ public class Algorithms {
             return new int[]{-1};
     }
 
+    //FOR STATIC ALGORITHM
+    public static Dijkstra2DResults Dijkstra(int[][] free_edges, double[][] sh_delay, int time_step, boolean[] I_bool,
+                                             int[] I_ord, int[] I_point, long SID, long FID){
+        Set<Integer> unSettledNodes = new HashSet<>();
+        Map<Integer, Integer> predecessors = new HashMap<>();
+        Map<Integer, Double> distance = new HashMap<>();
+
+        distance.put((int) SID, 0.0);
+        unSettledNodes.add((int) SID);
+
+        while(unSettledNodes.size() > 0){
+            int node = getMinimum(unSettledNodes, distance);
+            unSettledNodes.remove(node);
+            findMinimalDistances(node, (int) FID,I_bool, I_ord, I_point, distance,free_edges, sh_delay, time_step, predecessors, unSettledNodes);
+        }
+        return new Dijkstra2DResults(distance.get((int) FID), getPath((int) FID, predecessors));
+    }
+
+    private static void findMinimalDistances(int source, int destination, boolean[] I_bool,int[] I_ord, int[] I_point, Map<Integer, Double> distance,
+                                             int[][] free_edges, double[][] edge_cost, int time_step, Map<Integer, Integer> predecessors, Set<Integer> unSettledNodes){
+        int[] adjacentNodes = getNeighbors(I_bool, I_ord, I_point, source, free_edges);
+        for(int target : adjacentNodes){
+            if(target != -1){
+                if(getShortestDistance(target, distance) > (getShortestDistance(source, distance) + getDistance(target, edge_cost, time_step))){
+                    distance.put(target, (getShortestDistance(source, distance) + getDistance(target, edge_cost, time_step)));
+                    predecessors.put(target, source);
+                    unSettledNodes.add(target);
+                }
+                if(target == destination)
+                    unSettledNodes.removeAll(unSettledNodes);
+            }
+        }
+    }
+
+    private static double getDistance(int destination, double[][] edge_cost, int time_step){
+        return edge_cost[destination][time_step];
+    }
 }
