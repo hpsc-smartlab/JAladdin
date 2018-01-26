@@ -999,6 +999,7 @@ public class Utility {
         return interp1(x, y, xiDouble);
     }
 
+
     public static double interp1(ArrayList<Double> x, double[] y, double xi){
         //wrapper for the interp1 method
         double[] xArray = new double[x.size()];
@@ -1031,6 +1032,23 @@ public class Utility {
             }
         }
         return out;
+    }
+
+    public static double interp1(ArrayList<Double> x, double[][] y, int colIDX, double x0, String extrapolation){
+        if(extrapolation!= "extrap")
+            return Double.NaN;
+        else{
+
+            if((x0 > x.get(x.size()-1)) || (x0 < x.get(0))){ //perform the extrapolation
+                //y(0) = y(k-1) + ( (x0 - x(k-1))/(x(k) - x(k-1)) )*(y(k) - y(k-1))
+                return y[y.length-2][colIDX] +( (x0-x.get(x.size()-2))/(x.get(x.size()-1) - x.get(x.size()-2)) ) * ( y[y.length-1][colIDX] - y[y.length-2][colIDX] );
+            }else {
+                double[] y_array = new double[y.length];
+                for(int i=0;i<y.length;++i)
+                    y_array[i] = y[i][colIDX];
+                return interp1(x, y_array, x0);
+            }
+        }
     }
 
 
@@ -1656,6 +1674,14 @@ public class Utility {
             i++;
         }
         return found;
+    }
+
+    public static double[] diff(double[] X){
+        double[] Y = new double[X.length-1];
+        for(int i=0;i<Y.length;++i){
+            Y[i] = X[i+1] - X[i];
+        }
+        return Y;
     }
 
     public static int[] cumsum(boolean[] array){

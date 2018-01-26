@@ -1,5 +1,7 @@
 package it.uniparthenope;
 
+import java.util.stream.DoubleStream;
+
 public class MemorySaver {
 
     public static double[][][] getXInset(double[][][] A, double deg2rad){
@@ -23,6 +25,33 @@ public class MemorySaver {
                 }
             }
         }
+        return B;
+    }
+
+    public static int getIdx(int[][] free_edges, int valueA, int valueB){
+        boolean found = false;
+        boolean overIndex = false;
+        int i=0;
+        while(!found && !overIndex){
+            if( (free_edges[i][0] == valueA )&& (free_edges[i][1] == valueB) ){
+                found = true;
+            } else{
+                ++i;
+                if(i==free_edges.length){
+                    overIndex = true;
+                }
+            }
+
+        }
+        if(found) return i;
+        else return -1;
+    }
+
+    public static double[] addNaNAtTheEnd(double[] A){
+        double[] B = new double[A.length+1];
+        for(int i=0;i<A.length;++i)
+            B[i] = A[i];
+        B[B.length-1] = Double.NaN;
         return B;
     }
     

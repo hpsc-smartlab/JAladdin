@@ -1,7 +1,5 @@
 package it.uniparthenope;
 
-import com.google.common.primitives.Ints;
-import com.mchange.v1.util.ArrayUtils;
 import it.uniparthenope.Boxing.Dijkstra2DResults;
 
 import java.util.*;
@@ -29,7 +27,7 @@ public class Algorithms {
         while(unSettledNodes.size() > 0){
             int node = getMinimum(unSettledNodes, distance);
             unSettledNodes.remove(node);
-            findMinimalDistances(node, (int) FID,I_bool, I_ord, I_point, distance,free_edges, edge_costs, predecessors, unSettledNodes);
+            findMinimalDistances(node,I_bool, I_ord, I_point, distance,free_edges, edge_costs, predecessors, unSettledNodes);
         }
         return new Dijkstra2DResults(distance.get((int) FID), getPath((int) FID, predecessors));
     }
@@ -49,7 +47,7 @@ public class Algorithms {
         return path;
     }
 
-    private static void findMinimalDistances(int source, int destination, boolean[] I_bool,int[] I_ord, int[] I_point, Map<Integer, Double> distance,int[][] free_edges, double[] edge_cost, Map<Integer, Integer> predecessors, Set<Integer> unSettledNodes){
+    private static void findMinimalDistances(int source, boolean[] I_bool,int[] I_ord, int[] I_point, Map<Integer, Double> distance,int[][] free_edges, double[] edge_cost, Map<Integer, Integer> predecessors, Set<Integer> unSettledNodes){
         int[] adjacentNodes = getNeighbors(I_bool, I_ord, I_point, source, free_edges);
         for(int target: adjacentNodes){
             if(target != -1) {
@@ -58,8 +56,6 @@ public class Algorithms {
                     predecessors.put(target, source);
                     unSettledNodes.add(target);
                 }
-                if(target == destination)
-                    unSettledNodes.removeAll(unSettledNodes);
             }
         }
     }
@@ -70,6 +66,8 @@ public class Algorithms {
 
     private static int getMinimum(Set<Integer> src, Map<Integer, Double> distance){
         Integer minimum = null;
+
+
         for(int vertex : src){
             if(minimum == null)
                 minimum = vertex;
@@ -135,8 +133,6 @@ public class Algorithms {
                     predecessors.put(target, source);
                     unSettledNodes.add(target);
                 }
-                if(target == destination)
-                    unSettledNodes.removeAll(unSettledNodes);
             }
         }
     }
