@@ -147,7 +147,7 @@ public class JVisirModel {
             RouteInfo gdtRoute = Gdt_route(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),
                     this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
 
-            RouteInfo staticRoute = Static_algorithm(edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(), (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
+            RouteInfo staticRoute = Static_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(), (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
             seconds = seconds + gdtRoute.getComputationTime() + staticRoute.getComputationTime();
             try{
                 GeoJsonFormatter.writeGeoJson( getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getRoute().getPath()),
@@ -162,6 +162,7 @@ public class JVisirModel {
             }
 
             gettingRouteInfo(gdtRoute);
+            gettingRouteInfo(staticRoute);
         }
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Done. Total execution time: "+Utility.secondsToMins(seconds)+" Min.");
@@ -192,19 +193,32 @@ public class JVisirModel {
         return new RouteInfo(geoRoute, Utility.nanosecToSec(toc+dt+Utility.Toc(t0)), partialTimes, routeInfo);
     }
 
-    private RouteInfo Static_algorithm(int[][] free_edges, double[][] sh_delay, int time_step, boolean[] I_bool,
+    private RouteInfo Static_algorithm(double[][] xy, int[][] free_edges, double[][] sh_delay, int time_step, boolean[] I_bool,
                                        int[] I_ord, int[] I_point, long SID, long FID){
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Calculating static route at "+time_step+" time step...");
         this.logFile.CloseFile();
         long tic = Utility.Tic();
-        Dijkstra2DResults staticRoute = Algorithms.Dijkstra(free_edges, sh_delay, time_step, I_bool, I_ord, I_point, SID, FID);
+        //Ignoring current time step, why?
+        Dijkstra2DResults staticRoute = Algorithms.Dijkstra(free_edges, sh_delay, 0, I_bool, I_ord, I_point, SID, FID);
         long toc = Utility.Toc(tic);
+        tic = Utility.Tic();
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Done. Static route found in  "+ Utility.nanosecToSec(toc)+" seconds.");
         this.logFile.CloseFile();
-        return new RouteInfo(staticRoute, Utility.nanosecToSec(toc));
+        double[] partial_cost = path_labels(free_edges, sh_delay, 0, staticRoute.getPath());
+        get_Info_at_NodeResults routeInfo = get_Info_at_Node(xy, partial_cost, staticRoute.getPath());
+        return new RouteInfo(staticRoute, Utility.nanosecToSec(toc+Utility.Toc(tic)), partial_cost, routeInfo);
 
+    }
+
+    private double[] path_labels(int[][] edge_list, double[][] edge_weights, int colIDX, LinkedList<Integer> path_nodes){
+        double[] Labels = new double[path_nodes.size()];
+        for(int i=0; i<Labels.length-1; ++i){
+            int edge_no = MemorySaver.getIdx(edge_list, path_nodes.get(i), path_nodes.get(i+1));
+            Labels[i+1] = Labels[i] + edge_weights[edge_no][colIDX];
+        }
+        return Labels;
     }
 
     private void gettingRouteInfo(RouteInfo gdt){
