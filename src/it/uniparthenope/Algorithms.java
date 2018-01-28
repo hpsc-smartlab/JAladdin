@@ -1,6 +1,7 @@
 package it.uniparthenope;
 
 import it.uniparthenope.Boxing.Dijkstra2DResults;
+import it.uniparthenope.Boxing.getNeighborsResults;
 
 import java.util.*;
 
@@ -50,11 +51,13 @@ public class Algorithms {
     }
 
     private static void findMinimalDistances(int source, boolean[] I_bool,int[] I_ord, int[] I_point, Map<Integer, Double> distance,int[][] free_edges, double[] edge_cost, Map<Integer, Integer> predecessors, Set<Integer> unSettledNodes,Set<Integer> settledNodes){
-        int[] adjacentNodes = getNeighbors(settledNodes, I_bool, I_ord, I_point, source, free_edges);
-        for(int target: adjacentNodes){
-            if(target != -1) {
-                if (getShortestDistance(target, distance) > (getShortestDistance(source, distance) + getDistance(target, edge_cost))) {
-                    distance.put(target, getShortestDistance(source, distance) + getDistance(target, edge_cost));
+        getNeighborsResults adjacentNodes = getNeighbors(settledNodes, I_bool, I_ord, I_point, source, free_edges);
+        for(int i=0;i<adjacentNodes.getRows().length;++i){
+            int target = adjacentNodes.getNeighbors()[i];
+            int row = adjacentNodes.getRows()[i];
+            if(target != -1){
+                if (getShortestDistance(target, distance) > (getShortestDistance(source, distance) + getDistance(row, edge_cost))){
+                    distance.put(target, (getShortestDistance(source, distance) + getDistance(row, edge_cost)));
                     predecessors.put(target, source);
                     unSettledNodes.add(target);
                 }
@@ -89,35 +92,27 @@ public class Algorithms {
             return dist;
     }
 
-    private static int[] getNeighbors(Set<Integer> settledNodes, boolean[] I_bool, int[] I_ord, int[] I_point, int I, int[][] free_edges){
+    private static getNeighborsResults getNeighbors(Set<Integer> settledNodes, boolean[] I_bool, int[] I_ord, int[] I_point, int I, int[][] free_edges){
         if(I>=I_bool.length)
-            return new int[]{-1};
+            return new getNeighborsResults(new int[]{-1}, new int[]{-1});
         if(I_bool[I]){
             int head_ordinal = I_ord[I]-1;//Necessary because java indexes are from 0!
             int block_start = I_point[head_ordinal];
             int block_end = I_point[head_ordinal +1] -1;
-//            int[] destinations = new int[(block_end-block_start)+1];
-//            int tmp = block_start;
-//            for(int i=0;i<destinations.length; ++i) {
-//                destinations[i] = free_edges[tmp][1];
-//                ++tmp;
-//            }
-//            return destinations;
-            ArrayList<Integer> tmp_dest = new ArrayList<>();
+            int[] neighbors = new int[(block_end-block_start)+1];
+            int[] nids = new int[(block_end-block_start)+1];
             int tmp = block_start;
-            for(int i = 0; i<(block_end-block_start)+1; ++i ){
-                if(!settledNodes.contains(free_edges[tmp][1])){
-                    tmp_dest.add(free_edges[tmp][1]);
-                }
+            for(int i=0;i<(block_end-block_start)+1; ++i){
+                nids[i] = tmp;
+                if(!settledNodes.contains(free_edges[tmp][1]))
+                    neighbors[i] = free_edges[tmp][1];
+                else
+                    neighbors[i] = -1;
                 ++tmp;
             }
-            int[] neighbors = new int[tmp_dest.size()];
-            for(int i=0;i<tmp_dest.size();++i){
-                neighbors[i] = tmp_dest.get(i);
-            }
-            return neighbors;
+            return new getNeighborsResults(nids, neighbors);
         } else
-            return new int[]{-1};
+            return new getNeighborsResults(new int[]{-1}, new int[]{-1});
     }
 
     //FOR STATIC ALGORITHM
@@ -135,18 +130,21 @@ public class Algorithms {
             int node = getMinimum(unSettledNodes, distance);
             settledNodes.add(node);
             unSettledNodes.remove(node);
-            findMinimalDistances(node, (int) FID,I_bool, I_ord, I_point, distance,free_edges, sh_delay, time_step, predecessors, unSettledNodes, settledNodes);
+            findMinimalDistances(node,I_bool, I_ord, I_point, distance,free_edges, sh_delay, time_step, predecessors, unSettledNodes, settledNodes);
         }
         return new Dijkstra2DResults(distance.get((int) FID), getPath((int) FID, predecessors));
     }
 
-    private static void findMinimalDistances(int source, int destination, boolean[] I_bool,int[] I_ord, int[] I_point, Map<Integer, Double> distance,
+    private static void findMinimalDistances(int source, boolean[] I_bool,int[] I_ord, int[] I_point, Map<Integer, Double> distance,
                                              int[][] free_edges, double[][] edge_cost, int time_step, Map<Integer, Integer> predecessors, Set<Integer> unSettledNodes, Set<Integer> settledNodes){
-        int[] adjacentNodes = getNeighbors(settledNodes, I_bool, I_ord, I_point, source, free_edges);
-        for(int target : adjacentNodes){
+
+        getNeighborsResults adjacentNodes = getNeighbors(settledNodes, I_bool, I_ord, I_point, source, free_edges);
+        for(int i=0;i<adjacentNodes.getRows().length;++i){
+            int target = adjacentNodes.getNeighbors()[i];
+            int row = adjacentNodes.getRows()[i];
             if(target != -1){
-                if(getShortestDistance(target, distance) > (getShortestDistance(source, distance) + getDistance(target, edge_cost, time_step))){
-                    distance.put(target, (getShortestDistance(source, distance) + getDistance(target, edge_cost, time_step)));
+                if (getShortestDistance(target, distance) > (getShortestDistance(source, distance) + getDistance(row, edge_cost, time_step))){
+                    distance.put(target, (getShortestDistance(source, distance) + getDistance(row, edge_cost, time_step)));
                     predecessors.put(target, source);
                     unSettledNodes.add(target);
                 }
