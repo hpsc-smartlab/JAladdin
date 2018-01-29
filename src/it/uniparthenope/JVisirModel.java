@@ -147,7 +147,9 @@ public class JVisirModel {
             RouteInfo gdtRoute = Gdt_route(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),
                     this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
 
-            RouteInfo staticRoute = Static_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(), (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
+            RouteInfo staticRoute = Static_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
+                    (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
+                    edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
             seconds = seconds + gdtRoute.getComputationTime() + staticRoute.getComputationTime();
             try{
                 GeoJsonFormatter.writeGeoJson( getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getRoute().getPath()),
@@ -160,7 +162,9 @@ public class JVisirModel {
             if(this.mode==1){//Serialize data
                 this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
             }
-
+            this.logFile = new MyFileWriter("","",true);
+            this.logFile.WriteLog("Route informations:");
+            this.logFile.CloseFile();
             gettingRouteInfo(gdtRoute);
             gettingRouteInfo(staticRoute);
         }
@@ -190,7 +194,7 @@ public class JVisirModel {
         this.logFile.CloseFile();
         double[] partialTimes = get_NodeLabel(free_edges, edge_costs, waveHeight_edges, geoRoute.getPath(), ship_v_LUT, H_array_m);
         get_Info_at_NodeResults routeInfo  = get_Info_at_Node(xy, partialTimes, geoRoute.getPath());
-        return new RouteInfo(geoRoute, Utility.nanosecToSec(toc+dt+Utility.Toc(t0)), partialTimes, routeInfo);
+        return new RouteInfo(geoRoute, Utility.nanosecToSec(toc+dt+Utility.Toc(t0)), partialTimes, routeInfo, 0);
     }
 
     private RouteInfo Static_algorithm(double[][] xy, int[][] free_edges, double[][] sh_delay, int time_step, boolean[] I_bool,
@@ -208,7 +212,7 @@ public class JVisirModel {
         this.logFile.CloseFile();
         double[] partial_cost = path_labels(free_edges, sh_delay, 0, staticRoute.getPath());
         get_Info_at_NodeResults routeInfo = get_Info_at_Node(xy, partial_cost, staticRoute.getPath());
-        return new RouteInfo(staticRoute, Utility.nanosecToSec(toc+Utility.Toc(tic)), partial_cost, routeInfo);
+        return new RouteInfo(staticRoute, Utility.nanosecToSec(toc+Utility.Toc(tic)), partial_cost, routeInfo, 1);
 
     }
 
@@ -222,19 +226,46 @@ public class JVisirModel {
     }
 
     private void gettingRouteInfo(RouteInfo gdt){
+        //type flag:
+        //0 = geodetic
+        //1 = static
+        //2 = dynamic
+        String tempString = "";
+        switch(gdt.getType()){
+            case 0:
+                tempString = "\tGeodetic nav. distance: "+gdt.getRoute().getCost()+" NM";
+                break;
+            case 1:
+                double navDist = gdt.getDr_cum()[gdt.getDr_cum().length-1];
+                tempString = "\tOptimal nav. distance: " + navDist + " NM";
+                break;
+        }
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("Route informations:");
-        this.logFile.CloseFile();
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tGeodetic nav. distance: "+gdt.getRoute().getCost()+" NM");
+        this.logFile.WriteLog(tempString);
         this.logFile.CloseFile();
         double gdt_time = 3600.0*gdt.getPartialTimes()[gdt.getPartialTimes().length-1];
         double gdt_avgV = gdt.getDr_cum()[gdt.getDr_cum().length-1] / gdt.getPartialTimes()[gdt.getPartialTimes().length-1];
+        switch (gdt.getType()){
+            case 0:
+                tempString = "\tGeodetic nav.time: "+secs2hms(gdt_time);
+                break;
+            case 1:
+                tempString = "\tOptimal nav.time: "+secs2hms(gdt_time);
+                break;
+        }
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tGeodetic nav.time: "+secs2hms(gdt_time));
+        this.logFile.WriteLog(tempString);
         this.logFile.CloseFile();
+        switch (gdt.getType()){
+            case 0:
+                tempString = "\tGeodetic average speed: "+gdt_avgV+" kts";
+                break;
+            case 1:
+                tempString = "\tOptimal average speed: "+gdt_avgV+" kts";
+                break;
+        }
         this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tGeodetic average speed: "+gdt_avgV+" kts");
+        this.logFile.WriteLog(tempString);
         this.logFile.CloseFile();
     }
 
@@ -310,8 +341,8 @@ public class JVisirModel {
         double[] edge_delay = Utility.diff(partial_cum_times);
 
         for(int iw=1; iw<nw ; ++iw){
-            double[] P_a = new double[]{xy[iw-1][0], xy[iw-1][1]};
-            double[] P_b = new double[]{xy[iw][0], xy[iw][1]};
+            double[] P_a = new double[]{xy[path.get(iw-1)][0], xy[path.get(iw-1)][1]};
+            double[] P_b = new double[]{xy[path.get(iw)][0], xy[path.get(iw)][1]};
 
             double edge_length = Haversine_distance(P_a, P_b);
 
