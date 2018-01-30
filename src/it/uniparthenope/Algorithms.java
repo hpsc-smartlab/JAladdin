@@ -1,9 +1,12 @@
 package it.uniparthenope;
 
 import it.uniparthenope.Boxing.Dijkstra2DResults;
+import it.uniparthenope.Boxing.DijkstraTimeResults;
 import it.uniparthenope.Boxing.getNeighborsResults;
+import sun.awt.image.ImageWatched;
 
 import java.util.*;
+import java.util.stream.DoubleStream;
 
 public class Algorithms {
 
@@ -154,5 +157,74 @@ public class Algorithms {
 
     private static double getDistance(int destination, double[][] edge_cost, int time_step){
         return edge_cost[destination][time_step];
+    }
+
+    //FOR DYNAMIC ALGORITHM
+    public static DijkstraTimeResults DijkstraTime(int[][] free_edges, double[][] sh_delay, boolean[] I_bool,
+                                                   int[] I_ord, int[] I_point, long SID, long FID){
+        Set<Integer> unSettledNodes = new HashSet<>();
+        Map<Integer, Integer> predecessors = new HashMap<>();
+        Map<Integer, Double> distance = new HashMap<>();
+        Set<Integer> settledNodes = new HashSet<>();
+
+        distance.put((int) SID, 0.0);
+        unSettledNodes.add((int) SID);
+
+        int Nt = sh_delay[0].length;
+        int Dt = 1; //hrs
+
+        while(!settledNodes.contains((int) FID)){//loop ends when dest node is settled
+            int node = getMinimum(unSettledNodes, distance);
+            settledNodes.add(node);
+            unSettledNodes.remove(node);
+            findMinimalDistances(node, I_bool, I_ord, I_point, distance,free_edges, sh_delay, predecessors, unSettledNodes, settledNodes, Dt, Nt);
+        }
+        LinkedList<Integer> paths = getPath((int) FID, predecessors);
+        return new DijkstraTimeResults(distance.get((int) FID), paths, getPartialCosts(paths, distance));
+    }
+    private static void findMinimalDistances(int source, boolean[] I_bool,int[] I_ord, int[] I_point, Map<Integer, Double> distance,
+                                             int[][] free_edges, double[][] edge_cost, Map<Integer, Integer> predecessors, Set<Integer> unSettledNodes, Set<Integer> settledNodes, int Dt, int Nt){
+
+        double itime = Math.floor(getShortestDistance(source, distance)/Dt);//NOTE: need double because Integer doesn't supports INFINITE
+        if(!Double.isInfinite(itime)){
+            if(itime > Nt){
+                System.out.println("c\'è qualquadra che non cosa...");
+                System.exit(0);
+            }
+        }
+        getNeighborsResults adjacentNodes = getNeighbors(settledNodes, I_bool, I_ord, I_point, source, free_edges);
+        for(int i=0;i<adjacentNodes.getRows().length;++i){
+            int target = adjacentNodes.getNeighbors()[i];
+            int row = adjacentNodes.getRows()[i];
+            if(target != -1){
+                if (getShortestDistance(target, distance) > (getShortestDistance(source, distance) + getDistance(row, edge_cost, itime))){
+                    distance.put(target, (getShortestDistance(source, distance) + getDistance(row, edge_cost, itime)));
+                    predecessors.put(target, source);
+                    unSettledNodes.add(target);
+                }
+            }
+        }
+    }
+
+    private static double getDistance(int destination, double[][] edge_cost, double itime){
+        if(Double.isInfinite(itime))
+            return Double.POSITIVE_INFINITY;
+        else
+            return edge_cost[destination][(int) itime];
+    }
+
+//    private static LinkedList<Double> getPartialCosts(LinkedList<Integer> paths, Map<Integer, Double> distance){
+//        LinkedList<Double> tdep_partial_costs = new LinkedList<>();
+//        for(Integer node : paths){
+//            tdep_partial_costs.add(distance.get(node));
+//        }
+//        return tdep_partial_costs;
+//    }
+
+    private static double[] getPartialCosts(LinkedList<Integer> paths, Map<Integer, Double> distance){
+        double[] tdep_partial_costs = new double[paths.size()];
+        for(int i=0;i<paths.size();++i)
+            tdep_partial_costs[i] = distance.get(paths.get(i));
+        return tdep_partial_costs;
     }
 }

@@ -3,8 +3,10 @@ package it.uniparthenope.Boxing;
 import java.util.LinkedList;
 
 public class Dijkstra2DResults {
-    double cost;
-    LinkedList<Integer> path;
+    protected double cost;
+    protected LinkedList<Integer> path;
+
+    public Dijkstra2DResults(){};
 
     public Dijkstra2DResults(double cost, LinkedList<Integer>  path){
         this.cost = cost;

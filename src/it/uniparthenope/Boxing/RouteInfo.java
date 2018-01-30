@@ -1,7 +1,9 @@
 package it.uniparthenope.Boxing;
 
+import java.util.LinkedList;
+
 public class RouteInfo {
-    private Dijkstra2DResults route;
+//    private Dijkstra2DResults route;
     private int type;
     private double computationTime;//in seconds;
     private double[] partialTimes;
@@ -10,10 +12,15 @@ public class RouteInfo {
     private double[] dt_out;
     private double[] sh_course;
     private double[] theta_VMC;
+    private double cost;
+    private LinkedList<Integer> path;
+
 
 
     public RouteInfo(Dijkstra2DResults route, double computationTime, double[] partialTimes, get_Info_at_NodeResults routeInfo, int type) {
-        this.route = route;
+        //this.route = route;
+        this.cost = route.getCost();
+        this.path = route.getPath();
         this.computationTime = computationTime;
         this.partialTimes = partialTimes;
         Dr_cum = routeInfo.getDr_cum();
@@ -24,9 +31,22 @@ public class RouteInfo {
         this.type = type;
     }
 
-    public Dijkstra2DResults getRoute() {
-        return route;
+    public RouteInfo(DijkstraTimeResults route, double computationTime, get_Info_at_NodeResults routeInfo, int type){
+        this.cost = route.getCost();
+        this.path = route.getPath();
+        this.partialTimes = route.getPartial_times();
+        this.type = type;
+        this.computationTime = computationTime;
+        Dr_cum = routeInfo.getDr_cum();
+        spd = routeInfo.getV_opt();
+        dt_out = routeInfo.getEdge_delay();
+        sh_course = routeInfo.getTheta_opt();
+        theta_VMC = routeInfo.getTheta_VMC();
     }
+
+//    public Dijkstra2DResults getRoute() {
+//        return route;
+//    }
 
     public double getComputationTime() {
         return computationTime;
@@ -59,4 +79,13 @@ public class RouteInfo {
     public int getType() {
         return type;
     }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public LinkedList<Integer> getPath() {
+        return path;
+    }
+
 }
