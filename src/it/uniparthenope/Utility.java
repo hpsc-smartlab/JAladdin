@@ -3,6 +3,7 @@ package it.uniparthenope;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import it.uniparthenope.Boxing.*;
@@ -1328,27 +1329,6 @@ public class Utility {
     }
 
 
-    //OLD INTERP2, 'cubic' implemented with Flangan's Math library
-
-//    public static double[][] interp2(double[][] X, double[][] Y, double[][] Z, double[] Xq, double[] Yq){
-//        double[] Xarray = new double[X[0].length];
-//        for(int i=0;i<X[0].length;i++)
-//            Xarray[i]=X[0][i];
-//        double[] Yarray = new double[Y.length];
-//        for(int i=0;i<Y.length;i++)
-//            Yarray[i]=Y[i][0];
-//
-//        double[][] Zt = transposeMatrix(Z);
-//        BiCubicSplineFast bcs = new BiCubicSplineFast(Xarray,Yarray, Zt);
-//        double[][] out = new double[Yq.length][Xq.length];
-//        for(int i=0;i<Yq.length;i++){
-//            for(int j=0;j<Xq.length;j++){
-//                out[i][j] = bcs.interpolate(Xq[j],Yq[i]);
-//            }
-//        }
-//        return out;
-//    }
-
     public static double[][] transposeMatrix(double[][] matrix){
         double[][] output = new double[matrix[0].length][matrix.length];
         for(int i=0;i< matrix.length;++i){
@@ -2012,6 +1992,38 @@ public class Utility {
 
     public static double secondsToMins(double seconds){
         return seconds * 0.01666667;
+    }
+
+    public static String secs2hms(double time_in_sec){
+        String time_string = "";
+        String hour_string;
+        String minute_string;
+        int nHours = 0;
+        int nMins = 0;
+        if(time_in_sec >= 3600.0){
+            nHours = (int)Math.floor(time_in_sec/3600);
+            if(nHours > 1)
+                hour_string = " hours, ";
+            else
+                hour_string = " hour, ";
+            time_string = nHours+hour_string;
+        }
+        if(time_in_sec >= 60.0){
+            nMins = (int) Math.floor((time_in_sec - (3600.0*nHours))/60);
+            if(nMins > 1)
+                minute_string = " mins, ";
+            else
+                minute_string = " min, ";
+            time_string += nMins + minute_string;
+        }
+        int nSec = (int)Math.floor(time_in_sec) - 3600*nHours - 60*nMins;
+        time_string += nSec + " secs.";
+        return time_string;
+    }
+
+    public static String forDecimalPts(double value){
+        DecimalFormat f = new DecimalFormat("##.0000");
+        return f.format(value);
     }
 }
 

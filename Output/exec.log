@@ -1,150 +1,153 @@
-Current timestamp: 2018/01/30 11:26:05
+Current timestamp: 2018/01/30 20:47:36
 
 ************************
-2018/01/30 11:26:05:	System initialization...
+2018/01/30 20:47:36:	System initialization...
 ************************
 ************************
-2018/01/30 11:26:05:	Processing namelists...
+2018/01/30 20:47:36:	Processing namelists...
 ************************
 ************************
-2018/01/30 11:26:05:	Ship model response (motorboat)...
+2018/01/30 20:47:36:	Ship model response (motorboat)...
 ************************
 ************************
-2018/01/30 11:26:17:	Bounding boxes and bathymetry postprocessing (grid definition): 
+2018/01/30 20:47:49:	Bounding boxes and bathymetry postprocessing (grid definition): 
 ************************
 ************************
-2018/01/30 11:26:17:		Loading coastline data...
+2018/01/30 20:47:49:		Loading coastline data...
 ************************
 ************************
-2018/01/30 11:26:18:		Creating target grid and loading bathymetry data...
+2018/01/30 20:47:50:		Creating target grid and loading bathymetry data...
 ************************
 ************************
-2018/01/30 11:26:18:		Calculating target grid and reduced bathy field...
+2018/01/30 20:47:51:		Calculating target grid and reduced bathy field...
 ************************
 ************************
-2018/01/30 11:26:18:			Grid size: 180x149 = 26820
+2018/01/30 20:47:51:			Grid size: 180x149 = 26820
 ************************
 ************************
-2018/01/30 11:26:18:			[min, max] grid depth (m): [2.0, 1523.0]
+2018/01/30 20:47:51:			[min, max] grid depth (m): [2.0, 1523.0]
 ************************
 ************************
-2018/01/30 11:26:18:		Calculating coastline excerpt within inset...
+2018/01/30 20:47:51:		Calculating coastline excerpt within inset...
 ************************
 ************************
-2018/01/30 11:26:19:		inset grid plaid coordinates...
+2018/01/30 20:47:52:		inset grid plaid coordinates...
 ************************
 ************************
-2018/01/30 11:26:19:		computation of a joint coast-vessel safety mask...
+2018/01/30 20:47:52:		computation of a joint coast-vessel safety mask...
 ************************
 ************************
-2018/01/30 11:26:19:		readout freenodes DB...
+2018/01/30 20:47:52:		readout freenodes DB...
 ************************
 ************************
-2018/01/30 11:26:19:		remapping free nodes...
+2018/01/30 20:47:52:		remapping free nodes...
 ************************
 ************************
-2018/01/30 11:26:19:		Creating lsm_mask using coastline DB...
+2018/01/30 20:47:52:		Creating lsm_mask using coastline DB...
 ************************
 ************************
-2018/01/30 11:26:19:		Calculating safe distance from coastline...
+2018/01/30 20:47:52:		Calculating safe distance from coastline...
 ************************
 ************************
-2018/01/30 11:26:52:		Calculating Joint safe mask...
+2018/01/30 20:48:26:		Calculating Joint safe mask...
 ************************
 ************************
-2018/01/30 11:26:52:		Calculating distances from start/end nodes...
+2018/01/30 20:48:26:		Calculating distances from start/end nodes...
 ************************
 ************************
-2018/01/30 11:26:52:		Calculating orientation of the geodetic route...
+2018/01/30 20:48:26:		Calculating orientation of the geodetic route...
 ************************
 ************************
-2018/01/30 11:26:52:	Done. Grid definition tooks 35.168333756 sec.
+2018/01/30 20:48:26:	Done. Grid definition tooks 37.144918864000005 sec.
 ************************
 ************************
-2018/01/30 11:26:52:	processing environmental fields...
+2018/01/30 20:48:26:	processing environmental fields...
 ************************
 ************************
-2018/01/30 11:26:52:		latest analysis date and time: 25-02-2015 12:00
+2018/01/30 20:48:26:		latest analysis date and time: 25-02-2015 12:00
 ************************
 ************************
-2018/01/30 11:26:52:		departure date and time: 27-02-2015 06:00
+2018/01/30 20:48:26:		departure date and time: 27-02-2015 06:00
 ************************
 ************************
-2018/01/30 11:26:52:		attempt reading WW3 wave forecast data...
+2018/01/30 20:48:26:		attempt reading WW3 wave forecast data...
 ************************
 ************************
-2018/01/30 11:26:56:		departure at time step #18 of hourly interpolated file
+2018/01/30 20:48:30:		departure at time step #18 of hourly interpolated file
 ************************
 ************************
-2018/01/30 11:26:56:			Data reduction: 1.5693509496091218%
+2018/01/30 20:48:30:			Data reduction: 1.5693509496091218%
 ************************
 ************************
-2018/01/30 11:26:56:		# time steps of forecast file employed: 24.0
+2018/01/30 20:48:30:		# time steps of forecast file employed: 24.0
 ************************
 ************************
-2018/01/30 11:26:56:		seaOverLand extrapolation...
+2018/01/30 20:48:30:		seaOverLand extrapolation...
 ************************
 ************************
-2018/01/30 11:26:57:	Done. Fields regridding tooks 5.415530521 sec.
+2018/01/30 20:48:31:	Done. Fields regridding tooks 5.265525964 sec.
 ************************
 ************************
-2018/01/30 11:26:57:	Defining edges...
+2018/01/30 20:48:31:	Defining edges...
 
 ************************
 ************************
-2018/01/30 11:26:57:		Reading out free edges from DB...
+2018/01/30 20:48:31:		Reading out free edges from DB...
 ************************
 ************************
-2018/01/30 11:27:05:		remapping free edges to inset Sgrid...
+2018/01/30 20:48:39:		remapping free edges to inset Sgrid...
 ************************
 ************************
-2018/01/30 11:27:08:		number of free nodes: 21730
+2018/01/30 20:48:42:		number of free nodes: 21730
 ************************
 ************************
-2018/01/30 11:27:08:		number of free edges: 509136
+2018/01/30 20:48:42:		number of free edges: 509136
 ************************
 ************************
-2018/01/30 11:27:08:		computing edge weights from model data
+2018/01/30 20:48:42:		computing edge weights from model data
 ************************
 ************************
-2018/01/30 11:27:14:		computing edge delays...
+2018/01/30 20:48:48:		computing edge delays...
 ************************
 ************************
-2018/01/30 11:28:04:	Done. Edges definition tooks 66.34143484500001 sec.
+2018/01/30 20:49:41:	Done. Edges definition tooks 69.690936283 sec.
 ************************
 ************************
-2018/01/30 11:28:04:	Calculating geodetic route...
+2018/01/30 20:49:41:	Calculating geodetic route...
 ************************
 ************************
-2018/01/30 11:28:04:	Done. Geodetic route found in 0.441492655 seconds.
+2018/01/30 20:49:41:	Done. Geodetic route found in 0.43101400100000004 seconds.
 ************************
 ************************
-2018/01/30 11:28:04:	Calculating dynamic route...
+2018/01/30 20:49:41:	Calculating dynamic route...
 ************************
 ************************
-2018/01/30 11:28:05:	Done. Dynamic route found in  0.30378488600000003 seconds.
+2018/01/30 20:49:42:	Done. Dynamic route found in  0.28233667 seconds.
 ************************
 ************************
-2018/01/30 11:28:05:	Route informations:
+2018/01/30 20:49:42:	Route informations:
 ************************
 ************************
-2018/01/30 11:28:05:		Geodetic nav. distance: 136.99652523749782 NM
+2018/01/30 20:49:42:		Geodetic nav. distance: 136.99652523749782 NM
 ************************
 ************************
-2018/01/30 11:28:05:		Geodetic nav.time: 14 hours, 25 mins, 7 secs.
+2018/01/30 20:49:42:		Geodetic nav.time: 14 hours, 25 mins, 7 secs.
 ************************
 ************************
-2018/01/30 11:28:05:		Geodetic average speed: 9.50119432943316 kts
+2018/01/30 20:49:42:		Geodetic average speed: 9.50119432943316 kts
 ************************
 ************************
-2018/01/30 11:28:05:		Optimal nav. distance: 149.31837629518006 NM
+2018/01/30 20:49:42:		Optimal nav. distance: 149.31837629518006 NM
 ************************
 ************************
-2018/01/30 11:28:05:		Optimal nav.time: 12 hours, 26 mins, 47 secs.
+2018/01/30 20:49:42:		Optimal nav.time: 12 hours, 26 mins, 47 secs.
 ************************
 ************************
-2018/01/30 11:28:05:		Optimal average speed: 11.996820900719984 kts
+2018/01/30 20:49:42:		Optimal average speed: 11.996820900719984 kts
 ************************
 ************************
-2018/01/30 11:28:05:	Done. Total execution time: 1.9943262378651683 Min.
+2018/01/30 20:49:42:	Generating GeoJSON...
+************************
+************************
+2018/01/30 20:49:42:	Done. Total execution time: 2.090123598691303 Min.
 ************************

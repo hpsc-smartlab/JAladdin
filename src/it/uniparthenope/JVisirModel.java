@@ -99,85 +99,147 @@ public class JVisirModel {
         Fields_regriddingResults fieldsRegriddingResults;
         Edges_definitionResults edgesDefinitionResults;
         this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
-        if(this.mode == 2){//Loading serialized data
-            try{
-                vesselResponse = new vessel_ResponseResults(true);
-                gridDefinitionResults = new Grid_definitionResults(true);
-                fieldsRegriddingResults = new Fields_regriddingResults(true);
-                edgesDefinitionResults = new Edges_definitionResults(true);
-
-
-            }
-            catch (Exception e){
-                MyFileWriter debug = new MyFileWriter("","debug",false);
-                debug.WriteLog("Start -> Parsing data: "+e.getMessage());
-                debug.CloseFile();
-                e.printStackTrace();
-            }
-        } else {
-            double stopTime;
-            tic = Utility.Tic();
-            vesselResponse = vessel_Response();
-            this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
-            tic = Utility.Tic();
-            gridDefinitionResults = Grid_definition();
-            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
-            seconds += stopTime;
-            this.logFile = new MyFileWriter("","",true);
-            this.logFile.WriteLog("Done. Grid definition tooks "+stopTime+" sec.");
-            this.logFile.CloseFile();
-            tic = Utility.Tic();
-            fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
-                    gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
-            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
-            seconds += stopTime;
-            this.logFile = new MyFileWriter("","",true);
-            this.logFile.WriteLog("Done. Fields regridding tooks "+stopTime+" sec.");
-            this.logFile.CloseFile();
-            tic = Utility.Tic();
-            edgesDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
+        double stopTime;
+        tic = Utility.Tic();
+        vesselResponse = vessel_Response();
+        this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
+        tic = Utility.Tic();
+        gridDefinitionResults = Grid_definition();
+        stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+        seconds += stopTime;
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Done. Grid definition tooks "+stopTime+" sec.");
+        this.logFile.CloseFile();
+        tic = Utility.Tic();
+        fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
+                gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
+        stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+        seconds += stopTime;
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Done. Fields regridding tooks "+stopTime+" sec.");
+        this.logFile.CloseFile();
+        tic = Utility.Tic();
+        edgesDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
                 fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
                 gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
-            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
-            seconds += stopTime;
-            this.logFile = new MyFileWriter("","",true);
-            this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
-            this.logFile.CloseFile();
+        stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+        seconds += stopTime;
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
+        this.logFile.CloseFile();
 
-            RouteInfo gdtRoute = Gdt_route(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),
-                    this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+        RouteInfo gdtRoute = Gdt_route(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),
+                this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
 
-            RouteInfo requestedRoute;
-            if(this.timedep_flag==0){
-                requestedRoute = Static_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
-                        (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
-                        edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
-            } else{
-                requestedRoute = Dynamic_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
-                        (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
-                        edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
-            }
-
-            seconds = seconds + gdtRoute.getComputationTime() + requestedRoute.getComputationTime();
-            try{
-
-                GeoJsonFormatter.writeGeoJson( getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getPath()),
-                        getRouteCoords(gridDefinitionResults.getXy(), requestedRoute.getPath()));
-            } catch (Exception e){
-                MyFileWriter debug = new MyFileWriter("","debug",false);
-                debug.WriteLog("GeoJsonFormatter: "+e.getMessage());
-                debug.CloseFile();
-            }
-            if(this.mode==1){//Serialize data
-                this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
-            }
-            this.logFile = new MyFileWriter("","",true);
-            this.logFile.WriteLog("Route informations:");
-            this.logFile.CloseFile();
-            gettingRouteInfo(gdtRoute);
-//            gettingRouteInfo(staticRoute);
-            gettingRouteInfo(requestedRoute);
+        RouteInfo requestedRoute;
+        if(this.timedep_flag==0){
+            requestedRoute = Static_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
+                    (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
+                    edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
+        } else{
+            requestedRoute = Dynamic_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
+                    (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
+                    edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
         }
+
+        seconds = seconds + gdtRoute.getComputationTime() + requestedRoute.getComputationTime();
+        if(this.mode==1){//Serialize data
+            this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
+        }
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Route informations:");
+        this.logFile.CloseFile();
+        gettingRouteInfo(gdtRoute);
+        gettingRouteInfo(requestedRoute);
+        this.logFile = new MyFileWriter("","",true);
+        this.logFile.WriteLog("Generating GeoJSON...");
+        this.logFile.CloseFile();
+        try{
+            GeoJsonFormatter.writeGeoJson(gdtRoute, requestedRoute, getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getPath()),
+                    getRouteCoords(gridDefinitionResults.getXy(), requestedRoute.getPath()));
+        } catch (Exception e){
+            MyFileWriter debug = new MyFileWriter("","debug",false);
+            debug.WriteLog("GeoJsonFormatter: "+e.getMessage());
+            debug.CloseFile();
+        }
+//        if(this.mode == 2){//Loading serialized data
+//            try{
+//                vesselResponse = new vessel_ResponseResults(true);
+//                gridDefinitionResults = new Grid_definitionResults(true);
+//                fieldsRegriddingResults = new Fields_regriddingResults(true);
+//                edgesDefinitionResults = new Edges_definitionResults(true);
+//
+//
+//            }
+//            catch (Exception e){
+//                MyFileWriter debug = new MyFileWriter("","debug",false);
+//                debug.WriteLog("Start -> Parsing data: "+e.getMessage());
+//                debug.CloseFile();
+//                e.printStackTrace();
+//            }
+//        } else {
+//            double stopTime;
+//            tic = Utility.Tic();
+//            vesselResponse = vessel_Response();
+//            this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
+//            tic = Utility.Tic();
+//            gridDefinitionResults = Grid_definition();
+//            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+//            seconds += stopTime;
+//            this.logFile = new MyFileWriter("","",true);
+//            this.logFile.WriteLog("Done. Grid definition tooks "+stopTime+" sec.");
+//            this.logFile.CloseFile();
+//            tic = Utility.Tic();
+//            fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
+//                    gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
+//            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+//            seconds += stopTime;
+//            this.logFile = new MyFileWriter("","",true);
+//            this.logFile.WriteLog("Done. Fields regridding tooks "+stopTime+" sec.");
+//            this.logFile.CloseFile();
+//            tic = Utility.Tic();
+//            edgesDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
+//                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
+//                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+//            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
+//            seconds += stopTime;
+//            this.logFile = new MyFileWriter("","",true);
+//            this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
+//            this.logFile.CloseFile();
+//
+//            RouteInfo gdtRoute = Gdt_route(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),
+//                    this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+//
+//            RouteInfo requestedRoute;
+//            if(this.timedep_flag==0){
+//                requestedRoute = Static_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
+//                        (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
+//                        edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
+//            } else{
+//                requestedRoute = Dynamic_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
+//                        (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
+//                        edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
+//            }
+//
+//            seconds = seconds + gdtRoute.getComputationTime() + requestedRoute.getComputationTime();
+//            try{
+//
+//                GeoJsonFormatter.writeGeoJson( getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getPath()),
+//                        getRouteCoords(gridDefinitionResults.getXy(), requestedRoute.getPath()));
+//            } catch (Exception e){
+//                MyFileWriter debug = new MyFileWriter("","debug",false);
+//                debug.WriteLog("GeoJsonFormatter: "+e.getMessage());
+//                debug.CloseFile();
+//            }
+//            if(this.mode==1){//Serialize data
+//                this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
+//            }
+//            this.logFile = new MyFileWriter("","",true);
+//            this.logFile.WriteLog("Route informations:");
+//            this.logFile.CloseFile();
+//            gettingRouteInfo(gdtRoute);
+//            gettingRouteInfo(requestedRoute);
+//        }
         this.logFile = new MyFileWriter("","",true);
         this.logFile.WriteLog("Done. Total execution time: "+Utility.secondsToMins(seconds)+" Min.");
         this.logFile.CloseFile();
@@ -280,15 +342,15 @@ public class JVisirModel {
         double gdt_avgV = gdt.getDr_cum()[gdt.getDr_cum().length-1] / gdt.getPartialTimes()[gdt.getPartialTimes().length-1];
         switch (gdt.getType()){
             case 0:{
-                tempString = "\tGeodetic nav.time: "+secs2hms(gdt_time);
+                tempString = "\tGeodetic nav.time: "+Utility.secs2hms(gdt_time);
                 break;
             }
             case 1:{
-                tempString = "\tOptimal nav.time: "+secs2hms(gdt_time);
+                tempString = "\tOptimal nav.time: "+Utility.secs2hms(gdt_time);
                 break;
             }
             case 2:{
-                tempString = "\tOptimal nav.time: "+secs2hms(gdt_time);
+                tempString = "\tOptimal nav.time: "+Utility.secs2hms(gdt_time);
                 break;
             }
         }
@@ -314,32 +376,7 @@ public class JVisirModel {
         this.logFile.CloseFile();
     }
 
-    private String secs2hms(double time_in_sec){
-        String time_string = "";
-        String hour_string;
-        String minute_string;
-        int nHours = 0;
-        int nMins = 0;
-        if(time_in_sec >= 3600.0){
-            nHours = (int)Math.floor(time_in_sec/3600);
-            if(nHours > 1)
-                hour_string = " hours, ";
-            else
-                hour_string = " hour, ";
-            time_string = nHours+hour_string;
-        }
-        if(time_in_sec >= 60.0){
-            nMins = (int) Math.floor((time_in_sec - (3600.0*nHours))/60);
-            if(nMins > 1)
-                minute_string = " mins, ";
-            else
-                minute_string = " min, ";
-            time_string += nMins + minute_string;
-        }
-        int nSec = (int)Math.floor(time_in_sec) - 3600*nHours - 60*nMins;
-        time_string += nSec + " secs.";
-        return time_string;
-    }
+
 
     private double[] get_NodeLabel(int[][] free_edges, double[] edge_costs, double[][] waveHeight_edges, LinkedList<Integer> path_vector,
                                double[][] ship_v_LUT, ArrayList<Double> H_array_m){

@@ -1,11 +1,37 @@
 package it.uniparthenope.Parser;
 
+import it.uniparthenope.Boxing.RouteInfo;
+import it.uniparthenope.Utility;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
 
 public class GeoJsonFormatter {
+
+    public static void writeGeoJson(RouteInfo gdtRoute, RouteInfo optimalRoute, double[][] gdtRouteCoords, double[][] optimalRouteCoords) throws IOException{
+        JSONObject geojson = new JSONObject();
+        geojson.put("type", "FeatureCollection");
+        JSONArray features = new JSONArray();
+        String RED = "#ff0000";
+        String GREEN = "#00ff00";
+
+        //ADDING MARKERS
+        features.add(getMarker(gdtRouteCoords[0][0], gdtRouteCoords[0][1], "startPoint"));
+        features.add(getMarker(gdtRouteCoords[gdtRouteCoords.length-1][0], gdtRouteCoords[gdtRouteCoords.length-1][1], "endPoint"));
+
+        //ADDING ROUTES:
+        features.add(getLineString(gdtRoute, gdtRouteCoords,RED));// GDT
+        features.add(getLineString(optimalRoute, optimalRouteCoords, GREEN)); //OPTIMAL
+
+        //END
+        geojson.put("features", features);
+        FileWriter file = new FileWriter("Output/shipRoute.geojson");
+        file.write(geojson.toJSONString());
+        file.flush();
+        file.close();
+    }
 
     public static  void writeGeoJson(double[][]... coordsList) throws IOException{
         JSONObject geojson = new JSONObject();
@@ -45,6 +71,52 @@ public class GeoJsonFormatter {
         file.write(geojson.toJSONString());
         file.flush();
         file.close();
+    }
+
+    private static JSONObject getLineString(RouteInfo route, double[][] coords, String lineColor){
+        JSONObject feature = new JSONObject();
+        feature.put("type","Feature");
+        JSONObject properties = new JSONObject();
+        properties.put("stroke",lineColor);
+        properties.put("stroke-width", 2.5);
+        properties.put("stroke-opacity", 1);
+
+        //ADDING ROUTE INFO TO GEOJSON:
+        double time = 3600.0*route.getPartialTimes()[route.getPartialTimes().length-1];
+        double avgV = route.getDr_cum()[route.getDr_cum().length-1] / route.getPartialTimes()[route.getPartialTimes().length-1];
+            if(route.getType()==0){//GDT Route
+                properties.put("route-type","geodetic");
+                properties.put("route-distance", Utility.forDecimalPts(route.getCost()) + " NM");
+            } else {
+                double navDist = route.getDr_cum()[route.getDr_cum().length-1];
+                properties.put("route-distance", Utility.forDecimalPts(navDist) + " NM");
+                if(route.getType() == 1){//STATIC Route
+                    properties.put("route-type","static-optimal");
+                } else { //DYNAMIC Route
+                    properties.put("route-type","dynamic-optimal");
+                }
+            }
+        properties.put("navigation-time", Utility.secs2hms(time));
+        properties.put("average-speed", Utility.forDecimalPts(avgV) + " kts");
+        //END
+
+        feature.put("properties", properties);
+        JSONObject geometry = new JSONObject();
+        geometry.put("type", "LineString");
+        //coordinates
+        JSONArray coordinates = new JSONArray();
+        for(int ix=0;ix<coords.length;++ix)
+            coordinates.add(getPoint(coords[ix][0], coords[ix][1]));
+        geometry.put("coordinates", coordinates);
+        feature.put("geometry", geometry);
+        return feature;
+    }
+
+    private static JSONArray getPoint(double lon, double lat){
+        JSONArray point = new JSONArray();
+        point.add(0, lon);
+        point.add(1, lat);
+        return point;
     }
 
 
