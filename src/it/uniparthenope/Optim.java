@@ -39,6 +39,14 @@ public class Optim {
         this.waveModel = parser.getValueAsLong("waveModel");
     }
 
+    public void OptimizationParameters(String path){
+        //getting data from optim_pars.json parsing
+        MyJSONParser parser = new MyJSONParser(path);
+        this.intentional_speed_red = parser.getValueAsLong("intentional_speed_red");
+        this.windModel = parser.getValueAsLong("windModel");
+        this.waveModel = parser.getValueAsLong("waveModel");
+    }
+
 
     public void saveState() throws IOException {
         JSONManager writer = new JSONManager();

@@ -43,6 +43,18 @@ public class DepartureParameters {
         setDepDateTime();
     }
 
+    public DepartureParameters(String path){
+        //getting data from datetime_pars.json parsing
+        MyJSONParser parser = new MyJSONParser(path);
+        this.year = parser.getValueAsLong("year");
+        this.month = parser.getValueAsLong("month");
+        this.day = parser.getValueAsLong("day");
+        this.hour = parser.getValueAsLong("hour");
+        this.min = parser.getValueAsLong("min");
+        this.now_flag = 0;
+        setDepDateTime();
+    }
+
     public void saveState() throws IOException {
         JSONManager writer = new JSONManager();
         writer.initWriting("SerializedObjects/DepartureParameters.json");

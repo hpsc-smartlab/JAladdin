@@ -6,10 +6,7 @@ package it.uniparthenope;
 public class Main {
 
     public static void main(String[] args) {
-        //mode=0: normal execution without serialize objects
-        //mode=1: normal execution serializing objects
-        //mode=2: debugging mode: load data deserializing objects
-        JVisirModel v = new JVisirModel(2,2, 0);//Same input provided for testing .m files
+        JVisirModel v = new JVisirModel(2,2, null);//Same input provided for testing .m files
         v.Start();
     }
 }

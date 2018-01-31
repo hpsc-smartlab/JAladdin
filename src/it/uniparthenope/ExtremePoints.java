@@ -52,9 +52,31 @@ public class ExtremePoints{
         }
     }
 
-    public ExtremePoints(){
+//    public ExtremePoints(){
+//        //getting data from extrema_pars.json parsing
+//        MyJSONParser parser = new MyJSONParser("extrema_pars.json");
+//        this.start_lat = parser.getValueAsDouble("start_lat");
+//        this.start_lon = parser.getValueAsDouble("start_lon");
+//        this.end_lat = parser.getValueAsDouble("end_lat");
+//        this.end_lon = parser.getValueAsDouble("end_lon");
+//        this.bbox_deltaLat_u = parser.getValueAsDouble("bbox_deltaLat_u");
+//        this.bbox_deltaLon_l = parser.getValueAsDouble("bbox_deltaLon_l");
+//        this.bbox_deltaLat_d = parser.getValueAsDouble("bbox_deltaLat_d");
+//        this.bbox_deltaLon_r = parser.getValueAsDouble("bbox_deltaLon_r");
+//        this.minCoastDist = parser.getValueAsLong("minCoastDist");
+//        if(!RegionCheck()){
+//            System.out.println("Extreme points integrity check violated.");
+//            MyFileWriter debug = new MyFileWriter("","debug",false);
+//            debug.WriteLog("ExtremePoints constructor: Extreme points integrity check violated.");
+//            debug.CloseFile();
+//            System.exit(0);
+//        }
+//        this.cycType = "dd"; //cycloid type: 'id' % 'inverted_descent'; 'dd' % 'direct_descent'
+//    }
+
+    public ExtremePoints(String path, String outPath){
         //getting data from extrema_pars.json parsing
-        MyJSONParser parser = new MyJSONParser("extrema_pars.json");
+        MyJSONParser parser = new MyJSONParser(path);
         this.start_lat = parser.getValueAsDouble("start_lat");
         this.start_lon = parser.getValueAsDouble("start_lon");
         this.end_lat = parser.getValueAsDouble("end_lat");
@@ -66,7 +88,7 @@ public class ExtremePoints{
         this.minCoastDist = parser.getValueAsLong("minCoastDist");
         if(!RegionCheck()){
             System.out.println("Extreme points integrity check violated.");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outPath);
             debug.WriteLog("ExtremePoints constructor: Extreme points integrity check violated.");
             debug.CloseFile();
             System.exit(0);

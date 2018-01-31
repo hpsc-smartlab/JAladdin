@@ -2,17 +2,17 @@ package it.uniparthenope;
 
 import java.io.FileReader;
 import java.util.*;
-//Boxing classes
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.*;
-import org.apache.commons.math3.analysis.function.Min;
 
 public class JVisirModel {
     //input data
     private long bar_flag;
     private long timedep_flag;
     private int mode;
+    private InputPaths paths;
+
     private Fstats fstats;
     private Const constants;
     private Optim optim;
@@ -31,14 +31,49 @@ public class JVisirModel {
 
 
     //Constructor
+    public JVisirModel(long bar_flag, long timedep_flag, InputPaths paths){
+        //bar_flag = 1: fresh compution of edges not crossing coastline (mode 1 of GMD-D paper)
+        //bar_flag = 2: edges not crossing coastline read out from DB   (mode 2 of GMD-D paper)
+        long tic = Utility.Tic();
+        if((bar_flag!=1) && (bar_flag!=2)) { //If the input incorrect, set bar_flag = 2 as default value.
+            this.bar_flag = 2;
+        } else {
+            this.bar_flag = bar_flag;
+        }
+        if((timedep_flag!=0) && (timedep_flag!=2)) { //Same thing for timedep_flag.
+            this.timedep_flag = 2;
+        } else {
+            this.timedep_flag = timedep_flag;
+        }
+        this.mode=0;
+        this.fstats = new Fstats();
+        this.constants = new Const();
+        this.optim = new Optim();
+        this.ship = new Ship();
+        this.sGrid = new SpatialGrid();
+        this.tGrid = new TemporalGrid();
+        this.visualization = new Visualization();
+
+        if(paths==null)
+            this.paths = new InputPaths();//default
+        else
+            this.paths = new InputPaths(paths.getDep_parameters(), paths.getExtr_parameters(),
+                    paths.getOptim_parameters(), paths.getSafety_parameters(), paths.getShip_parameters(),
+                    paths.getVisualization_parameters(), paths.getOutDir(), paths.getFreeNodesDB(),
+                    paths.getCoastlineDB(), paths.getBathymetryDB(), paths.getAnalysisDB(), paths.getForecastFile(), paths.getFreeEdgesDB());
+        this.logFile = new MyFileWriter("","",false, this.paths.getOutDir());
+        this.logFile.WriteLine("");
+        this.logFile.WriteLog("System initialization...");
+        this.logFile.CloseFile();
+        this.seconds = Utility.nanosecToSec(Utility.Toc(tic));
+    }
+
     public JVisirModel(long bar_flag, long timedep_flag, int mode){//Initialize with standard values defined in settings.m
-        this.logFile = new MyFileWriter("","",false);
+        this.logFile = new MyFileWriter("","",false, this.paths.getOutDir());
         this.logFile.WriteLine("");
         this.logFile.WriteLog("System initialization...");
         this.logFile.CloseFile();
         long tic = Utility.Tic();
-        //Locale.setDefault(new Locale("en", "US"));
-        //this.startTime = Utility.Tic();//Start the "timer"
 
         //bar_flag = 1: fresh compution of edges not crossing coastline (mode 1 of GMD-D paper)
         //bar_flag = 2: edges not crossing coastline read out from DB   (mode 2 of GMD-D paper)
@@ -61,7 +96,7 @@ public class JVisirModel {
         this.mode = mode;
         if(this.mode==0 || this.mode==1){
             if(this.mode==1){
-                this.logFile = new MyFileWriter("","",true);
+                this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
                 this.logFile.WriteLog("\t[mode flag=1]: normal execution with serialization...");
                 this.logFile.CloseFile();
             }
@@ -73,7 +108,7 @@ public class JVisirModel {
             this.tGrid = new TemporalGrid();
             this.visualization = new Visualization();
         } else if(this.mode==2){
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\t[DEBUG MODE] loading serialized objects...");
             this.logFile.CloseFile();
             LoadState();
@@ -107,7 +142,7 @@ public class JVisirModel {
         gridDefinitionResults = Grid_definition();
         stopTime = Utility.nanosecToSec(Utility.Toc(tic));
         seconds += stopTime;
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Done. Grid definition tooks "+stopTime+" sec.");
         this.logFile.CloseFile();
         tic = Utility.Tic();
@@ -115,7 +150,7 @@ public class JVisirModel {
                 gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
         stopTime = Utility.nanosecToSec(Utility.Toc(tic));
         seconds += stopTime;
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Done. Fields regridding tooks "+stopTime+" sec.");
         this.logFile.CloseFile();
         tic = Utility.Tic();
@@ -124,7 +159,7 @@ public class JVisirModel {
                 gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
         stopTime = Utility.nanosecToSec(Utility.Toc(tic));
         seconds += stopTime;
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
         this.logFile.CloseFile();
 
@@ -146,101 +181,23 @@ public class JVisirModel {
         if(this.mode==1){//Serialize data
             this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Route informations:");
         this.logFile.CloseFile();
         gettingRouteInfo(gdtRoute);
         gettingRouteInfo(requestedRoute);
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Generating GeoJSON...");
         this.logFile.CloseFile();
         try{
             GeoJsonFormatter.writeGeoJson(gdtRoute, requestedRoute, getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getPath()),
                     getRouteCoords(gridDefinitionResults.getXy(), requestedRoute.getPath()));
         } catch (Exception e){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("GeoJsonFormatter: "+e.getMessage());
             debug.CloseFile();
         }
-//        if(this.mode == 2){//Loading serialized data
-//            try{
-//                vesselResponse = new vessel_ResponseResults(true);
-//                gridDefinitionResults = new Grid_definitionResults(true);
-//                fieldsRegriddingResults = new Fields_regriddingResults(true);
-//                edgesDefinitionResults = new Edges_definitionResults(true);
-//
-//
-//            }
-//            catch (Exception e){
-//                MyFileWriter debug = new MyFileWriter("","debug",false);
-//                debug.WriteLog("Start -> Parsing data: "+e.getMessage());
-//                debug.CloseFile();
-//                e.printStackTrace();
-//            }
-//        } else {
-//            double stopTime;
-//            tic = Utility.Tic();
-//            vesselResponse = vessel_Response();
-//            this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
-//            tic = Utility.Tic();
-//            gridDefinitionResults = Grid_definition();
-//            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
-//            seconds += stopTime;
-//            this.logFile = new MyFileWriter("","",true);
-//            this.logFile.WriteLog("Done. Grid definition tooks "+stopTime+" sec.");
-//            this.logFile.CloseFile();
-//            tic = Utility.Tic();
-//            fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
-//                    gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
-//            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
-//            seconds += stopTime;
-//            this.logFile = new MyFileWriter("","",true);
-//            this.logFile.WriteLog("Done. Fields regridding tooks "+stopTime+" sec.");
-//            this.logFile.CloseFile();
-//            tic = Utility.Tic();
-//            edgesDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
-//                fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
-//                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
-//            stopTime = Utility.nanosecToSec(Utility.Toc(tic));
-//            seconds += stopTime;
-//            this.logFile = new MyFileWriter("","",true);
-//            this.logFile.WriteLog("Done. Edges definition tooks "+stopTime+" sec.");
-//            this.logFile.CloseFile();
-//
-//            RouteInfo gdtRoute = Gdt_route(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),
-//                    this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
-//
-//            RouteInfo requestedRoute;
-//            if(this.timedep_flag==0){
-//                requestedRoute = Static_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
-//                        (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
-//                        edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
-//            } else{
-//                requestedRoute = Dynamic_algorithm(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getSh_delay(),
-//                        (int) (this.tGrid.getWave_dep_TS()-1),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),
-//                        edgesDefinitionResults.getI_point(),this.sGrid.getNode_start(), this.sGrid.getNode_end());
-//            }
-//
-//            seconds = seconds + gdtRoute.getComputationTime() + requestedRoute.getComputationTime();
-//            try{
-//
-//                GeoJsonFormatter.writeGeoJson( getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getPath()),
-//                        getRouteCoords(gridDefinitionResults.getXy(), requestedRoute.getPath()));
-//            } catch (Exception e){
-//                MyFileWriter debug = new MyFileWriter("","debug",false);
-//                debug.WriteLog("GeoJsonFormatter: "+e.getMessage());
-//                debug.CloseFile();
-//            }
-//            if(this.mode==1){//Serialize data
-//                this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
-//            }
-//            this.logFile = new MyFileWriter("","",true);
-//            this.logFile.WriteLog("Route informations:");
-//            this.logFile.CloseFile();
-//            gettingRouteInfo(gdtRoute);
-//            gettingRouteInfo(requestedRoute);
-//        }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Done. Total execution time: "+Utility.secondsToMins(seconds)+" Min.");
         this.logFile.CloseFile();
     }
@@ -253,7 +210,7 @@ public class JVisirModel {
         for(Integer element : nogo_edges)
             edge_costs[element] = Double.POSITIVE_INFINITY;
 
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Calculating geodetic route...");
         this.logFile.CloseFile();
         long dt = Utility.Toc(t0);
@@ -261,7 +218,7 @@ public class JVisirModel {
         Dijkstra2DResults geoRoute = Algorithms.Dijkstra(free_edges, edge_costs, I_bool, I_ord, I_point, SID, FID);
         long toc = Utility.Toc(tic);
         t0 = Utility.Tic();
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Done. Geodetic route found in "+ Utility.nanosecToSec(toc)+" seconds.");
         this.logFile.CloseFile();
         double[] partialTimes = get_NodeLabel(free_edges, edge_costs, waveHeight_edges, geoRoute.getPath(), ship_v_LUT, H_array_m);
@@ -271,7 +228,7 @@ public class JVisirModel {
 
     private RouteInfo Static_algorithm(double[][] xy, int[][] free_edges, double[][] sh_delay, int time_step, boolean[] I_bool,
                                        int[] I_ord, int[] I_point, long SID, long FID){
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Calculating static route at "+time_step+" time step...");
         this.logFile.CloseFile();
         long tic = Utility.Tic();
@@ -279,7 +236,7 @@ public class JVisirModel {
         Dijkstra2DResults staticRoute = Algorithms.Dijkstra(free_edges, sh_delay, 0, I_bool, I_ord, I_point, SID, FID);
         long toc = Utility.Toc(tic);
         tic = Utility.Tic();
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Done. Static route found in  "+ Utility.nanosecToSec(toc)+" seconds.");
         this.logFile.CloseFile();
         double[] partial_cost = path_labels(free_edges, sh_delay, 0, staticRoute.getPath());
@@ -290,14 +247,14 @@ public class JVisirModel {
 
     private RouteInfo Dynamic_algorithm(double[][] xy, int[][] free_edges, double[][] sh_delay, int time_step, boolean[] I_bool,
                                         int[] I_ord, int[] I_point, long SID, long FID){
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Calculating dynamic route...");
         this.logFile.CloseFile();
         long tic = Utility.Tic();
         DijkstraTimeResults dynamicRoute = Algorithms.DijkstraTime(free_edges, sh_delay, I_bool, I_ord, I_point, SID, FID);
         long toc = Utility.Toc(tic);
         tic = Utility.Tic();
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Done. Dynamic route found in  "+ Utility.nanosecToSec(toc)+" seconds.");
         this.logFile.CloseFile();
         get_Info_at_NodeResults routeInfo = get_Info_at_Node(xy, dynamicRoute.getPartial_times(), dynamicRoute.getPath());
@@ -335,7 +292,7 @@ public class JVisirModel {
                 break;
             }
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog(tempString);
         this.logFile.CloseFile();
         double gdt_time = 3600.0*gdt.getPartialTimes()[gdt.getPartialTimes().length-1];
@@ -354,7 +311,7 @@ public class JVisirModel {
                 break;
             }
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog(tempString);
         this.logFile.CloseFile();
         switch (gdt.getType()){
@@ -371,7 +328,7 @@ public class JVisirModel {
                 break;
             }
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog(tempString);
         this.logFile.CloseFile();
     }
@@ -395,7 +352,7 @@ public class JVisirModel {
                 sh_vel = waveHeight_edges[edge_no][0];
             else{
                 if(this.ship.getVessType() != this.ship.getSailType()){ //motorboat
-                    sh_vel = Utility.interp1(H_array_m, ship_v_LUT ,0, waveHeight_edges[edge_no][itime],"extrap");
+                    sh_vel = Utility.interp1(H_array_m, ship_v_LUT ,0, waveHeight_edges[edge_no][itime],"extrap", this.paths.getOutDir());
                 } else{ //sailboat
                     sh_vel = const_vel;
                 }
@@ -460,7 +417,7 @@ public class JVisirModel {
     }
 
     private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults, Edges_definitionResults edgesDefinitionResults){
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Saving state...");
         this.logFile.CloseFile();
         try{
@@ -479,7 +436,7 @@ public class JVisirModel {
             fieldsRegriddingResults.saveState();
             edgesDefinitionResults.saveState();
         } catch (Exception e){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("SaveState: "+e.getMessage());
             debug.CloseFile();
             e.printStackTrace();
@@ -499,7 +456,7 @@ public class JVisirModel {
             this.dep_datetime = new DepartureParameters(true);
 
         } catch (Exception e){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("LoadState: "+e.getMessage());
             debug.CloseFile();
             e.printStackTrace();
@@ -509,15 +466,21 @@ public class JVisirModel {
 
 
     private void LoadData(){//Loading data parsing them from json file defined in inputFiles folder
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Processing namelists...");
         this.logFile.CloseFile();
-        this.extreme_pts = new ExtremePoints();
-        this.dep_datetime = new DepartureParameters();
-        this.ship.LoadVesselParameters();
-        this.safety = new SafetyParameters();
-        this.optim.OptimizationParameters();
-        this.visualization.VisualizationParameters();
+//        this.extreme_pts = new ExtremePoints();
+//        this.dep_datetime = new DepartureParameters();
+//        this.ship.LoadVesselParameters();
+//        this.safety = new SafetyParameters();
+//        this.optim.OptimizationParameters();
+//        this.visualization.VisualizationParameters();
+        this.extreme_pts = new ExtremePoints(this.paths.getExtr_parameters(), this.paths.getOutDir());
+        this.dep_datetime = new DepartureParameters(this.paths.getDep_parameters());
+        this.ship.LoadVesselParameters(this.paths.getShip_parameters(), this.paths.getOutDir());
+        this.safety = new SafetyParameters(this.paths.getSafety_parameters());
+        this.optim.OptimizationParameters(this.paths.getOptim_parameters());
+        this.visualization.VisualizationParameters(this.paths.getVisualization_parameters());
     }
 
     private void CalculateParameters(){//namelist_postproc.m
@@ -601,7 +564,7 @@ public class JVisirModel {
 
 
     private vessel_ResponseResults vessel_Response(){//vessel_Response.m implementation
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         if(this.forcing.getAnalytic()==1){
             this.logFile.WriteLog("Analitical benchmark...");
         } else{
@@ -617,7 +580,7 @@ public class JVisirModel {
     }
 
     private Grid_definitionResults Grid_definition(){//Grid_definition.m implementation
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Bounding boxes and bathymetry postprocessing (grid definition): ");
         this.logFile.CloseFile();
         String freeedges_DB_filename = "freeedges_DB.dat";
@@ -656,7 +619,7 @@ public class JVisirModel {
             this.sGrid.setBbox__lat_min(lat_min);
             this.sGrid.setBbox__lon_max(lon_max);
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tLoading coastline data...");
         this.logFile.CloseFile();
         //Coastline:
@@ -669,7 +632,7 @@ public class JVisirModel {
         x_coast.addAll(readoutCoastResults.getLon_int());
         x_coast.add(Double.NaN);
         x_coast.addAll(readoutCoastResults.getLon_ext());
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tCreating target grid and loading bathymetry data...");
         this.logFile.CloseFile();
         //Bathymetry:
@@ -689,7 +652,7 @@ public class JVisirModel {
         ArrayList<Double> lon_bathy = bathymetry.getLon();
         double[][] z_bathy = bathymetry.getZ();
         this.sGrid.setInv_step( Math.round(1.0/Math.abs(lon_bathy.get(1)-lon_bathy.get(0)))+0.0 );
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tCalculating target grid and reduced bathy field...");
         this.logFile.CloseFile();
         //Target grid and reduced bathy field:
@@ -706,7 +669,7 @@ public class JVisirModel {
         ArrayList<Double> y_coast_Inset = new ArrayList<>();
         if(this.bar_flag == 2){
             // coastline excerpt within Inset:
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tCalculating coastline excerpt within inset...");
             this.logFile.CloseFile();
             double min_lon_bathy = Collections.min(lon_bathy_Inset);
@@ -747,7 +710,7 @@ public class JVisirModel {
         //double[][] yg_DB = data_gridOut.getYg();
 
         //inset grid plaid coordinates:
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tinset grid plaid coordinates...");
         this.logFile.CloseFile();
         mdata_gridResults data_gridOut2 = mdata_grid(lat_bathy_Inset, lon_bathy_Inset);
@@ -756,14 +719,14 @@ public class JVisirModel {
         GridOut.setYg(data_gridOut2.getYg());
         if(this.visualization.getGraphData()==1){
             //csv_write xy
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tWriting graph coords in GRAPH.node_LonLat.csv...");
             this.logFile.CloseFile();
             try{
                 MyCSVParser csv = new MyCSVParser("Output/GRAPH.node_LonLat.csv");
                 csv.writeCSV(GridOut.getXy());
             } catch (Exception e){
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("grid_definition, csv parser: "+e.getMessage());
                 debug.CloseFile();
                 e.printStackTrace();
@@ -772,7 +735,7 @@ public class JVisirModel {
 
         //--------------------------------------------------------------------
         //Joint coast-vessel safety mask:
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tcomputation of a joint coast-vessel safety mask...");
         this.logFile.CloseFile();
         double[][] UKC_mask = Utility.NaNmatrix(bathy_Inset.length, bathy_Inset[0].length);
@@ -793,13 +756,13 @@ public class JVisirModel {
         double[][] min_coast_dist;
         if(this.bar_flag == 2){
             //readout free nodes DB:
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\treadout freenodes DB...");
             this.logFile.CloseFile();
-            MyBinaryParser datFile = new MyBinaryParser("inputFiles/graph/freeNodes_DB.dat");
+            MyBinaryParser datFile = new MyBinaryParser(this.paths.getFreeNodesDB());
             long[] free_nodes_DB = datFile.readAsUInt32();
             //remapping free nodes:
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tremapping free nodes...");
             this.logFile.CloseFile();
             long lambda = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
@@ -824,20 +787,20 @@ public class JVisirModel {
             long free_nodes_Number = free_nodes.length;
             if(free_nodes_Number==0){
                 System.out.println("no free nodes found in graph");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("Grid_definition: no free nodes found in graph");
                 debug.CloseFile();
                 System.exit(0);
             } else if(free_nodes_Number > this.sGrid.getNodesLargeN()){
                 System.out.println("too large graph");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("Grid_definition: too large graph");
                 debug.CloseFile();
                 System.exit(0);
             }
             this.sGrid.setFreenodes(free_nodes_Number);
             //lsm, created using coastline DB (NaNs on landmass):
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tCreating lsm_mask using coastline DB...");
             this.logFile.CloseFile();
             double[][] lsm_mask = Utility.NaNmatrix(GridOut.getXg().length,GridOut.getXg()[0].length);
@@ -855,11 +818,11 @@ public class JVisirModel {
             dim[1]=GridOut.getXg()[0].length;
 
             //Safe distance from coastline:
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tCalculating safe distance from coastline...");
             this.logFile.CloseFile();
-            xg_array = Utility.reshape(GridOut.getXg(),dim[0]*dim[1]);
-            yg_array = Utility.reshape(GridOut.getYg(), GridOut.getYg().length*GridOut.getYg()[0].length);
+            xg_array = Utility.reshape(GridOut.getXg(),dim[0]*dim[1], this.paths.getOutDir());
+            yg_array = Utility.reshape(GridOut.getYg(), GridOut.getYg().length*GridOut.getYg()[0].length, this.paths.getOutDir());
             xy_g = new double[xg_array.length][2];
             for(int i=0;i<xg_array.length;i++){
                 xy_g[i][0] = xg_array[i];
@@ -880,7 +843,7 @@ public class JVisirModel {
 //                    }
                 }
                 double[] min_coast_distTmp = Utility.min(coast_dist,1);
-                min_coast_dist = Utility.reshape(min_coast_distTmp, dim);
+                min_coast_dist = Utility.reshape(min_coast_distTmp, dim, this.paths.getOutDir());
                 dist_mask = Utility.NaNmatrix(dim[0],dim[1]);
                 for(int i=0;i<dist_mask.length;++i){
                     for(int j=0;j<dist_mask[0].length;++j){
@@ -893,7 +856,7 @@ public class JVisirModel {
             } else{
                 dist_mask = Utility.ones(dim[0],dim[1]);
             }
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tCalculating Joint safe mask...");
             this.logFile.CloseFile();
             // %###############################################
@@ -903,10 +866,10 @@ public class JVisirModel {
             // J_mask = lsm_mask' .* UKC_mask .* dist_mask' ;
             // %
             // %###############################################
-            double[][] J_mask = Utility.MatrixComponentXcomponent(Utility.MatrixComponentXcomponent(Utility.transposeMatrix(lsm_mask),UKC_mask),Utility.transposeMatrix(dist_mask));
+            double[][] J_mask = Utility.MatrixComponentXcomponent(Utility.MatrixComponentXcomponent(Utility.transposeMatrix(lsm_mask),UKC_mask, this.paths.getOutDir()),Utility.transposeMatrix(dist_mask), this.paths.getOutDir());
 
-            xg_Jmasked = Utility.MatrixComponentXcomponent(GridOut.getXg(),Utility.transposeMatrix(J_mask));
-            yg_Jmasked = Utility.MatrixComponentXcomponent(GridOut.getYg(),Utility.transposeMatrix(J_mask));
+            xg_Jmasked = Utility.MatrixComponentXcomponent(GridOut.getXg(),Utility.transposeMatrix(J_mask), this.paths.getOutDir());
+            yg_Jmasked = Utility.MatrixComponentXcomponent(GridOut.getYg(),Utility.transposeMatrix(J_mask), this.paths.getOutDir());
             //J_bathy_Inset = Utility.MatrixComponentXcomponent(bathy_Inset,J_mask);//VALORE MAI USATO
 
             // % Note: It is not necessary to pass [xg_Jmasked,yg_Jmasked] to the MAIN.m in place of [xg,yg].
@@ -915,14 +878,14 @@ public class JVisirModel {
             // % [xg_Jmasked,yg_Jmasked] are used here just for the sake of searching departure and arrival nodes (s. below).
             //-----------------------------------------------------------------------------------------------------
             //Start and end nodes:
-            xg_array = Utility.reshape(xg_Jmasked,xg_Jmasked.length*xg_Jmasked[0].length);
-            yg_array = Utility.reshape(yg_Jmasked, yg_Jmasked.length*yg_Jmasked[0].length);
+            xg_array = Utility.reshape(xg_Jmasked,xg_Jmasked.length*xg_Jmasked[0].length, this.paths.getOutDir());
+            yg_array = Utility.reshape(yg_Jmasked, yg_Jmasked.length*yg_Jmasked[0].length, this.paths.getOutDir());
             xy_g = new double[xg_Jmasked.length*xg_Jmasked[0].length][2];
             for(int i =0 ;i<xg_Jmasked.length*xg_Jmasked[0].length;++i){
                 xy_g[i][0]=xg_array[i];
                 xy_g[i][1]=yg_array[i];
             }
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tCalculating distances from start/end nodes...");
             this.logFile.CloseFile();
             //distance from start/end nodes:
@@ -941,7 +904,7 @@ public class JVisirModel {
 
             if(Double.isNaN(this.sGrid.getMin_start_dist()) || Double.isNaN(this.sGrid.getMin_end_dist())){
                 System.out.println("departure or arrival point not compliant with safety specifications");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("Grid_definition: departure or arrival point not compliant with safety specifications");
                 debug.CloseFile();
                 System.exit(0);
@@ -992,7 +955,7 @@ public class JVisirModel {
             delta_x=delta_x*sign;
 
             //orientation of the gdt route
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tCalculating orientation of the geodetic route...");
             this.logFile.CloseFile();
             double atan2 = Math.atan2(delta_x,delta_y);
@@ -1453,14 +1416,14 @@ public class JVisirModel {
         //checks:
         if(nx > nx_big || ny> ny_big || lambda+nx > nx_big || mu+ny > ny_big){
             System.out.println("inset grid not within reference grid!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("idx_ref2inset_grid: inset grid not within reference grid!");
             debug.CloseFile();
             System.exit(0);
         }
         if((Utility.any(idx_big,"<",1)) || Utility.any(idx_big,">",(nx_big*ny_big))){
             System.out.println("grid index not within reference grid!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("idx_ref2inset_grid: grid index not within reference grid!");
             debug.CloseFile();
             System.exit(0);
@@ -1539,14 +1502,14 @@ public class JVisirModel {
         //checks:
         if(nx > nx_big || ny> ny_big || lambda+nx > nx_big || mu+ny > ny_big){
             System.out.println("inset grid not within reference grid!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("idx_ref2inset_grid: inset grid not within reference grid!");
             debug.CloseFile();
             System.exit(0);
         }
         if((Utility.any(idx_big,"<",1)) || Utility.any(idx_big,">",(int)(nx_big*ny_big))){
             System.out.println("grid index not within reference grid!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("idx_ref2inset_grid: grid index not within reference grid!");
             debug.CloseFile();
             System.exit(0);
@@ -1589,8 +1552,8 @@ public class JVisirModel {
         int[] aDim = new int[2];
         aDim[0]=NN;
         aDim[1]=1;
-        double[][] xa = Utility.reshape(out.getY(), aDim);
-        double[][] ya = Utility.reshape(out.getX(), aDim);
+        double[][] xa = Utility.reshape(out.getY(), aDim, this.paths.getOutDir());
+        double[][] ya = Utility.reshape(out.getX(), aDim, this.paths.getOutDir());
 //        double[][] xa = Utility.reshape(xg, aDim);
 //        double[][] ya = Utility.reshape(yg, aDim);
         double[][] xy = new double[NN][2];
@@ -1673,7 +1636,7 @@ public class JVisirModel {
                 }
             }
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\t\tGrid size: "+this.sGrid.getInset_Nx()+"x"+this.sGrid.getInset_Ny()+" = "+(this.sGrid.getInset_Ny()*this.sGrid.getInset_Nx()));
         this.logFile.WriteLog("\t\t[min, max] grid depth (m): ["+Utility.min2d(field_out)+", "+Utility.max2d(field_out)+"]");
         this.logFile.CloseFile();
@@ -1707,7 +1670,7 @@ public class JVisirModel {
             ArrayList<Double> lat_tmp = new ArrayList<>();
             ArrayList<Double> lon_tmp = new ArrayList<>();
             //Opening file
-            FileReader file = new FileReader("inputFiles/coast/medf.map");
+            FileReader file = new FileReader(this.paths.getCoastlineDB());
             Scanner coastFile = new Scanner(file);
             //first line has a single column (i don't need)
             if(coastFile.hasNextInt()){
@@ -1750,7 +1713,7 @@ public class JVisirModel {
             return new readout_coastResults(lon_ext, lat_ext, lon_int, lat_int);
         } catch(Exception e){
             System.out.println("Lines readed: "+totalLines);
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("readout_coast: "+e.getMessage());
             debug.CloseFile();
             e.printStackTrace();
@@ -1759,45 +1722,46 @@ public class JVisirModel {
     }
 
     private readout_bathyResults readout_bathy(int bathy_code){
-        String filename ="";
-        String varname = "";
-        String lonname = "";
-        String latname = "";
-        switch(bathy_code){
-            case 1:
-                //MedOneMin:
-                filename = "inputFiles/bathy/MedOneMin/med_one_min_single_vs2.nc";
-                varname = "z";
-                lonname = "longitude";
-                latname = "latitude";
-                break;
-            case 2:
-                //GEBCO_08:
-                filename = "inputFiles/bathy/GEBCO/gebco_08_10_34_15_38.nc";
-                varname = "z";
-                lonname = "x_range";
-                latname = "y_range";
-                break;
-            case 3:
-                //EMODnet:
-                filename = "inputFiles/bathy/EMODnet/Adriatic_Ionian_central__MedSea_mean.nc";
-                varname = "depth_average";
-                lonname = "lon";
-                latname = "lat";
-                break;
-            default:
-                System.out.println("unknow bathy DB code!");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
-                debug.WriteLog("readout_bathy: unknow bathy DB code!");
-                debug.CloseFile();
-                break;
-        }
+        String filename = this.paths.getBathymetryDB();
+//        String varname = "";
+//        String lonname = "";
+//        String latname = "";
+//        switch(bathy_code){
+//            case 1:
+//                //MedOneMin:
+//                filename = "inputFiles/bathy/MedOneMin/med_one_min_single_vs2.nc";
+//                varname = "z";
+//                lonname = "longitude";
+//                latname = "latitude";
+//                break;
+//            case 2:
+//                //GEBCO_08:
+//                filename = "inputFiles/bathy/GEBCO/gebco_08_10_34_15_38.nc";
+//                varname = "z";
+//                lonname = "x_range";
+//                latname = "y_range";
+//                break;
+//            case 3:
+//                //EMODnet:
+//                filename = "inputFiles/bathy/EMODnet/Adriatic_Ionian_central__MedSea_mean.nc";
+//                varname = "depth_average";
+//                lonname = "lon";
+//                latname = "lat";
+//                break;
+//            default:
+//                System.out.println("unknow bathy DB code!");
+//                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
+//                debug.WriteLog("readout_bathy: unknow bathy DB code!");
+//                debug.CloseFile();
+//                break;
+//        }
         //Parsing file:
+//        MyNetCDFParser test = new MyNetCDFParser(filename);
         MyNetCDFParser test = new MyNetCDFParser(filename);
-        parseMedOneMinResults out = test.parseMedOneMin();
+        parseMedOneMinResults out = test.parseMedOneMin(this.paths.getOutDir());
         if(out == null){
             System.out.println("Parsing fail!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("readout_bathy: Parsing fail!");
             debug.CloseFile();
             return null;
@@ -1947,7 +1911,7 @@ public class JVisirModel {
 
     private Fields_regriddingResults Fields_regridding(ArrayList<Double> lat_bathy_Inset, ArrayList<Double> lon_bathy_Inset, double[][] bathy_Inset, double[][] lsm_mask,
                                                         double[][] ship_v_LUT, ArrayList<Double> H_array_m, double estGdtDist){
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("processing environmental fields...");
         this.logFile.CloseFile();
         //Spatial and temporal Grid:
@@ -1966,20 +1930,21 @@ public class JVisirModel {
             wind_t1 = 15.0; //COSMO-ME wind file (forecast) start time is 1500 UTC  *** use also analysis in the future!
         } else {
             System.out.println("unknown wind model code!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("Fields_regridding: unknown wind model code!");
             debug.CloseFile();
             System.exit(0);
         }
-        String dateListFile = "inputFiles/fields/an_dates_DB.txt";
-        MyTxtParser file = new MyTxtParser(dateListFile);
+        //String dateListFile = "inputFiles/fields/an_dates_DB.txt";
+        String dateListFile = this.paths.getAnalysisDB();
+        MyTxtParser file = new MyTxtParser(dateListFile, this.paths.getOutDir());
         this.tGrid.setLatest_date(file.tail(1).get(0));
 
         String l_date_str = this.tGrid.getLatest_date()+"1200";
-        long l_num = Utility.datenum(l_date_str,"yyyyMMddHHmm"); // taken at 1200 UTC (analysis time)
+        long l_num = Utility.datenum(l_date_str,"yyyyMMddHHmm", this.paths.getOutDir()); // taken at 1200 UTC (analysis time)
 
         this.tGrid.setDepDateTime(Utility.datenum(2000+this.dep_datetime.getYear(),this.dep_datetime.getMonth(),
-                this.dep_datetime.getDay(),this.dep_datetime.getHour(),this.dep_datetime.getMin()));
+                this.dep_datetime.getDay(),this.dep_datetime.getHour(),this.dep_datetime.getMin(), this.paths.getOutDir()));
 
         //hrs elapsed between latest analysis and departure time
         int cento = 100;
@@ -1987,8 +1952,7 @@ public class JVisirModel {
         if(this.forcing.getAnalytic()==1){
             deltaHr_anls = 1;
         } else{
-            //deltaHr_anls = Math.round(cento*this.constants.getTwentyfour()*(this.tGrid.getDepDateTime() - l_num)/cento);
-            deltaHr_anls = Utility.hoursBetween("yyyyMMddHHmm",l_date_str,dep_datetime.getDepDateTime());
+            deltaHr_anls = Utility.hoursBetween("yyyyMMddHHmm",l_date_str,dep_datetime.getDepDateTime(), this.paths.getOutDir());
         }
 
 
@@ -1996,9 +1960,9 @@ public class JVisirModel {
 
         this.tGrid.setWind_dep_TS(Math.round(1+ deltaHr_anls - (wave_t1 - this.constants.getTwelve())));
 
-        this.logFile = new MyFileWriter("","",true);
-        this.logFile.WriteLog("\tlatest analysis date and time: "+Utility.datestr(l_num,12,00));
-        this.logFile.WriteLog("\tdeparture date and time: "+Utility.datestr(this.tGrid.getDepDateTime(),this.dep_datetime.getHour(),this.dep_datetime.getMin()));
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
+        this.logFile.WriteLog("\tlatest analysis date and time: "+Utility.datestr(l_num,12,00, this.paths.getOutDir()));
+        this.logFile.WriteLog("\tdeparture date and time: "+Utility.datestr(this.tGrid.getDepDateTime(),this.dep_datetime.getHour(),this.dep_datetime.getMin(), this.paths.getOutDir()));
         this.logFile.CloseFile();
 
         //-----------------------------------------------------------------------------------------------------
@@ -2077,17 +2041,17 @@ public class JVisirModel {
             if(this.optim.getWindModel() == 11 || this.optim.getWindModel() == 12){//ecmwf
 
                 U10M_at_TS = Utility.interp1(envFieldsResults.getEcmwf_wind_origTimes(),
-                        ecmwfDataReduction.getOut(0), interpTimes);
+                        ecmwfDataReduction.getOut(0), interpTimes, this.paths.getOutDir());
 
                 V10M_at_TS = Utility.interp1(envFieldsResults.getEcmwf_wind_origTimes(),
-                        ecmwfDataReduction.getOut(1), interpTimes);
+                        ecmwfDataReduction.getOut(1), interpTimes, this.paths.getOutDir());
             } else if(this.optim.getWindModel() == 2){//cosmo-me
 
                 U10M_at_TS = Utility.interp1(envFieldsResults.getCosmo_wind_origTimes(),
-                        cosmoDataReduction.getOut(0), interpTimes);
+                        cosmoDataReduction.getOut(0), interpTimes, this.paths.getOutDir());
 
                 V10M_at_TS = Utility.interp1(envFieldsResults.getCosmo_wind_origTimes(),
-                        cosmoDataReduction.getOut(1), interpTimes);
+                        cosmoDataReduction.getOut(1), interpTimes, this.paths.getOutDir());
             }
 
 
@@ -2144,7 +2108,7 @@ public class JVisirModel {
 
             //-----------------------------------------------------------------------------------------------------
             // seaOverLand:
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tseaOverLand extrapolation...");
             this.logFile.CloseFile();
             //Wave fields processing:
@@ -2222,7 +2186,7 @@ public class JVisirModel {
         //%--------------------------------------------------------------------------
         if(varargs.length < 1 || varargs.length > 4){
             System.out.println("seaOverLand_3steps: varargs must be between 1 and 4");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("\tseaOverLand_3steps: varargs must be between 1 and 4");
             debug.CloseFile();
             System.exit(0);
@@ -2230,7 +2194,7 @@ public class JVisirModel {
 
         if(Math.min(lon_f.length, lon_f[0].length) < this.sGrid.getMinNoGridPoints()){
             System.out.println("seaOverLand_3steps: too small or too narrow bounding box");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("\tseaOverLand_3steps: too small or too narrow bounding box");
             debug.CloseFile();
             System.exit(0);
@@ -2251,9 +2215,9 @@ public class JVisirModel {
                     }
                 }
                 if(this.forcing.getWind()!=1){
-                    myfield_mat = SeaOverLand(Utility.squeeze(tmp),n_loops);
+                    myfield_mat = SeaOverLand(Utility.squeeze(tmp, this.paths.getOutDir()),n_loops);
                 } else {
-                    myfield_mat = Utility.squeeze(tmp);
+                    myfield_mat = Utility.squeeze(tmp, this.paths.getOutDir());
                 }
 
                 // (2) regridding to bathy-grid:
@@ -2264,7 +2228,7 @@ public class JVisirModel {
                     int nan_rank = Utility.rank(Utility.convertDouble(Utility.isnan(myfield_mat)));
                     if((size_min-nan_rank) < 2){
                         System.out.println("seaOverLand_3steps: too few sea grid points");
-                        MyFileWriter debug = new MyFileWriter("","debug",false);
+                        MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                         debug.WriteLog("\tseaOverLand_3steps: too few sea grid points");
                         debug.CloseFile();
                     }
@@ -2288,8 +2252,8 @@ public class JVisirModel {
                 % landmass for reproducing the no-slip boundary condition!*/
                 if(this.forcing.getWind()!=1){
                     for(int it=0;it<(int) this.tGrid.getNt(); ++it){
-                        double[][] tmp = Utility.squeeze(myfield_bathy,1,it);
-                        double[][] vv1 = Utility.MatrixComponentXcomponent(tmp,Utility.transposeMatrix(lsm_mask));
+                        double[][] tmp = Utility.squeeze(myfield_bathy,1,it, this.paths.getOutDir());
+                        double[][] vv1 = Utility.MatrixComponentXcomponent(tmp,Utility.transposeMatrix(lsm_mask), this.paths.getOutDir());
                         for(int i=0;i<vv1.length;i++){
                             for(int j=0;j<vv1[0].length;j++){
                                 myfield_Inset[j][it][i] = vv1[i][j];
@@ -2432,8 +2396,8 @@ public class JVisirModel {
             for(int i=0;i<ship_v_LUT.length;++i){
                 ship_v_LUT_1stCol[i] = ship_v_LUT[i][0];
             }
-            v_kts_min = Utility.interp1(H_array_m, ship_v_LUT_1stCol, this.fstats.getWheight_max());
-            v_kts_max = Utility.interp1(H_array_m, ship_v_LUT_1stCol, this.fstats.getWheight_min());
+            v_kts_min = Utility.interp1(H_array_m, ship_v_LUT_1stCol, this.fstats.getWheight_max(), this.paths.getOutDir());
+            v_kts_max = Utility.interp1(H_array_m, ship_v_LUT_1stCol, this.fstats.getWheight_min(), this.paths.getOutDir());
         } else{//sailboat
             v_kts_min=Utility.min(ship_v_LUT);
             v_kts_max=Utility.max(ship_v_LUT);
@@ -2447,7 +2411,7 @@ public class JVisirModel {
         double Nt_2 = Math.max(this.tGrid.getMinNt(), Nt_2b);
         this.tGrid.setNt(Math.min(Nt_1, Nt_2));
 
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\t# time steps of forecast file employed: "+this.tGrid.getNt());
         this.logFile.CloseFile();
     }
@@ -2707,7 +2671,7 @@ public class JVisirModel {
         int[] row_lon = lonTmp.getIndexes();
 
         if(row_lon.length<this.sGrid.getMinNoGridPoints() || row_lat.length<this.sGrid.getMinNoGridPoints()){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("mFields_reduction: check_start_timestep: too small or too narrow bounding box");
             debug.CloseFile();
             System.exit(0);
@@ -2741,7 +2705,7 @@ public class JVisirModel {
         long n_elementsOut = Utility.numel(retThis.getOut(n_in-1));
         double red_percent = (n_elementsOut+0.0)/(n_elementsIn+0.0);
         if(red_percent<1.0){
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\t\tData reduction: "+(red_percent*100)+"%");
             this.logFile.CloseFile();
         }
@@ -2751,7 +2715,7 @@ public class JVisirModel {
 
     private void check_start_timestep(long deltaHr_anls){
         if(deltaHr_anls <= 0){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("mFields_reduction: departure time too far back in the past!");
             debug.CloseFile();
             System.exit(0);
@@ -2759,14 +2723,14 @@ public class JVisirModel {
 
         if(this.forcing.getWave()==1){
             if(this.tGrid.getWave_dep_TS() < 1){
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("check_start_timestep: departure time too far back in the past!");
                 debug.CloseFile();
                 System.exit(0);
             }
 
             if(this.tGrid.getWave_dep_TS() > this.tGrid.getMaxNt()){
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("check_start_timestep: departure time too far in future!");
                 debug.CloseFile();
                 System.exit(0);
@@ -2775,14 +2739,14 @@ public class JVisirModel {
 
         if(this.forcing.getWind() == 1){
             if(this.tGrid.getWind_dep_TS() < 1){
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("check_start_timestep: departure time too far back in the past!");
                 debug.CloseFile();
                 System.exit(0);
             }
 
             if(this.tGrid.getWind_dep_TS() > this.tGrid.getMaxNt()){
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("check_start_timestep: departure time too far back in the past!");
                 debug.CloseFile();
                 System.exit(0);
@@ -2810,20 +2774,20 @@ public class JVisirModel {
                     model_str = "SWAN (reloc)";
                 } else {
                     System.out.println("readout_envFields: unknown waveModel!");
-                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                     debug.WriteLog("readout_envFields: unknown waveModel!");
                     debug.CloseFile();
                     System.exit(0);
                 }
             }
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tattempt reading "+model_str+" wave forecast data...");
             this.logFile.CloseFile();
 
             readout_mWaveResults readout_mWave = readout_mWave();
             if(!readout_mWave.isWave_status()){
                 System.out.println("readout_envFields: "+ readout_mWave.getWave_filename() + "wave forecast not found!");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("readout_envFields: "+ readout_mWave.getWave_filename() + "wave forecast not found!");
                 debug.CloseFile();
                 System.exit(0);
@@ -2837,7 +2801,7 @@ public class JVisirModel {
             wave_origtimes = new int[(int)wave_maxNt];
             for(int i=0;i<(int)wave_maxNt;i++)
                 wave_origtimes[i]=(i+1);
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\tdeparture at time step #"+(this.tGrid.getWave_dep_TS()-1)+" of hourly interpolated file");
             this.logFile.CloseFile();
         } else{
@@ -2880,7 +2844,7 @@ public class JVisirModel {
                         cosmo_str = read_str1 + "COSMO-ME_1/16" + read_str2;
                     } else {
                         System.out.println("readout_envFields: unknown windModel!");
-                        MyFileWriter debug = new MyFileWriter("","debug",false);
+                        MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                         debug.WriteLog("readout_envFields: unknown windModel!");
                         debug.CloseFile();
                         System.exit(0);
@@ -2888,7 +2852,7 @@ public class JVisirModel {
                 }
             }
             //------------------------------------------------------------------------
-            this.logFile = new MyFileWriter("","",true);
+            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
             this.logFile.WriteLog("\t"+ecmwf_str);
             this.logFile.CloseFile();
 
@@ -2950,16 +2914,8 @@ public class JVisirModel {
     private fake_waveFieldsResults fake_waveFields(int mtwave, int nsteps, int nlat, int nlon){
         ArrayList<Double> lat_waveTmp = Utility.linspace(this.sGrid.getBbox__lat_min(), this.sGrid.getBbox__lat_max(), nlat);
         double[] lat_wave = Utility.arrayfy(lat_waveTmp);
-//        double[] lat_wave = new double[lat_waveTmp.size()];
-//        for(int i=0;i<lat_waveTmp.size();i++){
-//            lat_wave[i]=lat_waveTmp.get(i);
-//        }
         ArrayList<Double> lon_waveTmp = Utility.linspace(this.sGrid.getBbox__lon_min(), this.sGrid.getBbox__lon_max(), nlon);
         double[] lon_wave = Utility.arrayfy(lon_waveTmp);
-//        double[] lon_wave = new double[lon_waveTmp.size()];
-//        for(int i=0;i<lon_waveTmp.size();i++){
-//            lon_wave[i]=lon_waveTmp.get(i);
-//        }
         double[][][] VTDH = Utility.ones3Dmatrix(nlon,nsteps,nlat);
         double[][][] VTPK = Utility.ones3Dmatrix(nlon,nsteps,nlat);
         double[][][] VDIR = Utility.ones3Dmatrix(nlon,nsteps,nlat);
@@ -2972,35 +2928,28 @@ public class JVisirModel {
     private readout_mWaveResults readout_mWave(){
         // % reads out Waves forecast data
         // % physical fields from either WAM or WW3 model:
-        String Stagein_path = "";
-        if(this.optim.getWaveModel() == 10){
-            Stagein_path = "inputFiles/wave/WW3/analysis";
-        } else {
-            if(this.optim.getWaveModel() == 1){
-                Stagein_path = "inputFiles/wave/WW3/forecast";
-            } else {
-                if(this.optim.getWaveModel() >= 20){//relocatable
-                    Stagein_path = "inputFiles/wave/SWAN";
-                }
-            }
-        }
-
-        String wave_filename = Stagein_path+"/start__"+this.tGrid.getLatest_date()+".nc";
+//        String Stagein_path = "";
+//        if(this.optim.getWaveModel() == 10){
+//            Stagein_path = "inputFiles/wave/WW3/analysis";
+//        } else {
+//            if(this.optim.getWaveModel() == 1){
+//                Stagein_path = "inputFiles/wave/WW3/forecast";
+//            } else {
+//                if(this.optim.getWaveModel() >= 20){//relocatable
+//                    Stagein_path = "inputFiles/wave/SWAN";
+//                }
+//            }
+//        }
+//
+//        String wave_filename = Stagein_path+"/start__"+this.tGrid.getLatest_date()+".nc";
+        String wave_filename = this.paths.getForecastFile();
         MyNetCDFParser parser = new MyNetCDFParser(wave_filename);
         boolean wave_status = parser.isFileExists();
-//        double[] lat;
-//        double[] lon;
-//        double[][][] VTDH;
-//        double[][][] VDIR;
-//        double[][][] VTPK;
-        if(wave_status){
-            waveForecastResults waveForecast = parser.parseWaveForecastData();
-            //lat= waveForecast.getLatitude();
-            //lon = waveForecast.getLongitude();
 
-            //VTDH = waveForecast.getVTDH();
+        if(wave_status){
+            waveForecastResults waveForecast = parser.parseWaveForecastData(this.paths.getOutDir());
+
             double[][][] VDIR = waveForecast.getVDIR();
-            //VTPK = waveForecast.getVTPK();
 
             //############################ WAM convention used in VISIR!! ###################
             // if optim.waveModel<optim.relocAnlsCode
@@ -3027,14 +2976,9 @@ public class JVisirModel {
                     }
                 }
             } else {
-//                double[][][] VY = new double[VDIR.length][VDIR[0].length][VDIR[0][0].length];
-//                double[][][] VX = new double[VDIR.length][VDIR[0].length][VDIR[0][0].length];
                 for(int i=0;i<VDIR.length; ++i){
                     for(int j=0;j<VDIR[0].length; ++j){
                         for(int k=0;k<VDIR[0][0].length; ++k){
-//                            VY[i][j][k]=Math.cos(this.constants.getDeg2rad()*VDIR[i][j][k]);
-//                            VX[i][j][k]=Math.sin(this.constants.getDeg2rad()*VDIR[i][j][k]);
-//                            VDIR[i][j][k] = Math.atan2(VY[i][j][k], VX[i][j][k])/this.constants.getDeg2rad();
                             double VY = Math.cos(this.constants.getDeg2rad()*VDIR[i][j][k]);
                             double VX = Math.sin(this.constants.getDeg2rad()*VDIR[i][j][k]);
                             VDIR[i][j][k] = Math.atan2(VY, VX)/this.constants.getDeg2rad();
@@ -3102,7 +3046,7 @@ public class JVisirModel {
 
         int[] utmzone_number = new int[Np];
         Arrays.fill(utmzone_number, zoneN_start);
-        degzone2utmResults dz2uTmp = degzone2utm(Utility.reshape(lat_gr,Np), Utility.reshape(lon_gr, Np), utmzone_number);
+        degzone2utmResults dz2uTmp = degzone2utm(Utility.reshape(lat_gr,Np, this.paths.getOutDir()), Utility.reshape(lon_gr, Np, this.paths.getOutDir()), utmzone_number);
         double[] xx=dz2uTmp.getX();
         double[] yy=dz2uTmp.getY();
 
@@ -3112,7 +3056,7 @@ public class JVisirModel {
         int[] dim = new int[2];
         dim[0]=Nx;
         dim[1]=Ny;
-        double[][] Nyy = Utility.reshape(yy,dim);
+        double[][] Nyy = Utility.reshape(yy,dim, this.paths.getOutDir());
 
         //Dy
         double[][] DeltaY = new double[Nx][Ny];
@@ -3186,19 +3130,20 @@ public class JVisirModel {
             motorboat = true; //so, varargin = H_array_m
             //else sailboat, so varargin(0) = twa_array, varargin(1) = tws_array
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Defining edges...\n");
         this.logFile.WriteLog("\tReading out free edges from DB...");
         this.logFile.CloseFile();
-        MyBinaryParser edgesDBParser = new MyBinaryParser("inputFiles/graph/freeedges_DB.dat");
+        //MyBinaryParser edgesDBParser = new MyBinaryParser("inputFiles/graph/freeedges_DB.dat");
+        MyBinaryParser edgesDBParser = new MyBinaryParser(this.paths.getFreeEdgesDB());
         int[] free_edges_DB_array = edgesDBParser.readAsUInt16();
         int[] free_edges_DB_size = new int[2];
         free_edges_DB_size[0]=(int) Math.floor(free_edges_DB_array.length/2);
         free_edges_DB_size[1]=2;
-        int[][] free_edges_DB = Utility.reshape(free_edges_DB_array,free_edges_DB_size);
+        int[][] free_edges_DB = Utility.reshape(free_edges_DB_array,free_edges_DB_size, this.paths.getOutDir());
 
         //remapping free edges:
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tremapping free edges to inset Sgrid...");
         this.logFile.CloseFile();
         long ll = Math.round((this.sGrid.getXi()-this.sGrid.getDB_xi())*this.sGrid.getInv_step());
@@ -3206,12 +3151,12 @@ public class JVisirModel {
         int[][] free_edges = idx_ref2inset_gridCompact(free_edges_DB, this.sGrid.getDB_Nx(), this.sGrid.getDB_Ny(), this.sGrid.getInset_Nx(), this.sGrid.getInset_Ny(), ll, mm);
         int free_edges_Number = free_edges.length;
         if(free_edges_Number==0){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("Edges_definition: no free edges found in graph!");
             debug.CloseFile();
             System.exit(0);
         }
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tnumber of free nodes: "+this.sGrid.getFreenodes());
         this.logFile.WriteLog("\tnumber of free edges: "+free_edges_Number);
         this.logFile.CloseFile();
@@ -3222,12 +3167,12 @@ public class JVisirModel {
                 MemorySaver.getYInset(VDIR_Inset, this.constants.getDeg2rad()), MemorySaver.getXInset(VDIR_Inset, this.constants.getDeg2rad()),
                 bathy_Inset, J_mask, windMAGN_Inset, MemorySaver.getYInset(windDIR_Inset, this.constants.getDeg2rad()), MemorySaver.getXInset(windDIR_Inset, this.constants.getDeg2rad()));
 
-        double[][] waveDir_edges = changeDirRule( Utility.atan2(fields_node2edgeRes.getYwave_edges(), fields_node2edgeRes.getXwave_edges()) );
+        double[][] waveDir_edges = changeDirRule( Utility.atan2(fields_node2edgeRes.getYwave_edges(), fields_node2edgeRes.getXwave_edges(), this.paths.getOutDir()) );
         for(int i=0;i<waveDir_edges.length;++i)
             for(int j=0;j<waveDir_edges[0].length;++j)
                 waveDir_edges[i][j] = waveDir_edges[i][j]/this.constants.getDeg2rad();
 
-        double[][] windDir_edges = changeDirRule( Utility.atan2(fields_node2edgeRes.getYwind_edges(), fields_node2edgeRes.getXwind_edges()) );
+        double[][] windDir_edges = changeDirRule( Utility.atan2(fields_node2edgeRes.getYwind_edges(), fields_node2edgeRes.getXwind_edges(), this.paths.getOutDir()) );
         for(int i=0;i<windDir_edges.length;++i)
             for(int j=0;j<windDir_edges[0].length;++j)
                 windDir_edges[i][j] = windDir_edges[i][j]/this.constants.getDeg2rad();
@@ -3235,7 +3180,7 @@ public class JVisirModel {
         ArrayList<Integer> nogo_edges = Utility.findNaNs(fields_node2edgeRes.getJ_edges());
 
         //edge delays:
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tcomputing edge delays...");
         this.logFile.CloseFile();
         //edge delays
@@ -3385,13 +3330,13 @@ public class JVisirModel {
                     steepness[i]=waveHeight_edges[i][it]/waveLenght_edges[i];
                 }
 
-                double[] Fr_crit = Utility.interp1(do_fr_crit_lutRes.getSteep_var(), do_fr_crit_lutRes.getFr_LUT(), steepness, Double.POSITIVE_INFINITY);
+                double[] Fr_crit = Utility.interp1(do_fr_crit_lutRes.getSteep_var(), do_fr_crit_lutRes.getFr_LUT(), steepness, Double.POSITIVE_INFINITY, this.paths.getOutDir());
                 //-------------------------------------------------------------------------------------------------
                 //ship speed and ship edge delays:
                 for( int jv = 0; jv<(int) this.ship.getNvel(); ++jv){
                     double[] sh_vel;
                     if(this.forcing.getAnalytic() != 1){//FALSO
-                        sh_vel = Utility.interp1(H_array_m, ship_v_LUT, jv, waveHeight_edges, it);
+                        sh_vel = Utility.interp1(H_array_m, ship_v_LUT, jv, waveHeight_edges, it, this.paths.getOutDir());
                     } else {
                         sh_vel = new double[waveHeight_edges.length];
                         for(int i=0;i<waveHeight_edges.length;++i)
@@ -3556,7 +3501,7 @@ public class JVisirModel {
 //                %     source: IMO 1228, sect 1.6 (holds just in deep waters
 
         if((v_ship.length != wave_period.length) || (alpha.length != wave_period.length)){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("enc_wavePeriod: all arguments must have same dimensions!");
             debug.CloseFile();
             System.exit(0);
@@ -3589,7 +3534,7 @@ public class JVisirModel {
 //            % and sailboat PolarPlots convention
 
         if(ship_dir.length != envField_dir.length){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("wave2ship_reldir: ship_dir and envField_dir have different sizes.");
             debug.CloseFile();
             System.exit(0);
@@ -3621,7 +3566,7 @@ public class JVisirModel {
 
         double[] Fr_LUT = new double[inv_xvar.length];
         for(int i=0;i<inv_xvar.length;i++)
-            Fr_LUT[i] = fncrit1 * Utility.nthroot(inv_xvar[i], 3) - fncrit2 * Math.sqrt(inv_xvar[i]);
+            Fr_LUT[i] = fncrit1 * Utility.nthroot(inv_xvar[i], 3, this.paths.getOutDir()) - fncrit2 * Math.sqrt(inv_xvar[i]);
 
         return new do_Fr_crit_LUTResults(xvar, Fr_LUT);
     }
@@ -3702,7 +3647,7 @@ public class JVisirModel {
         //varargin[0] = windMAGN_Inset
         //varargin[1] = Ywind_Inset
         //varargin[2] = Xwind_Inset
-        this.logFile = new MyFileWriter("","",true);
+        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tcomputing edge weights from model data");
         this.logFile.CloseFile();
         fields_node2edgeResults res = new fields_node2edgeResults();
@@ -3806,7 +3751,7 @@ public class JVisirModel {
 
     private double[] mStaticF_EWeights(int[][] free_edges, double[][] input_field, String operation){
         //condense the spatial dimensions into a single dimension:
-        double[] model_field=Utility.reshape(Utility.transposeMatrix(input_field), Utility.numel(input_field));
+        double[] model_field=Utility.reshape(Utility.transposeMatrix(input_field), Utility.numel(input_field), this.paths.getOutDir());
         //conservative approach: minimum edge depth
         double[] phi_I = new double[free_edges.length];
         double[] phi_J = new double[free_edges.length];
@@ -3818,14 +3763,14 @@ public class JVisirModel {
         double[] output_field = null;
         switch (operation){
             case "min":
-                output_field = Utility.min(phi_I, phi_J);
+                output_field = Utility.min(phi_I, phi_J, this.paths.getOutDir());
                 break;
             case "mean":
                 //out_field = Utility.mean(phi_I, phi_J);
-                output_field = Utility.mean(phi_I, phi_J);
+                output_field = Utility.mean(phi_I, phi_J, this.paths.getOutDir());
                 break;
                 default:
-                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                     debug.WriteLog("mStaticF_EWeights: unknown operation!");
                     debug.CloseFile();
                     System.exit(0);
@@ -3890,7 +3835,7 @@ public class JVisirModel {
                                                                         if(J_I == (2*Nx)-1)
                                                                             angolo=360.0-theta_27;
                                                                         else{
-                                                                            MyFileWriter debug = new MyFileWriter("","debug",false);
+                                                                            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                                                                             debug.WriteLog("dirOnGrid24N: I and J ("+free_edges[ie][0]+" and "+free_edges[ie][1]+") are not next or second next neighbours of a squared grid with "+Nx+" horizontal nodes!");
                                                                             debug.CloseFile();
                                                                             System.exit(0);
@@ -3926,14 +3871,14 @@ public class JVisirModel {
 
         if(n1!=n2){
             System.out.println("degzone2utm: Lat and Lon vectors should have the same length");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("degzone2utm: Lat and Lon vectors should have the same length");
             debug.CloseFile();
             System.exit(0);
         } else{
             if(n1!=n3){
                 System.out.println("degzone2utm: Lat and Lon vectors should have the same length of utmzone_number vector");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
                 debug.WriteLog("degzone2utm: Lat and Lon vectors should have the same length of utmzone_number vector");
                 debug.CloseFile();
                 System.exit(0);
@@ -4040,7 +3985,7 @@ public class JVisirModel {
 
         if(n1!=n2){
             System.out.println("Lat and Lon vectors should have the same length");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("deg2utm: Lat and Lon vectors should have the same length");
             debug.CloseFile();
             System.exit(0);

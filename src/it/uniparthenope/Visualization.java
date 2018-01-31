@@ -96,6 +96,14 @@ public class Visualization {
         this.safegram = parser.getValueAsLong("safegram");
     }
 
+    public void VisualizationParameters(String path){
+        //getting data from visualization_pars.json parsing
+        MyJSONParser parser = new MyJSONParser(path);
+        this.env_fields = parser.getValueAsLong("env_fields");
+        this.waypoint_info = parser.getValueAsLong("waypoint_info");
+        this.safegram = parser.getValueAsLong("safegram");
+    }
+
     public void setData(){
         this.shipSpeedLUT = 1;
         this.encounter_TF = 'T'; //Encounter period ('T') or frequency ('F')

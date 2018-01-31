@@ -105,9 +105,9 @@ public class Ship implements Serializable {
         writer.dispose();
     }
 
-    public void LoadVesselParameters(){
+    public void LoadVesselParameters(String path, String outDir){
         //getting data from ship_pars.json parsing
-        MyJSONParser parser = new MyJSONParser("ship_pars.json");
+        MyJSONParser parser = new MyJSONParser(path);
         this.vessType = parser.getValueAsLong("vessType");
         this.sailClass = parser.getValueAsLong("sailClass");
         this.P_max_hp = parser.getValueAsLong("P_max_hp");
@@ -118,7 +118,7 @@ public class Ship implements Serializable {
         this.obs_roll_period = parser.getValueAsDouble("obs_roll_period(s)");
         if(!IntegrityCheck()){
             System.out.println("Ship integrity check violated.");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outDir);
             debug.WriteLog("LoadVesselParameters: Ship integrity check violated.");
             debug.CloseFile();
             System.exit(0);
@@ -134,6 +134,36 @@ public class Ship implements Serializable {
         this.Nvel = 1; //Default value for steps in power reduction.
         this.P_level_hp = new ArrayList<Double>();
     }
+
+//    public void LoadVesselParameters(){
+//        //getting data from ship_pars.json parsing
+//        MyJSONParser parser = new MyJSONParser("ship_pars.json");
+//        this.vessType = parser.getValueAsLong("vessType");
+//        this.sailClass = parser.getValueAsLong("sailClass");
+//        this.P_max_hp = parser.getValueAsLong("P_max_hp");
+//        this.maxv = parser.getValueAsDouble("maxv");
+//        this.length = parser.getValueAsDouble("length(m)");
+//        this.beam = parser.getValueAsDouble("beam(m)");
+//        this.draught = parser.getValueAsDouble("draught(m)");
+//        this.obs_roll_period = parser.getValueAsDouble("obs_roll_period(s)");
+//        if(!IntegrityCheck()){
+//            System.out.println("Ship integrity check violated.");
+//            MyFileWriter debug = new MyFileWriter("","debug",false);
+//            debug.WriteLog("LoadVesselParameters: Ship integrity check violated.");
+//            debug.CloseFile();
+//            System.exit(0);
+//        }
+//        if( this.vessType != this.sailType){
+//            this.roll_period = this.obs_roll_period;
+//        } else {
+//            this.roll_period = 1;
+//        }
+//        this.bottomDraughtfactor = 1; //bottomDraughtfactor*draught is threshold for effect of sea bottom on enhanced frictional
+//        this.TEsaturFactor = 10; //max allowed TE in plots is ship.roll_period*ship.TEsaturFactor
+//        this.Rspectrum = 0;
+//        this.Nvel = 1; //Default value for steps in power reduction.
+//        this.P_level_hp = new ArrayList<Double>();
+//    }
 
     private boolean IntegrityCheck(){//namelist_check.m file porting
         boolean check = true;

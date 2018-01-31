@@ -12,7 +12,7 @@ public class MyTxtParser {
     private ArrayList<String> lines;
     private BufferedReader file;
 
-    public MyTxtParser(String fileName){
+    public MyTxtParser(String fileName, String outDir){
         this.fileName = fileName;
         try {
             this.file = new BufferedReader(new FileReader(fileName));
@@ -24,7 +24,7 @@ public class MyTxtParser {
             this.file.close();
         } catch (Exception ex){
             ex.printStackTrace();
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outDir);
             debug.WriteLog("MyTxtParser: "+ex.getMessage());
             debug.CloseFile();
             System.exit(0);

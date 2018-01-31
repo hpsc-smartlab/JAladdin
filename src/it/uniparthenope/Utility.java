@@ -66,12 +66,12 @@ public class Utility {
         return matrix;
     }
 
-    public static double[] NaN(int dim){
-        double[] out = new double[dim];
-        for(int i=0;i<dim;++i)
-            out[i]=Double.NaN;
-        return out;
-    }
+//    public static double[] NaN(int dim){
+//        double[] out = new double[dim];
+//        for(int i=0;i<dim;++i)
+//            out[i]=Double.NaN;
+//        return out;
+//    }
 
     public static double[][] NaN(int rows, int cols){
         double[][] out = new double[rows][cols];
@@ -126,20 +126,20 @@ public class Utility {
         return out;
     }
 
-    public static double[] nthroot(double[] x, int n){
+    public static double[] nthroot(double[] x, int n, String outdir){
         double[] out = new double[x.length];
         for(int i=0;i<out.length;++i)
-            out[i] = nthroot(x[i], n);
+            out[i] = nthroot(x[i], n, outdir);
         return out;
     }
 
-    public static double nthroot(double x, int n)
+    public static double nthroot(double x, int n, String outdir)
     {
         double threshold = 0.0001;
         if(x < 0)
         {
             System.err.println("nthroot: Negative!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("nthroot: Negative!");
             debug.CloseFile();
             System.exit(0);
@@ -423,10 +423,10 @@ public class Utility {
     }
 
 
-    public static double[] reshape(double[][] A, int dim){// Reshape 1
+    public static double[] reshape(double[][] A, int dim, String outdir){// Reshape 1
         if(A.length*A[0].length != dim){
             System.out.println("size(A) must be = dim!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("reshape: size(A) must be = dim!");
             debug.CloseFile();
             System.exit(0);
@@ -446,37 +446,37 @@ public class Utility {
         return output;
     }
 
-    public static double[][] reshape(ArrayList<Double> A, int[] dim){//reshape 2
-        int nRows = dim[0];
-        int nCols = dim[1];
-        if(A.size() != nRows*nCols){
-            System.out.println("size(A) must be = to nRows*nCols!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
-            debug.WriteLog("reshape: size(A) must be = to nRows*nCols!");
-            debug.CloseFile();
-            System.exit(0);
-        }
-        double[][] out = new double[nRows][nCols];
-        int i=0;
-        int j=0;
-        for(int k=0;k<A.size();++k){
-            out[i][j]=A.get(k);
-            i++;
-            if(i==nRows){
-                i=0;
-                j++;
-            }
+//    public static double[][] reshape(ArrayList<Double> A, int[] dim){//reshape 2
+//        int nRows = dim[0];
+//        int nCols = dim[1];
+//        if(A.size() != nRows*nCols){
+//            System.out.println("size(A) must be = to nRows*nCols!");
+//            MyFileWriter debug = new MyFileWriter("","debug",false);
+//            debug.WriteLog("reshape: size(A) must be = to nRows*nCols!");
+//            debug.CloseFile();
+//            System.exit(0);
+//        }
+//        double[][] out = new double[nRows][nCols];
+//        int i=0;
+//        int j=0;
+//        for(int k=0;k<A.size();++k){
+//            out[i][j]=A.get(k);
+//            i++;
+//            if(i==nRows){
+//                i=0;
+//                j++;
+//            }
+//
+//        }
+//        return out;
+//    }
 
-        }
-        return out;
-    }
-
-    public static double[][] reshape(double[] A, int[] dim){//reshape 3
+    public static double[][] reshape(double[] A, int[] dim, String outdir){//reshape 3
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.length != nRows*nCols){
             System.out.println("A.length must be = to nRows*nCols!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("reshape: A.length must be = to nRows*nCols!");
             debug.CloseFile();
             System.exit(0);
@@ -498,12 +498,12 @@ public class Utility {
         return out;
     }
 
-    public static double[][] reshape(double[][] A, int[] dim){//Reshape 4
+    public static double[][] reshape(double[][] A, int[] dim, String outdir){//Reshape 4
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.length*A[0].length != nRows*nCols){
             System.out.println("size(A) must be = to nRows*nCols!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("reshape: size(A) must be = to nRows*nCols!");
             debug.CloseFile();
             System.exit(0);
@@ -529,12 +529,12 @@ public class Utility {
         return out;
     }
 
-    public static int[][] reshape(int[] A, int[] dim){//reshape 3 for Long Int
+    public static int[][] reshape(int[] A, int[] dim, String outdir){//reshape 3 for Long Int
         int nRows = dim[0];
         int nCols = dim[1];
         if(A.length != nRows*nCols){
             System.out.println("A.length must be = to nRows*nCols!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("reshape: A.length must be = to nRows*nCols!");
             debug.CloseFile();
             System.exit(0);
@@ -777,7 +777,7 @@ public class Utility {
         return output;
     }
 
-    public static double[][] squeeze(double[][][] mat3d, int dimToSqueeze, int index){
+    public static double[][] squeeze(double[][][] mat3d, int dimToSqueeze, int index, String outdir){
         int z_dim = mat3d.length;
         int rows = mat3d[0].length;
         int cols = mat3d[0][0].length;
@@ -787,7 +787,7 @@ public class Utility {
                 //squeezing Zs
                 if(index>=z_dim){
                     System.out.println("squeeze: index "+index+" exceed Z dimension ("+z_dim+")");
-                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                     debug.WriteLog("squeeze: index "+index+" exceed Z dimension ("+z_dim+")");
                     debug.CloseFile();
                     System.exit(0);
@@ -803,7 +803,7 @@ public class Utility {
                 //squeezing rows:
                 if(index>=rows){
                     System.out.println("squeeze: index "+index+" exceed rows dimension ("+rows+")");
-                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                     debug.WriteLog("squeeze: index "+index+" exceed rows dimension ("+rows+")");
                     debug.CloseFile();
                     System.exit(0);
@@ -819,7 +819,7 @@ public class Utility {
                 //squeezing cols:
                 if(index>=cols){
                     System.out.println("squeeze: index "+index+" exceed cols dimension ("+cols+")");
-                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                     debug.WriteLog("squeeze: index "+index+" exceed cols dimension ("+cols+")");
                     debug.CloseFile();
                     System.exit(0);
@@ -833,7 +833,7 @@ public class Utility {
                 break;
             default:
                 System.out.println("squeeze: "+dimToSqueeze+" is not a valid dimension");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                 debug.WriteLog("squeeze: "+dimToSqueeze+" is not a valid dimension");
                 debug.CloseFile();
                 System.exit(0);
@@ -843,7 +843,7 @@ public class Utility {
     }
 
 
-    public static double[][] squeeze(double[][][] mat3d){
+    public static double[][] squeeze(double[][][] mat3d, String outdir){
         int z_dim = mat3d.length;
         int rows = mat3d[0].length;
         int cols = mat3d[0][0].length;
@@ -877,7 +877,7 @@ public class Utility {
                     }
                 } else {
                     System.out.println("squeeze: no singleton dimension found!");
-                    MyFileWriter debug = new MyFileWriter("","debug",false);
+                    MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                     debug.WriteLog("squeeze: no singleton dimension found!");
                     debug.CloseFile();
                     System.exit(0);
@@ -974,7 +974,7 @@ public class Utility {
     }
 
 
-    public static double[][] interp1(double[] x, double[][] y, double[] xi){
+    public static double[][] interp1(double[] x, double[][] y, double[] xi, String outdir){
         //wrapper for the interp1 method
         double[][] yi = new double[y.length][y[0].length];
         for(int row=0;row<y.length; ++row){
@@ -984,7 +984,7 @@ public class Utility {
                 Y[i]=y[row][i];
             }
             //calculating y-row and adding it to result
-            double[] yirow = interp1(x,Y,xi);
+            double[] yirow = interp1(x,Y,xi, outdir);
             for(int i=0;i<y[0].length;++i){
                 yi[row][i]=yirow[i];
             }
@@ -992,16 +992,16 @@ public class Utility {
         return yi;
     }
 
-    public static double[][][] interp1(double[] x, double[][][] y, int[] xi){
+    public static double[][][] interp1(double[] x, double[][][] y, int[] xi, String outdir){
         //wrapper for the interp1 method
         double[] xiDouble = new double[xi.length];
         for(int i=0;i<xiDouble.length;++i)
             xiDouble[i]=xi[i]+0.0;
-        return interp1(x, y, xiDouble);
+        return interp1(x, y, xiDouble, outdir);
     }
 
 
-    public static double interp1(ArrayList<Double> x, double[] y, double xi){
+    public static double interp1(ArrayList<Double> x, double[] y, double xi, String outdir){
         //wrapper for the interp1 method
         double[] xArray = new double[x.size()];
         for(int i=0;i<x.size();++i){
@@ -1009,11 +1009,11 @@ public class Utility {
         }
         double[] xiArray = new double[1];
         xiArray[0]=xi;
-        double[] yi = interp1(xArray, y, xiArray);
+        double[] yi = interp1(xArray, y, xiArray, outdir);
         return yi[0];
     }
 
-    public static double[][][] interp1(double[] x, double[][][] y, double[] xi){
+    public static double[][][] interp1(double[] x, double[][][] y, double[] xi, String outdir){
         //wrapper for the interp1 method
         int Z = y.length;
         int rows = y[0].length;
@@ -1026,7 +1026,7 @@ public class Utility {
                 for(int i=0;i<rows;++i){
                     row[i]=y[z][i][j];
                 }
-                double[] rowOut = interp1(x,row,xi);
+                double[] rowOut = interp1(x,row,xi, outdir);
                 for(int i=0;i<rowOut.length;++i){
                     out[z][i][j] = rowOut[i];
                 }
@@ -1035,7 +1035,7 @@ public class Utility {
         return out;
     }
 
-    public static double interp1(ArrayList<Double> x, double[][] y, int colIDX, double x0, String extrapolation){
+    public static double interp1(ArrayList<Double> x, double[][] y, int colIDX, double x0, String extrapolation, String outdir){
         if(extrapolation!= "extrap")
             return Double.NaN;
         else{
@@ -1047,24 +1047,24 @@ public class Utility {
                 double[] y_array = new double[y.length];
                 for(int i=0;i<y.length;++i)
                     y_array[i] = y[i][colIDX];
-                return interp1(x, y_array, x0);
+                return interp1(x, y_array, x0, outdir);
             }
         }
     }
 
 
-    public static double[] interp1(double[] x, double[] y, double[] xi, double extrapolation){
+    public static double[] interp1(double[] x, double[] y, double[] xi, double extrapolation, String outdir){
         //interp1 MATLAB function porting
         if(x.length != y.length){
             System.out.println("interp1: X and Y must be the same length!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("interp1: X and Y must be the same length!");
             debug.CloseFile();
             System.exit(0);
         }
         if(x.length == 1){
             System.out.println("interp1: X must contain more than one value");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("interp1: X must contain more than one value");
             debug.CloseFile();
             System.exit(0);
@@ -1080,14 +1080,14 @@ public class Utility {
             dx[i] = x[i + 1] - x[i];
             if (dx[i] == 0) {
                 System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                 debug.WriteLog("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
                 debug.CloseFile();
                 System.exit(0);
             }
             if (dx[i] < 0) {
                 System.out.println("interp1: X must be sorted");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                 debug.WriteLog("interp1: X must be sorted");
                 debug.CloseFile();
                 System.exit(0);
@@ -1129,18 +1129,18 @@ public class Utility {
      * index -> if the item is present in the collection
      * -(index) -1 -> otherwise*/
 
-    public static double[] interp1(double[] x, double[][] y,int yColIdx, double[][] xi, int xiColIdx){
+    public static double[] interp1(double[] x, double[][] y,int yColIdx, double[][] xi, int xiColIdx, String outdir){
         //interp1 MATLAB function porting
         if(x.length != y.length){
             System.out.println("interp1: X and Y must be the same length!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("interp1: X and Y must be the same length!");
             debug.CloseFile();
             System.exit(0);
         }
         if(x.length == 1){
             System.out.println("interp1: X must contain more than one value");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("interp1: X must contain more than one value");
             debug.CloseFile();
             System.exit(0);
@@ -1156,14 +1156,14 @@ public class Utility {
             dx[i] = x[i + 1] - x[i];
             if (dx[i] == 0) {
                 System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                 debug.WriteLog("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
                 debug.CloseFile();
                 System.exit(0);
             }
             if (dx[i] < 0) {
                 System.out.println("interp1: X must be sorted");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                 debug.WriteLog("interp1: X must be sorted");
                 debug.CloseFile();
                 System.exit(0);
@@ -1197,18 +1197,18 @@ public class Utility {
     }
 
 
-    public static double[] interp1(double[] x, double[] y, double[] xi){
+    public static double[] interp1(double[] x, double[] y, double[] xi, String outdir){
         //interp1 MATLAB function porting
         if(x.length != y.length){
             System.out.println("interp1: X and Y must be the same length!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("interp1: X and Y must be the same length!");
             debug.CloseFile();
             System.exit(0);
         }
         if(x.length == 1){
             System.out.println("interp1: X must contain more than one value");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("interp1: X must contain more than one value");
             debug.CloseFile();
             System.exit(0);
@@ -1224,14 +1224,14 @@ public class Utility {
             dx[i] = x[i + 1] - x[i];
             if (dx[i] == 0) {
                 System.out.println("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                 debug.WriteLog("interp1: X must be montotonic. A duplicate \" + \"x-value was found");
                 debug.CloseFile();
                 System.exit(0);
             }
             if (dx[i] < 0) {
                 System.out.println("interp1: X must be sorted");
-                MyFileWriter debug = new MyFileWriter("","debug",false);
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
                 debug.WriteLog("interp1: X must be sorted");
                 debug.CloseFile();
                 System.exit(0);
@@ -1352,19 +1352,19 @@ public class Utility {
         return out;
     }
 
-    public static double[][] MatrixComponentXcomponent(double[][] a, double[][] b){
+    public static double[][] MatrixComponentXcomponent(double[][] a, double[][] b, String outdir){
         int nRows = a.length;
         int nCols = a[0].length;
         if(a.length!=b.length){
             System.out.println("a.length != b.length");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("MatrixComponentXcomponent: a.length != b.length");
             debug.CloseFile();
             System.exit(0);
         }
         if(a[0].length!=b[0].length){
             System.out.println("a[0].length != b[0].length");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("MatrixComponentXcomponent: a[0].length != b[0].length");
             debug.CloseFile();
             System.exit(0);
@@ -1736,18 +1736,18 @@ public class Utility {
         return false; // Doesn't fall in any of the above cases
     }
 
-    public static inpolygonResults inpolygon(double xP, double yP, ArrayList<Double> xPolygon, ArrayList<Double> yPolygon){
+    public static inpolygonResults inpolygon(double xP, double yP, ArrayList<Double> xPolygon, ArrayList<Double> yPolygon, String outdir){
         inpolygonResults result = new inpolygonResults();
         if(xPolygon.size() != yPolygon.size()){
             System.out.println("xPolygon.size != yPolygon.size");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("xPolygon.size != yPolygon.size");
             debug.CloseFile();
             System.exit(0);
         }
         if(xPolygon.size() < 3){
             System.out.println("there must be at least 3 vertices in a polygon!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("there must be at least 3 vertices in a polygon!");
             debug.CloseFile();
             System.exit(0);
@@ -1781,10 +1781,10 @@ public class Utility {
         return  result;
     }
 
-    public static double[][] atan2(double[][] a, double[][] b){
+    public static double[][] atan2(double[][] a, double[][] b, String outdir){
         if((a.length != b.length) || (a[0].length != b[0].length)){
             System.out.println("Utility.atan2: A and B must have same size!");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("Utility.atan2: A and B must have same size!");
             debug.CloseFile();
             System.exit(0);
@@ -1798,7 +1798,7 @@ public class Utility {
         return out;
     }
 
-    public static long datenum(String dateString, String format){
+    public static long datenum(String dateString, String format, String outdir){
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         try {
             Date data = sdf.parse("000001010000");
@@ -1808,14 +1808,14 @@ public class Utility {
             return Days.daysBetween(from,to).getDays();
         } catch (Exception ex){
             ex.printStackTrace();
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("datenum: "+ex.getMessage());
             debug.CloseFile();
             return 0;
         }
     }
 
-    public static long hoursBetween(String format, String fromString, String toString){
+    public static long hoursBetween(String format, String fromString, String toString, String outdir){
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         long hoursBetween = 0;
         try{
@@ -1830,16 +1830,16 @@ public class Utility {
             hoursBetween = (days*24)+hours+minutes;
         } catch (Exception ex) {
             ex.printStackTrace();
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("hoursBetween: "+ex.getMessage());
             debug.CloseFile();
         }
         return  hoursBetween;
     }
 
-    public static double[] min(double[] x, double[] y){//excluding NaNs
+    public static double[] min(double[] x, double[] y, String outdir){//excluding NaNs
         if(x.length!=y.length){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("Utility.min(): x.length and y.lenght must be equals!");
             debug.CloseFile();
             System.exit(0);
@@ -1861,10 +1861,10 @@ public class Utility {
         }
         return out;
     }
-    public static double[] mean(double[] x, double[] y){
+    public static double[] mean(double[] x, double[] y, String outdir){
         double[] out = new double[x.length];
         if(x.length!=y.length){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("Utility.mean(): x.length and y.lenght must be equals!");
             debug.CloseFile();
             System.exit(0);
@@ -1875,7 +1875,7 @@ public class Utility {
     }
 
 
-    public static long datenum(long year, long month, long day, long hour, long min){
+    public static long datenum(long year, long month, long day, long hour, long min, String outdir){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         try {
             Date data = sdf.parse("000001000000");
@@ -1908,7 +1908,7 @@ public class Utility {
             return Days.daysBetween(from,to).getDays();
         } catch (Exception ex){
             ex.printStackTrace();
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("datenum: "+ex.getMessage());
             debug.CloseFile();
             return 0;
@@ -1916,7 +1916,7 @@ public class Utility {
     }
 
 
-    public static String datestr(long datenum, long hours, long minutes){
+    public static String datestr(long datenum, long hours, long minutes, String outdir){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         try {
             Date data = sdf.parse("000000000000");
@@ -1936,7 +1936,7 @@ public class Utility {
             return out;
         } catch (Exception ex) {
             ex.printStackTrace();
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("datestr: "+ex.getMessage());
             debug.CloseFile();
             return "";

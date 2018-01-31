@@ -12,7 +12,7 @@ public class MyJSONParser {
     public MyJSONParser(String path){
         JSONParser parser = new JSONParser();
         try{
-            Object obj = parser.parse(new FileReader("inputFiles/"+path));
+            Object obj = parser.parse(new FileReader(path));
             object = (JSONObject) obj;
         } catch (Exception e) {
             e.printStackTrace();

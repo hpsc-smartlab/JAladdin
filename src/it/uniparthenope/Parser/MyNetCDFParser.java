@@ -34,12 +34,12 @@ public class MyNetCDFParser {
         return fileExists;
     }
 
-    public parseMedOneMinResults parseMedOneMin(){
+    public parseMedOneMinResults parseMedOneMin(String outdir){//Bathy
         //Retrive the variable named "latitude"
         Variable latitude = dataFile.findVariable("latitude");
         if(latitude == null){
             System.out.println("Can't find the variable named latitude");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedOneMinResults: Can't find the variable named latitude");
             debug.CloseFile();
             System.exit(0);
@@ -50,7 +50,7 @@ public class MyNetCDFParser {
         Variable longitude = dataFile.findVariable("longitude");
         if(longitude == null){
             System.out.println("Can't find the variable named longitude");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedOneMinResults: Can't find the variable named longitude");
             debug.CloseFile();
             System.exit(0);
@@ -61,7 +61,7 @@ public class MyNetCDFParser {
         Variable z = dataFile.findVariable("z");
         if(z == null){
             System.out.println("Can't find the variable named z");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedOneMinResults: Can't find the variable named z");
             debug.CloseFile();
             System.exit(0);
@@ -95,24 +95,24 @@ public class MyNetCDFParser {
             return new parseMedOneMinResults(lat, lon, depth);
 
         } catch(Exception e){
-            errLog(e);
+            errLog(e, outdir);
         } finally {
             try {
                 this.dataFile.close();
             } catch (Exception e){
-                errLog(e);
+                errLog(e, outdir);
 
             }
         }
         return null;
     }
 
-    public waveForecastResults parseWaveForecastData(){
+    public waveForecastResults parseWaveForecastData(String outdir){
         //Retrive the variable named "time"
         Variable time = dataFile.findVariable("time");
         if(time==null){
             System.out.println("Can't find the variable named time");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedWaveForecastData: Can't find the variable named time");
             debug.CloseFile();
             System.exit(0);
@@ -123,7 +123,7 @@ public class MyNetCDFParser {
         Variable latitude = dataFile.findVariable("lat");
         if(latitude == null){
             System.out.println("Can't find the variable named lat");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedWaveForecastData: Can't find the variable named lat");
             debug.CloseFile();
             System.exit(0);
@@ -134,7 +134,7 @@ public class MyNetCDFParser {
         Variable longitude = dataFile.findVariable("lon");
         if(longitude == null){
             System.out.println("Can't find the variable named lon");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedWaveForecastData: Can't find the variable named lon");
             debug.CloseFile();
             System.exit(0);
@@ -145,7 +145,7 @@ public class MyNetCDFParser {
         Variable VDIR = dataFile.findVariable("VDIR");
         if(VDIR==null){
             System.out.println("Can't find the variable named VDIR");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VDIR");
             debug.CloseFile();
             System.exit(0);
@@ -156,7 +156,7 @@ public class MyNetCDFParser {
         Variable VTDH = dataFile.findVariable("VTDH");
         if(VTDH==null){
             System.out.println("Can't find the variable named VTDH");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VTDH");
             debug.CloseFile();
             System.exit(0);
@@ -167,7 +167,7 @@ public class MyNetCDFParser {
         Variable VTPK = dataFile.findVariable("VTPK");
         if(VTDH==null){
             System.out.println("Can't find the variable named VTPK");
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
             debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VTPK");
             debug.CloseFile();
             System.exit(0);
@@ -203,12 +203,12 @@ public class MyNetCDFParser {
             return new waveForecastResults(parsedVDIR, parsedVTDH, parsedVTPK, parsedTime, parsedLatitude, parsedLongitude);
 
         } catch (Exception e){
-            errLog(e);
+            errLog(e, outdir);
         } finally {
             try {
                 this.dataFile.close();
             } catch (Exception e){
-                errLog(e);
+                errLog(e, outdir);
             }
         }
         return null;
@@ -230,9 +230,9 @@ public class MyNetCDFParser {
         return out;
     }
 
-    private void errLog(Exception e){
+    private void errLog(Exception e, String outdir){
         e.printStackTrace();
-        MyFileWriter debug = new MyFileWriter("","debug",false);
+        MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
         debug.WriteLog("parseMedWaveForecastData: "+e.getMessage());
         debug.CloseFile();
         System.exit(0);

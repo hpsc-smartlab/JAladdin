@@ -14,6 +14,15 @@ public class SafetyParameters implements Serializable {
     private long surfRiding;
     private ArrayList<Long> criteria;
 
+    public SafetyParameters(String path){
+        //getting data from safety_pars.json parsing
+        MyJSONParser parser = new MyJSONParser(path);
+        this.par_rolling = parser.getValueAsLong("par_rolling");
+        this.pureLossStab = parser.getValueAsLong("pureLossStab");
+        this.surfRiding = parser.getValueAsLong("surfRiding");
+        this.criteria = new ArrayList<Long>();
+    }
+
     public SafetyParameters(){
         //getting data from safety_pars.json parsing
         MyJSONParser parser = new MyJSONParser("safety_pars.json");
