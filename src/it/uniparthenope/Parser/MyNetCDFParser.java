@@ -108,6 +108,7 @@ public class MyNetCDFParser {
     }
 
     public waveForecastResults parseWaveForecastData(String outdir){
+        boolean flag = false;
         //Retrive the variable named "time"
         Variable time = dataFile.findVariable("time");
         if(time==null){
@@ -144,62 +145,96 @@ public class MyNetCDFParser {
         //Retrive the variable named "VDIR"
         Variable VDIR = dataFile.findVariable("VDIR");
         if(VDIR==null){
-            System.out.println("Can't find the variable named VDIR");
-            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
-            debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VDIR");
-            debug.CloseFile();
-            System.exit(0);
+            flag=true;
+            VDIR = dataFile.findVariable("dirmn");
+            if(VDIR==null){
+                System.out.println("Can't find the variable named VDIR or dirmn (wave direction)");
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
+                debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VDIR");
+                debug.CloseFile();
+                System.exit(0);
+            }
         }
         int[] VDIRShape = VDIR.getShape();
         int[] VDIROrigin = new int[3];
         //Retrive the variable named "VTDH"
         Variable VTDH = dataFile.findVariable("VTDH");
         if(VTDH==null){
-            System.out.println("Can't find the variable named VTDH");
-            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
-            debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VTDH");
-            debug.CloseFile();
-            System.exit(0);
+            VTDH = dataFile.findVariable("hs");
+            if(VTDH == null){
+                System.out.println("Can't find the variable named VTDH or hs (wave height)");
+                MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
+                debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VTDH");
+                debug.CloseFile();
+                System.exit(0);
+            }
         }
         int[] VTDHShape = VDIR.getShape();
         int[] VTDHOrigin = new int[3];
         //Retrive the variable named "VTPK"
         Variable VTPK = dataFile.findVariable("VTPK");
-        if(VTDH==null){
-            System.out.println("Can't find the variable named VTPK");
-            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
-            debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VTPK");
-            debug.CloseFile();
-            System.exit(0);
+        if(VTPK==null){
+            VTPK = dataFile.findVariable("tmn");
+            if(VTPK==null) {
+                System.out.println("Can't find the variable named VTPK or tmn (wave period)");
+                MyFileWriter debug = new MyFileWriter("", "debug", false, outdir);
+                debug.WriteLog("parseMedWaveForecastData: Can't find the variable named VTPK");
+                debug.CloseFile();
+                System.exit(0);
+            }
         }
         int[] VTPKShape = VDIR.getShape();
         int[] VTPKOrigin = new int[3];
 
         try {
-            //Loading data from NetCDF file
-            ArrayInt.D1 timeArray = (ArrayInt.D1) time.read(timeOrigin,timeShape);
-            ArrayFloat.D1 latitudeArray = (ArrayFloat.D1) latitude.read(latitudeOrigin, latitudeShape);
-            ArrayFloat.D1 longitudeArray = (ArrayFloat.D1) longitude.read(longitudeOrigin, longitudeShape);
-            ArrayFloat.D3 vdir3DMatrix = (ArrayFloat.D3) VDIR.read(VDIROrigin, VDIRShape);
-            ArrayFloat.D3 vtdh3DMatrix = (ArrayFloat.D3) VTDH.read(VTDHOrigin, VTDHShape);
-            ArrayFloat.D3 vtpk3DMatrix = (ArrayFloat.D3) VTPK.read(VTPKOrigin, VTPKShape);
-            //passing to parseWaveForecastDataResults data types
+            //Loading data from NetCDF file and passing them to parseWaveForecastDataResults data types
             int[] parsedTime = new int[timeShape[0]];
-            for(int i=0;i<timeShape[0];i++){
-                parsedTime[i] = timeArray.get(i);
-            }
             double[] parsedLatitude = new double[latitudeShape[0]];
-            for(int i=0;i<latitudeShape[0];i++){
-                parsedLatitude[i] = latitudeArray.get(i);
-            }
             double[] parsedLongitude = new double[longitudeShape[0]];
-            for(int i=0;i<longitudeShape[0];i++){
-                parsedLongitude[i] = longitudeArray.get(i);
+            double[][][] parsedVDIR;
+            double[][][] parsedVTDH;
+            double[][][] parsedVTPK;
+
+            if(!flag){
+                ArrayInt.D1 timeArray = (ArrayInt.D1) time.read(timeOrigin,timeShape);
+                ArrayFloat.D1 latitudeArray = (ArrayFloat.D1) latitude.read(latitudeOrigin, latitudeShape);
+                ArrayFloat.D1 longitudeArray = (ArrayFloat.D1) longitude.read(longitudeOrigin, longitudeShape);
+                ArrayFloat.D3 vdir3DMatrix = (ArrayFloat.D3) VDIR.read(VDIROrigin, VDIRShape);
+                ArrayFloat.D3 vtdh3DMatrix = (ArrayFloat.D3) VTDH.read(VTDHOrigin, VTDHShape);
+                ArrayFloat.D3 vtpk3DMatrix = (ArrayFloat.D3) VTPK.read(VTPKOrigin, VTPKShape);
+                for(int i=0;i<timeShape[0];i++){
+                    parsedTime[i] = timeArray.get(i);
+                }
+                for(int i=0;i<latitudeShape[0];i++){
+                    parsedLatitude[i] = latitudeArray.get(i);
+                }
+                for(int i=0;i<longitudeShape[0];i++){
+                    parsedLongitude[i] = longitudeArray.get(i);
+                }
+                parsedVDIR = ArrayFloatD3ToDouble3D(vdir3DMatrix, VDIRShape);
+                parsedVTDH = ArrayFloatD3ToDouble3D(vtdh3DMatrix, VTDHShape);
+                parsedVTPK = ArrayFloatD3ToDouble3D(vtpk3DMatrix, VTPKShape);
+            } else{
+                ArrayDouble.D1 tmpArray = (ArrayDouble.D1) time.read(timeOrigin, timeShape);
+                for(int i=0;i<timeShape[0];i++){
+                    parsedTime[i] = (int) Math.floor(tmpArray.get(i));
+                }
+                tmpArray = (ArrayDouble.D1) latitude.read(latitudeOrigin, latitudeShape);
+                for(int i=0;i<latitudeShape[0];i++){
+                    parsedLatitude[i] = tmpArray.get(i);
+                }
+                tmpArray = (ArrayDouble.D1) longitude.read(longitudeOrigin, longitudeShape);
+                for(int i=0;i<longitudeShape[0];i++){
+                    parsedLongitude[i] = tmpArray.get(i);
+                }
+                ArrayFloat.D3 vdir3DMatrix = (ArrayFloat.D3) VDIR.read(VDIROrigin, VDIRShape);
+                ArrayFloat.D3 vtdh3DMatrix = (ArrayFloat.D3) VTDH.read(VTDHOrigin, VTDHShape);
+                ArrayFloat.D3 vtpk3DMatrix = (ArrayFloat.D3) VTPK.read(VTPKOrigin, VTPKShape);
+                parsedVDIR = ArrayFloatD3ToDouble3D(vdir3DMatrix, VDIRShape, true);
+                parsedVTDH = ArrayFloatD3ToDouble3D(vtdh3DMatrix, VTDHShape);
+                parsedVTPK = ArrayFloatD3ToDouble3D(vtpk3DMatrix, VTPKShape);
             }
 
-            double[][][] parsedVDIR = ArrayFloatD3ToDouble3D(vdir3DMatrix, VDIRShape);
-            double[][][] parsedVTDH = ArrayFloatD3ToDouble3D(vtdh3DMatrix, VTDHShape);
-            double[][][] parsedVTPK = ArrayFloatD3ToDouble3D(vtpk3DMatrix, VTPKShape);
             return new waveForecastResults(parsedVDIR, parsedVTDH, parsedVTPK, parsedTime, parsedLatitude, parsedLongitude);
 
         } catch (Exception e){
@@ -219,10 +254,28 @@ public class MyNetCDFParser {
         for(int k=0;k<shape[2];k++){
             for(int i=0;i<shape[0];i++){
                 for(int j=0;j<shape[1];j++){
-                    if(Matrix.get(i,j,k) >= 1.0E20){
+                    if((Matrix.get(i,j,k) >= 1.0E20) || Matrix.get(i,j,k) <= -999.9/*-999.9f*/){
                         out[k][i][j] = Double.NaN;
                     } else {
                         out[k][i][j] = Matrix.get(i,j,k);
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+
+    private double[][][] ArrayFloatD3ToDouble3D(ArrayFloat.D3 Matrix, int[] shape, boolean flag){
+        double[][][] out = new double[shape[2]][shape[0]][shape[1]];
+        double radToDegreeFactor = 180/Math.PI;
+        for(int k=0;k<shape[2];k++){
+            for(int i=0;i<shape[0];i++){
+                for(int j=0;j<shape[1];j++){
+                    if((Matrix.get(i,j,k) >= 1.0E20) || Matrix.get(i,j,k) <= -999.9/*-999.9f*/){
+                        out[k][i][j] = Double.NaN;
+                    } else {
+                        out[k][i][j] = Matrix.get(i,j,k)*radToDegreeFactor;
                     }
                 }
             }
