@@ -1,6 +1,6 @@
 {
   "_comment": "visualization parameters ",
-  "env_fields": 1,
-  "waypoint_info": 1,
+  "env_fields": 0,
+  "waypoint_info": 0,
   "safegram": 0
 }
