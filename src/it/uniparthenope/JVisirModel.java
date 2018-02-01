@@ -191,7 +191,7 @@ public class JVisirModel {
         this.logFile.CloseFile();
         try{
             GeoJsonFormatter.writeGeoJson(gdtRoute, requestedRoute, getRouteCoords(gridDefinitionResults.getXy(), gdtRoute.getPath()),
-                    getRouteCoords(gridDefinitionResults.getXy(), requestedRoute.getPath()));
+                    getRouteCoords(gridDefinitionResults.getXy(), requestedRoute.getPath()), this.paths.getOutDir());
         } catch (Exception e){
             MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
             debug.WriteLog("GeoJsonFormatter: "+e.getMessage());

@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
 
 public class GeoJsonFormatter {
 
-    public static void writeGeoJson(RouteInfo gdtRoute, RouteInfo optimalRoute, double[][] gdtRouteCoords, double[][] optimalRouteCoords) throws IOException{
+    public static void writeGeoJson(RouteInfo gdtRoute, RouteInfo optimalRoute, double[][] gdtRouteCoords, double[][] optimalRouteCoords, String outdir) throws IOException{
         JSONObject geojson = new JSONObject();
         geojson.put("type", "FeatureCollection");
         JSONArray features = new JSONArray();
@@ -27,7 +27,7 @@ public class GeoJsonFormatter {
 
         //END
         geojson.put("features", features);
-        FileWriter file = new FileWriter("Output/shipRoute.geojson");
+        FileWriter file = new FileWriter(outdir+"/shipRoute.geojson");
         file.write(geojson.toJSONString());
         file.flush();
         file.close();
@@ -80,33 +80,51 @@ public class GeoJsonFormatter {
         properties.put("stroke",lineColor);
         properties.put("stroke-width", 2.5);
         properties.put("stroke-opacity", 1);
-
-        //ADDING ROUTE INFO TO GEOJSON:
+        JSONObject property = new JSONObject();
+        //ADDING SUMMARY ROUTE INFO TO GEOJSON:
         double time = 3600.0*route.getPartialTimes()[route.getPartialTimes().length-1];
         double avgV = route.getDr_cum()[route.getDr_cum().length-1] / route.getPartialTimes()[route.getPartialTimes().length-1];
-            if(route.getType()==0){//GDT Route
-                properties.put("route-type","geodetic");
-                properties.put("route-distance", Utility.forDecimalPts(route.getCost()) + " NM");
-            } else {
-                double navDist = route.getDr_cum()[route.getDr_cum().length-1];
-                properties.put("route-distance", Utility.forDecimalPts(navDist) + " NM");
-                if(route.getType() == 1){//STATIC Route
-                    properties.put("route-type","static-optimal");
-                } else { //DYNAMIC Route
-                    properties.put("route-type","dynamic-optimal");
-                }
+        if(route.getType()==0){//GDT Route
+            property.put("route-type","geodetic");
+            property.put("route-distance", Utility.forDecimalPts(route.getCost()) + " NM");
+        } else {
+            double navDist = route.getDr_cum()[route.getDr_cum().length-1];
+            property.put("route-distance", Utility.forDecimalPts(navDist) + " NM");
+            if(route.getType() == 1){//STATIC Route
+                property.put("route-type","static-optimal");
+            } else { //DYNAMIC Route
+                property.put("route-type","dynamic-optimal");
             }
-        properties.put("navigation-time", Utility.secs2hms(time));
-        properties.put("average-speed", Utility.forDecimalPts(avgV) + " kts");
+        }
+        property.put("navigation-time", Utility.secs2hms(time));
+        property.put("average-speed", Utility.forDecimalPts(avgV) + " kts");
+        properties.put("summary", property);
         //END
 
         feature.put("properties", properties);
         JSONObject geometry = new JSONObject();
         geometry.put("type", "LineString");
-        //coordinates
+        //coordinates and waypoint info:
+        property = new JSONObject();
+        JSONObject waypointInfo = new JSONObject();
         JSONArray coordinates = new JSONArray();
-        for(int ix=0;ix<coords.length;++ix)
+        for(int ix=0;ix<coords.length;++ix){
             coordinates.add(getPoint(coords[ix][0], coords[ix][1]));
+            JSONObject waypoint = new JSONObject();
+            if(ix>=1){
+                waypoint.put("nav-time", Utility.secs2hms((route.getPartialTimes()[ix]*3600.0)));
+                waypoint.put("avg-speed", (route.getDr_cum()[ix]/route.getPartialTimes()[ix])+" kts");
+                waypoint.put("distance", (route.getDr_cum()[ix])+" NM");
+            } else{
+                waypoint.put("nav-time", "0.0 sec");
+                waypoint.put("avg-speed", "0.0 kts");
+                waypoint.put("distance", "0.0 NM");
+            }
+            waypointInfo.put(ix,waypoint);
+        }
+        property.put("waypoint-list",waypointInfo);
+        properties.put("waypoint-informations", property);
+
         geometry.put("coordinates", coordinates);
         feature.put("geometry", geometry);
         return feature;
