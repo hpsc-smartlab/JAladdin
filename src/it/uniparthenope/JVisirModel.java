@@ -361,7 +361,8 @@ public class JVisirModel {
             label[ip+1] = label[ip] + edge_costs[edge_no] / sh_vel;
 
             if(this.timedep_flag == 2) {//Dynamic algorithm
-                itime = Math.min(1+ (int) Math.floor(label[ip+1]/this.tGrid.getDt()) , (int) this.tGrid.getNt());
+                //itime = Math.min(1+ (int) Math.floor(label[ip+1]/this.tGrid.getDt()) , (int) this.tGrid.getNt());
+                itime = Math.min((int) Math.floor(label[ip+1]/this.tGrid.getDt()) , (int) this.tGrid.getNt());
             }
         }
         return label;
@@ -1924,7 +1925,7 @@ public class JVisirModel {
         //Time parameters preprocessing:
         double wave_t1= 12.5; // wave file start time is 1230 UTC (WW3 4e)
         double wind_t1;
-        if (this.optim.getWindModel()==11 || this.optim.getWindModel()==12){//EXMWF
+        if (this.optim.getWindModel()==11 || this.optim.getWindModel()==12){//ECMWF
             wind_t1 = 12.0;//ECMWF wind file (analysis) start time is 1200 UTC
         } else if (this.optim.getWindModel() == 2){
             wind_t1 = 15.0; //COSMO-ME wind file (forecast) start time is 1500 UTC  *** use also analysis in the future!
@@ -1936,9 +1937,12 @@ public class JVisirModel {
             System.exit(0);
         }
         //String dateListFile = "inputFiles/fields/an_dates_DB.txt";
-        String dateListFile = this.paths.getAnalysisDB();
-        MyTxtParser file = new MyTxtParser(dateListFile, this.paths.getOutDir());
-        this.tGrid.setLatest_date(file.tail(1).get(0));
+//        String dateListFile = this.paths.getAnalysisDB();
+//        MyTxtParser file = new MyTxtParser(dateListFile, this.paths.getOutDir());
+//        this.tGrid.setLatest_date(file.tail(1).get(0));
+
+        String noExtension = this.paths.getForecastFile().substring(0, paths.getForecastFile().length()-3);
+        this.tGrid.setLatest_date(noExtension.substring(noExtension.length()-8));
 
         String l_date_str = this.tGrid.getLatest_date()+"1200";
         long l_num = Utility.datenum(l_date_str,"yyyyMMddHHmm", this.paths.getOutDir()); // taken at 1200 UTC (analysis time)
