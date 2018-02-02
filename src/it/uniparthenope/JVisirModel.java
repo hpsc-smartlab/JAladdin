@@ -580,12 +580,25 @@ public class JVisirModel {
         return new vessel_ResponseResults(tmp.getShip_v_LUT(), tmp.getH_array_m(), new ArrayList<Double>(), new ArrayList<Double>());
     }
 
+    private boolean pointInPolygon(double x, double y, Polygon polygon){
+        boolean isInside = false;
+        int nVert = polygon.getCornersNumber();
+        int i, j;
+        for(i=0, j=nVert-1; i<nVert; j = i++){
+            if(((polygon.getCorner(i).getY() >= y) != (polygon.getCorner(j).getY() >= y)) &&
+                    (x <= (polygon.getCorner(j).getX()-polygon.getCorner(i).getX()) * (y-polygon.getCorner(i).getY()) /
+                            (polygon.getCorner(j).getY()-polygon.getCorner(i).getY()) + polygon.getCorner(i).getX() ) ){
+                isInside = !isInside;
+            }
+        }
+
+        return isInside;
+    }
+
     private Grid_definitionResults Grid_definition(){//Grid_definition.m implementation
         this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Bounding boxes and bathymetry postprocessing (grid definition): ");
         this.logFile.CloseFile();
-        String freeedges_DB_filename = "freeedges_DB.dat";
-        String freenodes_DB_filename = "freeNodes_DB.dat";
         Grid_definitionResults GridOut = new Grid_definitionResults();
         // Bounding boxes:
         // there are 2 grids:
@@ -724,7 +737,7 @@ public class JVisirModel {
             this.logFile.WriteLog("\tWriting graph coords in GRAPH.node_LonLat.csv...");
             this.logFile.CloseFile();
             try{
-                MyCSVParser csv = new MyCSVParser("Output/GRAPH.node_LonLat.csv");
+                MyCSVParser csv = new MyCSVParser(this.paths.getOutDir()+"GRAPH.node_LonLat.csv");
                 csv.writeCSV(GridOut.getXy());
             } catch (Exception e){
                 MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
@@ -962,6 +975,36 @@ public class JVisirModel {
             double atan2 = Math.atan2(delta_x,delta_y);
             this.sGrid.setTheta_gdt(atan2);
             //th= Sgrid.theta_gdt/const.deg2rad
+
+
+            /**NEW*/
+            ArrayList<Polygon> vFences;
+            try{
+                vFences = GeoJsonFormatter.getPolygons("inputFiles/Fences/virtualFences.geojson");
+                this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
+                this.logFile.WriteLog("\tGetting virtual fences info from DB...");
+                this.logFile.CloseFile();
+            } catch (Exception e){
+                this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
+                this.logFile.WriteLog("\tFences Info not found, skipping...");
+                this.logFile.CloseFile();
+                vFences = new ArrayList<>();
+            }
+            /**NEW*/
+            if(vFences.size()>0){
+                this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
+                this.logFile.WriteLog("\tRemoving virtual fences from grid...");
+                this.logFile.CloseFile();
+                for(int i=0;i<lsm_mask.length;++i){
+                    for(int j=0;j<lsm_mask[0].length;++j){
+                        for(Polygon polygon : vFences){
+                            if(pointInPolygon(lon_bathy_Inset.get(i), lat_bathy_Inset.get(j), polygon)){
+                                lsm_mask[i][j] = Double.NaN;
+                            }
+                        }
+                    }
+                }
+            }
 
             GridOut.setXg_array(xg_array);
             GridOut.setYg_array(yg_array);
@@ -2077,40 +2120,6 @@ public class JVisirModel {
                 }
             }
 
-//            for(int i=0;i<waveDataReduction.getOut(0).length;++i){
-//                for(int j=0;j<interpTimes.length;++j){
-//                    for(int k=0; k<waveDataReduction.getOut(0)[0][0].length; ++k){
-//                        VTDH_times[i][j][k]=waveDataReduction.getOut(0)[i][interpTimes[j]][k];
-//                    }
-//                }
-//            }
-
-//            for(int i=0;i<waveDataReduction.getOut(1).length;++i){
-//                for(int j=0;j<interpTimes.length;++j){
-//                    for(int k=0; k<waveDataReduction.getOut(1)[0][0].length; ++k){
-//                        VTPK_times[i][j][k]=waveDataReduction.getOut(1)[i][interpTimes[j]][k];
-//                    }
-//                }
-//            }
-
-
-//            for(int i=0;i<X_Inset.length;++i){
-//                for(int j=0;j<interpTimes.length;++j){
-//                    for(int k=0; k<X_Inset[0][0].length; ++k){
-//                        X_times[i][j][k]=X_Inset[i][interpTimes[j]][k];
-//                    }
-//                }
-//            }
-
-
-//            for(int i=0;i<Y_Inset.length;++i){
-//                for(int j=0;j<interpTimes.length;++j){
-//                    for(int k=0; k<Y_Inset[0][0].length; ++k){
-//                        Y_times[i][j][k]=Y_Inset[i][interpTimes[j]][k];
-//                    }
-//                }
-//            }
-
 
             //-----------------------------------------------------------------------------------------------------
             // seaOverLand:
@@ -2162,14 +2171,6 @@ public class JVisirModel {
                     }
                 }
             }
-
-//            for(int i=0;i<windMAGN_out.length;i++){
-//                for(int j=0;j<windMAGN_out[0].length;j++){
-//                    for(int k=0;k<windMAGN_out[0][0].length;k++){
-//                        windMAGN_out[i][j][k] = Math.sqrt(Math.pow(U10M_at_TS[i][j][k],2)+Math.pow(V10M_at_TS[i][j][k],2));
-//                    }
-//                }
-//            }
 
             return new Fields_regriddingResults(time_steps, seaOverLand_3stepsOut.get(0),
                     seaOverLand_3stepsOut.get(1), VDIR_out, windMAGN_out, windDIR_out);
@@ -3140,7 +3141,6 @@ public class JVisirModel {
         this.logFile.WriteLog("Defining edges...\n");
         this.logFile.WriteLog("\tReading out free edges from DB...");
         this.logFile.CloseFile();
-        //MyBinaryParser edgesDBParser = new MyBinaryParser("inputFiles/graph/freeedges_DB.dat");
         MyBinaryParser edgesDBParser = new MyBinaryParser(this.paths.getFreeEdgesDB());
         int[] free_edges_DB_array = edgesDBParser.readAsUInt16();
         int[] free_edges_DB_size = new int[2];
