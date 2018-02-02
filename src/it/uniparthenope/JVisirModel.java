@@ -1945,6 +1945,7 @@ public class JVisirModel {
         this.tGrid.setLatest_date(noExtension.substring(noExtension.length()-8));
 
         String l_date_str = this.tGrid.getLatest_date()+"1200";
+        //String l_date_str = this.tGrid.getLatest_date()+"0000";//TEST
         long l_num = Utility.datenum(l_date_str,"yyyyMMddHHmm", this.paths.getOutDir()); // taken at 1200 UTC (analysis time)
 
         this.tGrid.setDepDateTime(Utility.datenum(2000+this.dep_datetime.getYear(),this.dep_datetime.getMonth(),
@@ -1966,6 +1967,7 @@ public class JVisirModel {
 
         this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("\tlatest analysis date and time: "+Utility.datestr(l_num,12,00, this.paths.getOutDir()));
+//        this.logFile.WriteLog("\tlatest analysis date and time: "+Utility.datestr(l_num,00,00, this.paths.getOutDir()));//TEST
         this.logFile.WriteLog("\tdeparture date and time: "+Utility.datestr(this.tGrid.getDepDateTime(),this.dep_datetime.getHour(),this.dep_datetime.getMin(), this.paths.getOutDir()));
         this.logFile.CloseFile();
 

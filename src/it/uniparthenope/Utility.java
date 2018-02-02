@@ -3,6 +3,7 @@ package it.uniparthenope;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -12,9 +13,7 @@ import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularValueDecomposition;
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.Period;
+import org.joda.time.*;
 
 public class Utility {
 
@@ -1798,6 +1797,20 @@ public class Utility {
         return out;
     }
 
+    public static long secSince1970(String stringDate, String outdir){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+        try{
+            Date d = sdf.parse(stringDate);
+            return (long) Math.round(d.getTime()/1000);
+        } catch (Exception ex){
+            ex.printStackTrace();
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
+            debug.WriteLog("secSince1970: "+ex.getMessage());
+            debug.CloseFile();
+            return 0;
+        }
+    }
+
     public static long datenum(String dateString, String format, String outdir){
         SimpleDateFormat sdf = new SimpleDateFormat(format);
         try {
@@ -1812,6 +1825,25 @@ public class Utility {
             debug.WriteLog("datenum: "+ex.getMessage());
             debug.CloseFile();
             return 0;
+        }
+    }
+
+    public static long getTimeStamp(String fdate, String outdir){
+//        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GDT"));
+//        cal.clear();
+//        cal.set(year, month, day, hour,0,0);
+//        return cal.getTimeInMillis()/1000L;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+        try {
+            Date parsedDate = dateFormat.parse(fdate);
+            Timestamp t = new java.sql.Timestamp(parsedDate.getTime());
+            return t.getTime();
+        }catch (Exception e){
+            e.printStackTrace();
+            MyFileWriter debug = new MyFileWriter("","debug",false, outdir);
+            debug.WriteLog("getTimeStamp: "+e.getMessage());
+            debug.CloseFile();
+            return -1;
         }
     }
 
@@ -1919,7 +1951,8 @@ public class Utility {
     public static String datestr(long datenum, long hours, long minutes, String outdir){
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
         try {
-            Date data = sdf.parse("000000000000");
+            //Date data = sdf.parse("000000000000");
+            Date data = sdf.parse("000001010000");
             Calendar c = Calendar.getInstance();
             c.setTime(data);
             c.add(Calendar.DATE, (int) datenum);

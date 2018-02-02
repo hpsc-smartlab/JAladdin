@@ -2,6 +2,7 @@ package it.uniparthenope.Parser;
 
 import it.uniparthenope.Boxing.waveForecastResults;
 import it.uniparthenope.Debug.MyFileWriter;
+import it.uniparthenope.Utility;
 import ucar.ma2.ArrayDouble;
 import ucar.ma2.ArrayFloat;
 import ucar.ma2.ArrayInt;
@@ -174,7 +175,7 @@ public class MyNetCDFParser {
         //Retrive the variable named "VTPK"
         Variable VTPK = dataFile.findVariable("VTPK");
         if(VTPK==null){
-            VTPK = dataFile.findVariable("tmn");
+            VTPK = dataFile.findVariable("peakp");
             if(VTPK==null) {
                 System.out.println("Can't find the variable named VTPK or tmn (wave period)");
                 MyFileWriter debug = new MyFileWriter("", "debug", false, outdir);
@@ -185,7 +186,6 @@ public class MyNetCDFParser {
         }
         int[] VTPKShape = VDIR.getShape();
         int[] VTPKOrigin = new int[3];
-
         try {
             //Loading data from NetCDF file and passing them to parseWaveForecastDataResults data types
             int[] parsedTime = new int[timeShape[0]];
@@ -194,6 +194,14 @@ public class MyNetCDFParser {
             double[][][] parsedVDIR;
             double[][][] parsedVTDH;
             double[][][] parsedVTPK;
+
+            //date extraction from namefile
+            String noExtension = this.filePath.substring(0, this.filePath.length()-3);
+            String baseDate = noExtension.substring(noExtension.length()-8);
+            int base_year = Integer.parseInt(baseDate.substring(0,4));
+            int base_month = Integer.parseInt(baseDate.substring(4,6));
+            int base_day = Integer.parseInt(baseDate.substring(6,8));
+            int base_hours = 0;
 
             if(!flag){
                 ArrayInt.D1 timeArray = (ArrayInt.D1) time.read(timeOrigin,timeShape);
@@ -217,7 +225,43 @@ public class MyNetCDFParser {
             } else{
                 ArrayDouble.D1 tmpArray = (ArrayDouble.D1) time.read(timeOrigin, timeShape);
                 for(int i=0;i<timeShape[0];i++){
-                    parsedTime[i] = (int) Math.floor(tmpArray.get(i));
+                    //ADDED
+                    int hoursSinceBaseDate =(int) Math.floor(tmpArray.get(i));
+                    int daysToAdd = (int) Math.floor(hoursSinceBaseDate/23);
+                    int hoursToAdd = hoursSinceBaseDate%23;
+                    int yearsToAdd = 0;
+
+                    long hh = base_hours + hoursToAdd;
+                    long dd = base_day + daysToAdd;
+                    long MM = base_month;
+                    if(switchMonth(dd,base_month)){
+                        MM++;
+                        dd=1;
+                        if(MM>=12){
+                            yearsToAdd++;
+                            MM=1;
+                        }
+                    }
+                    //parsedTime[i]=(int) Utility.datenum(base_year+yearsToAdd, MM,dd,hh,0,outdir);
+                    //getting string
+                    String finaldate = ""+(base_year+yearsToAdd);
+                    if(MM<10)
+                        finaldate+="0"+MM;
+                    else
+                        finaldate+=MM;
+                    if(dd<10)
+                        finaldate+="0"+dd;
+                    else
+                        finaldate+=dd;
+                    if(hh<10)
+                        finaldate+="0"+hh;
+                    else
+                        finaldate+=hh;
+                    finaldate+="00";
+
+                    //getting time
+                    parsedTime[i] = (int) Utility.getTimeStamp(finaldate, outdir);
+
                 }
                 tmpArray = (ArrayDouble.D1) latitude.read(latitudeOrigin, latitudeShape);
                 for(int i=0;i<latitudeShape[0];i++){
@@ -249,6 +293,35 @@ public class MyNetCDFParser {
         return null;
     }
 
+    private boolean switchMonth(long day, long month){
+        if(month==1 && day>=31)
+            return true;
+        if(month==2 && day>=28)
+            return true;
+        if(month==3 && day>=31)
+            return true;
+        if(month==4 && day>=30)
+            return true;
+        if(month==5 && day>=31)
+            return true;
+        if(month==6 && day>=30)
+            return true;
+        if(month==7 && day>=31)
+            return true;
+        if(month==8 && day>=31)
+            return true;
+        if(month==9 && day>=30)
+            return true;
+        if(month==10 && day>=31)
+            return true;
+        if(month==11 && day>=30)
+            return true;
+        if(month==12 && day>=31)
+            return true;
+        return false;
+
+    }
+
     private double[][][] ArrayFloatD3ToDouble3D(ArrayFloat.D3 Matrix, int[] shape){
         double[][][] out = new double[shape[2]][shape[0]][shape[1]];
         for(int k=0;k<shape[2];k++){
@@ -267,6 +340,7 @@ public class MyNetCDFParser {
 
 
     private double[][][] ArrayFloatD3ToDouble3D(ArrayFloat.D3 Matrix, int[] shape, boolean flag){
+        //Converting radiants to degree and degree to degree north
         double[][][] out = new double[shape[2]][shape[0]][shape[1]];
         double radToDegreeFactor = 180/Math.PI;
         for(int k=0;k<shape[2];k++){
@@ -276,6 +350,19 @@ public class MyNetCDFParser {
                         out[k][i][j] = Double.NaN;
                     } else {
                         out[k][i][j] = Matrix.get(i,j,k)*radToDegreeFactor;
+                        //conversion to degree north
+                        if((out[k][i][j]>=0.0) && (out[k][i][j]<=90.0)){
+                            //1st quarter
+                            out[k][i][j] = 90.0-out[k][i][j];
+                        } else{
+                            if((out[k][i][j]>90.0) && (out[k][i][j]<180.0)){
+                                //2-nd quarter
+                                out[k][i][j] = 90.0+out[k][i][j];
+                            } else{
+                                //3-rd and 4-th quarter
+                                out[k][i][j] = 360.0-out[k][i][j]+90.0;
+                            }
+                        }
                     }
                 }
             }
