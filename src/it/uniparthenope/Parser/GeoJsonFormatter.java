@@ -16,62 +16,87 @@ public class GeoJsonFormatter {
         JSONArray features = new JSONArray();
         String RED = "#ff0000";
         String GREEN = "#00ff00";
-
-        //ADDING MARKERS
-        features.add(getMarker(gdtRouteCoords[0][0], gdtRouteCoords[0][1], "startPoint"));
-        features.add(getMarker(gdtRouteCoords[gdtRouteCoords.length-1][0], gdtRouteCoords[gdtRouteCoords.length-1][1], "endPoint"));
-
+//        features.add(getMarker(gdtRouteCoords[0][0], gdtRouteCoords[0][1], "startPoint"));
+//        features.add(getMarker(gdtRouteCoords[gdtRouteCoords.length-1][0], gdtRouteCoords[gdtRouteCoords.length-1][1], "endPoint"));
         //ADDING ROUTES:
         features.add(getLineString(gdtRoute, gdtRouteCoords,RED));// GDT
         features.add(getLineString(optimalRoute, optimalRouteCoords, GREEN)); //OPTIMAL
-
         //END
         geojson.put("features", features);
         FileWriter file = new FileWriter(outdir+"/shipRoute.geojson");
         file.write(geojson.toJSONString());
         file.flush();
         file.close();
-    }
 
-    public static  void writeGeoJson(double[][]... coordsList) throws IOException{
-        JSONObject geojson = new JSONObject();
+        geojson = new JSONObject();
         geojson.put("type", "FeatureCollection");
-        JSONArray features = new JSONArray();
-        String[] colors = new String[]{"#ff0000","#00ff00","#ff00ff"};
-        int i = 0;
-        for(double[][] coords : coordsList){
-            if(i==0){// Adding markers
-                features.add(getMarker(coords[0][0], coords[0][1], "startPoint"));
-                features.add(getMarker(coords[coords.length-1][0], coords[coords.length-1][1], "endPoint"));
-            }
-            JSONObject feature = new JSONObject();
-            feature.put("type","Feature");
-            JSONObject properties = new JSONObject();
-            properties.put("stroke",colors[i]);
-            properties.put("stroke-width", 2.5);
-            properties.put("stroke-opacity", 1);
-            feature.put("properties", properties);
-            JSONObject geometry = new JSONObject();
-            geometry.put("type", "LineString");
-            //coordinates
-            JSONArray coordinates = new JSONArray();
-            for(int ix=0;ix<coords.length;++ix){
-                JSONArray point = new JSONArray();
-                point.add(0,coords[ix][0]);
-                point.add(1,coords[ix][1]);
-                coordinates.add(point);
-            }
-            geometry.put("coordinates", coordinates);
-            feature.put("geometry", geometry);
-            features.add(feature);
-            ++i;
+        features = new JSONArray();
+        for(int i=0;i<optimalRouteCoords.length;++i){
+            features.add(getMarker(optimalRoute, optimalRouteCoords[i][0], optimalRouteCoords[i][1], i));
         }
         geojson.put("features", features);
-        FileWriter file = new FileWriter("Output/shipRoute.geojson");
+        file = new FileWriter(outdir+"/waypointInfo.geojson");
         file.write(geojson.toJSONString());
         file.flush();
         file.close();
     }
+
+    private static JSONObject getMarker(RouteInfo optRoute, double lon, double lat, int waypointIdx){
+        JSONObject marker = new JSONObject();
+        marker.put("type", "Feature");
+        JSONObject properties = new JSONObject();
+        if((waypointIdx==0) || (waypointIdx==optRoute.getPath().size()-1)){//start point or end point
+            properties.put("marker-color","#ffff00");//YELLOW
+            if(waypointIdx==0){
+                properties.put("marker-symbol","ferry");
+                properties.put("nav-time", "0.0 sec");
+                properties.put("avg-speed", "0.0 kts");
+                properties.put("distance", "0.0 NM");
+            } else {
+                properties.put("marker-symbol","college");
+                properties.put("nav-time", Utility.secs2hms((optRoute.getPartialTimes()[waypointIdx]*3600.0)));
+                properties.put("avg-speed", (optRoute.getDr_cum()[waypointIdx]/optRoute.getPartialTimes()[waypointIdx])+" kts");
+                properties.put("distance", (optRoute.getDr_cum()[waypointIdx])+" NM");
+            }
+        } else {
+            properties.put("marker-symbol","circle");
+            properties.put("marker-color","#7e7e7e");
+            properties.put("nav-time", Utility.secs2hms((optRoute.getPartialTimes()[waypointIdx]*3600.0)));
+            properties.put("avg-speed", (optRoute.getDr_cum()[waypointIdx]/optRoute.getPartialTimes()[waypointIdx])+" kts");
+            properties.put("distance", (optRoute.getDr_cum()[waypointIdx])+" NM");
+        }
+        properties.put("marker-size","medium");
+        marker.put("properties", properties);
+        JSONObject geometry = new JSONObject();
+        geometry.put("type", "Point");
+        JSONArray coordinates = new JSONArray();
+        coordinates.add(0, lon);
+        coordinates.add(1, lat);
+        geometry.put("coordinates",coordinates);
+        marker.put("geometry", geometry);
+        return marker;
+    }
+
+    //    private static JSONObject getMarker(double lon, double lat, String type){
+//        JSONObject marker = new JSONObject();
+//        marker.put("type", "Feature");
+//        JSONObject properties = new JSONObject();
+//        properties.put("marker-color","#ffff00");
+//        properties.put("marker-size","medium");
+//        if(type == "startPoint")
+//            properties.put("marker-symbol","ferry");
+//        else
+//            properties.put("marker-symbol","college");
+//        marker.put("properties", properties);
+//        JSONObject geometry = new JSONObject();
+//        geometry.put("type", "Point");
+//        JSONArray coordinates = new JSONArray();
+//        coordinates.add(0, lon);
+//        coordinates.add(1, lat);
+//        geometry.put("coordinates",coordinates);
+//        marker.put("geometry", geometry);
+//        return  marker;
+//    }
 
     private static JSONObject getLineString(RouteInfo route, double[][] coords, String lineColor){
         JSONObject feature = new JSONObject();
@@ -104,26 +129,26 @@ public class GeoJsonFormatter {
         feature.put("properties", properties);
         JSONObject geometry = new JSONObject();
         geometry.put("type", "LineString");
-        //coordinates and waypoint info:
-        property = new JSONObject();
-        JSONObject waypointInfo = new JSONObject();
+        //coordinates:
+        //property = new JSONObject();
+        //JSONObject waypointInfo = new JSONObject();
         JSONArray coordinates = new JSONArray();
         for(int ix=0;ix<coords.length;++ix){
             coordinates.add(getPoint(coords[ix][0], coords[ix][1]));
-            JSONObject waypoint = new JSONObject();
-            if(ix>=1){
-                waypoint.put("nav-time", Utility.secs2hms((route.getPartialTimes()[ix]*3600.0)));
-                waypoint.put("avg-speed", (route.getDr_cum()[ix]/route.getPartialTimes()[ix])+" kts");
-                waypoint.put("distance", (route.getDr_cum()[ix])+" NM");
-            } else{
-                waypoint.put("nav-time", "0.0 sec");
-                waypoint.put("avg-speed", "0.0 kts");
-                waypoint.put("distance", "0.0 NM");
-            }
-            waypointInfo.put(ix,waypoint);
+            //JSONObject waypoint = new JSONObject();
+//            if(ix>=1){
+//                waypoint.put("nav-time", Utility.secs2hms((route.getPartialTimes()[ix]*3600.0)));
+//                waypoint.put("avg-speed", (route.getDr_cum()[ix]/route.getPartialTimes()[ix])+" kts");
+//                waypoint.put("distance", (route.getDr_cum()[ix])+" NM");
+//            } else{
+//                waypoint.put("nav-time", "0.0 sec");
+//                waypoint.put("avg-speed", "0.0 kts");
+//                waypoint.put("distance", "0.0 NM");
+//            }
+            //waypointInfo.put(ix,waypoint);
         }
-        property.put("waypoint-list",waypointInfo);
-        properties.put("waypoint-informations", property);
+        //property.put("waypoint-list",waypointInfo);
+        //properties.put("waypoint-informations", property);
 
         geometry.put("coordinates", coordinates);
         feature.put("geometry", geometry);
@@ -138,26 +163,7 @@ public class GeoJsonFormatter {
     }
 
 
-    private static JSONObject getMarker(double lon, double lat, String type){
-        JSONObject marker = new JSONObject();
-        marker.put("type", "Feature");
-        JSONObject properties = new JSONObject();
-        properties.put("marker-color","#ffff00");
-        properties.put("marker-size","medium");
-        if(type == "startPoint")
-            properties.put("marker-symbol","ferry");
-        else
-            properties.put("marker-symbol","college");
-        marker.put("properties", properties);
-        JSONObject geometry = new JSONObject();
-        geometry.put("type", "Point");
-        JSONArray coordinates = new JSONArray();
-        coordinates.add(0, lon);
-        coordinates.add(1, lat);
-        geometry.put("coordinates",coordinates);
-        marker.put("geometry", geometry);
-        return  marker;
-    }
+
 
 
 

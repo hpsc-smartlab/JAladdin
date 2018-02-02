@@ -29,8 +29,8 @@ public class InputPaths {
         this.bathymetryDB = "inputFiles/bathy/MedOneMin/med_one_min_single_vs2.nc";
         this.analysisDB = "inputFiles/fields/an_dates_DB.txt";
 //        this.forecastFile = "inputFiles/wave/WW3/forecast/start__20150329.nc";
-        this.forecastFile = "inputFiles/wave/WW3/forecast/d01_20180129.nc";
-        //this.forecastFile = "inputFiles/wave/WW3/forecast/start__20131226.nc";
+//        this.forecastFile = "inputFiles/wave/WW3/forecast/d01_20180129.nc";
+        this.forecastFile = "inputFiles/wave/WW3/forecast/start__20131226.nc";
         this.freeEdgesDB = "inputFiles/graph/freeedges_DB.dat";
     }
 
