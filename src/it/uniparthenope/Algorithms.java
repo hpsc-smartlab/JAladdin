@@ -84,6 +84,8 @@ public class Algorithms {
                     minimum = vertex;
             }
         }
+        if(minimum==null)
+            System.out.println("CIAO");
         return minimum;
     }
 
@@ -173,7 +175,7 @@ public class Algorithms {
         int Nt = sh_delay[0].length;
         int Dt = 1; //hrs
 
-        while(!settledNodes.contains((int) FID)){//loop ends when dest node is settled
+        while((!settledNodes.contains((int) FID)) && unSettledNodes.size() > 0){//loop ends when dest node is settled
             int node = getMinimum(unSettledNodes, distance);
             settledNodes.add(node);
             unSettledNodes.remove(node);

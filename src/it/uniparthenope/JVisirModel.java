@@ -1983,8 +1983,16 @@ public class JVisirModel {
 //        String dateListFile = this.paths.getAnalysisDB();
 //        MyTxtParser file = new MyTxtParser(dateListFile, this.paths.getOutDir());
 //        this.tGrid.setLatest_date(file.tail(1).get(0));
-
-        String noExtension = this.paths.getForecastFile().substring(0, paths.getForecastFile().length()-3);
+        boolean isGRIB = false;
+        String noExtension = "";
+        if(this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-3).equals("grb")){
+            //grib file
+            isGRIB = true;
+            noExtension = this.paths.getForecastFile().substring(0, paths.getForecastFile().length()-4);
+        } else {
+            //netcdf
+            noExtension = this.paths.getForecastFile().substring(0, paths.getForecastFile().length()-3);
+        }
         this.tGrid.setLatest_date(noExtension.substring(noExtension.length()-8));
 
         String l_date_str = this.tGrid.getLatest_date()+"1200";
@@ -2447,28 +2455,7 @@ public class JVisirModel {
         this.fstats.setWlength_min((1-piccolo)*Utility.min3d(Lambda));
         this.fstats.setWlenght_max(Utility.max3d(Lambda));
         //----------------------------------------------------------
-        //Wind
-//        double[][][] ecmwf_wind10M_magn = new double[ecmwf_U10M.length][ecmwf_U10M[0].length][ecmwf_U10M[0][0].length];
-//        for(int i=0;i<ecmwf_wind10M_magn.length; ++i){
-//            for(int j=0;j<ecmwf_wind10M_magn[0].length; ++j){
-//                for(int k=0;k<ecmwf_wind10M_magn[0][0].length; ++k){
-//                    ecmwf_wind10M_magn[i][j][k] = Math.sqrt(Math.pow(ecmwf_U10M[i][j][k],2) + Math.pow(ecmwf_V10M[i][j][k],2));
-//                }
-//            }
-//        }
-//        //double ecmwf_wind10M_max = (1+piccolo) * Utility.max3d(ecmwf_wind10M_magn);
-//        //double ecmwf_wind10M_min = (1-piccolo) * Utility.min3d(ecmwf_wind10M_magn);
-//
-//        double[][][] cosmo_wind10M_magn = new double[cosmo_U10M.length][cosmo_U10M[0].length][cosmo_U10M[0][0].length];
-//        for(int i=0;i<cosmo_wind10M_magn.length; i++){
-//            for(int j=0;j<cosmo_wind10M_magn[0].length; j++){
-//                for(int k=0;k<cosmo_wind10M_magn[0][0].length; k++){
-//                    cosmo_wind10M_magn[i][j][k] = Math.sqrt(Math.pow(cosmo_U10M[i][j][k],2) + Math.pow(cosmo_V10M[i][j][k],2));
-//                }
-//            }
-//        }
-//        //double cosmo_wind10M_max = (1+piccolo) * Utility.max3d(cosmo_wind10M_magn);
-//        //double cosmo_wind10M_min = (1-piccolo) * Utility.min3d(cosmo_wind10M_magn);
+
         //WIND
         double[][][] ecmwf_wind10M_magn = new double[ecmwf_U10M.length][ecmwf_U10M[0].length][ecmwf_U10M[0][0].length];
         double[][][] cosmo_wind10M_magn = new double[cosmo_U10M.length][cosmo_U10M[0].length][cosmo_U10M[0][0].length];
@@ -2486,23 +2473,6 @@ public class JVisirModel {
             }
         }
 
-        //wind direction:
-//        double[][][] TmpEcmwf_cos_avg = new double[ecmwf_U10M.length][ecmwf_U10M[0].length][ecmwf_U10M[0][0].length];
-//        double[][][] TmpEcmwf_sin_avg = new double[ecmwf_V10M.length][ecmwf_V10M[0].length][ecmwf_V10M[0][0].length];
-//        for(int i=0;i<TmpEcmwf_cos_avg.length; ++i){
-//            for(int j=0;j<TmpEcmwf_cos_avg[0].length; ++j){
-//                for(int k=0;k<TmpEcmwf_cos_avg[0][0].length; ++k){
-//                    TmpEcmwf_cos_avg[i][j][k] = ecmwf_U10M[i][j][k]/ecmwf_wind10M_magn[i][j][k];
-//                }
-//            }
-//        }
-//        for(int i=0;i<TmpEcmwf_sin_avg.length; ++i){
-//            for(int j=0;j<TmpEcmwf_sin_avg[0].length; ++j){
-//                for(int k=0;k<TmpEcmwf_sin_avg[0][0].length; ++k){
-//                    TmpEcmwf_sin_avg[i][j][k] = ecmwf_V10M[i][j][k]/ecmwf_wind10M_magn[i][j][k];
-//                }
-//            }
-//        }
         double ecmwf_cos_avg = nanmean2(TmpEcmwf_cos_avg);
         double ecmwf_sin_avg = nanmean2(TmpEcmwf_sin_avg);
 
@@ -2520,20 +2490,7 @@ public class JVisirModel {
                 }
             }
         }
-//        for(int i=0;i<TmpCosmo_cos_avg.length; ++i){
-//            for(int j=0;j<TmpCosmo_cos_avg[0].length; ++j){
-//                for(int k=0;k<TmpCosmo_cos_avg[0][0].length; ++k){
-//                    TmpCosmo_cos_avg[i][j][k] = cosmo_U10M[i][j][k]/cosmo_wind10M_magn[i][j][k];
-//                }
-//            }
-//        }
-//        for(int i=0;i<TmpCosmo_sin_avg.length; ++i){
-//            for(int j=0;j<TmpCosmo_sin_avg[0].length; ++j){
-//                for(int k=0;k<TmpCosmo_sin_avg[0][0].length; ++k){
-//                    TmpCosmo_sin_avg[i][j][k] = cosmo_V10M[i][j][k]/cosmo_wind10M_magn[i][j][k];
-//                }
-//            }
-//        }
+
 
         double cosmo_cos_avg = nanmean2(TmpCosmo_cos_avg);
         double cosmo_sin_avg = nanmean2(TmpCosmo_sin_avg);
@@ -2949,74 +2906,134 @@ public class JVisirModel {
 //        }
 //
 //        String wave_filename = Stagein_path+"/start__"+this.tGrid.getLatest_date()+".nc";
-        String wave_filename = this.paths.getForecastFile();
-        MyNetCDFParser parser = new MyNetCDFParser(wave_filename);
-        boolean wave_status = parser.isFileExists();
 
-        if(wave_status){
-            waveForecastResults waveForecast = parser.parseWaveForecastData(this.paths.getOutDir());
+        if(this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-3).equals("grb")){//if is grib
+            try{
+                waveForecastResults waveForecast =  MyGribParser.parseGrib(this.paths.getForecastFile(), this.paths.getOutDir());
+                double[][][] VDIR = waveForecast.getVDIR();
 
-            double[][][] VDIR = waveForecast.getVDIR();
-
-            //############################ WAM convention used in VISIR!! ###################
-            // if optim.waveModel<optim.relocAnlsCode
-            //     % converting WW3 wave directions to WAM directions convention:
-            //     if numel(regexp(hostflag, 'okeanos'))==0
-            //         VDIR= VDIR + 180* sign(180- VDIR);
-            //         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
-            //     end
-            // elseif optim.waveModel>=optim.relocAnlsCode
-            //     VY=  cos(const.deg2rad*VDIR);
-            //     VX=  sin(const.deg2rad*VDIR);
-            //     VDIR= atan2(VY, VX)/const.deg2rad;
-            // end
+                //############################ WAM convention used in VISIR!! ###################
+                // if optim.waveModel<optim.relocAnlsCode
+                //     % converting WW3 wave directions to WAM directions convention:
+                //     if numel(regexp(hostflag, 'okeanos'))==0
+                //         VDIR= VDIR + 180* sign(180- VDIR);
+                //         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
+                //     end
+                // elseif optim.waveModel>=optim.relocAnlsCode
+                //     VY=  cos(const.deg2rad*VDIR);
+                //     VX=  sin(const.deg2rad*VDIR);
+                //     VDIR= atan2(VY, VX)/const.deg2rad;
+                // end
 
 
-            if(this.optim.getWaveModel() < this.optim.getRelocAnlsCode()){
-                for(int i=0;i<VDIR.length; ++i){
-                    for(int j=0;j<VDIR[0].length;++j){
-                        for(int k=0;k<VDIR[0][0].length; ++k){
-                            VDIR[i][j][k] = VDIR[i][j][k] + (180*Math.signum((180.0-VDIR[i][j][k])));
-                            if(VDIR[i][j][k]==180.0)
-                                VDIR[i][j][k] = 0.0;
+                if(this.optim.getWaveModel() < this.optim.getRelocAnlsCode()){
+                    for(int i=0;i<VDIR.length; ++i){
+                        for(int j=0;j<VDIR[0].length;++j){
+                            for(int k=0;k<VDIR[0][0].length; ++k){
+                                VDIR[i][j][k] = VDIR[i][j][k] + (180*Math.signum((180.0-VDIR[i][j][k])));
+                                if(VDIR[i][j][k]==180.0)
+                                    VDIR[i][j][k] = 0.0;
+                            }
+                        }
+                    }
+                } else {
+                    for(int i=0;i<VDIR.length; ++i){
+                        for(int j=0;j<VDIR[0].length; ++j){
+                            for(int k=0;k<VDIR[0][0].length; ++k){
+                                double VY = Math.cos(this.constants.getDeg2rad()*VDIR[i][j][k]);
+                                double VX = Math.sin(this.constants.getDeg2rad()*VDIR[i][j][k]);
+                                VDIR[i][j][k] = Math.atan2(VY, VX)/this.constants.getDeg2rad();
+                            }
                         }
                     }
                 }
-            } else {
-                for(int i=0;i<VDIR.length; ++i){
-                    for(int j=0;j<VDIR[0].length; ++j){
-                        for(int k=0;k<VDIR[0][0].length; ++k){
-                            double VY = Math.cos(this.constants.getDeg2rad()*VDIR[i][j][k]);
-                            double VX = Math.sin(this.constants.getDeg2rad()*VDIR[i][j][k]);
-                            VDIR[i][j][k] = Math.atan2(VY, VX)/this.constants.getDeg2rad();
-                        }
-                    }
-                }
+
+                //######################################################################
+
+                // %     GM's note 23/5/2016
+                // %     WAM (WW3 pre13Jun2016) convention is the oceanographic (meteorological) convention
+                // %
+                // %     starting since 13/6/2016, INGV will provide VDIR with oceanographic convention
+                // %     Thus, the conversion:
+                // %          VDIR= VDIR + 180* sign(180- VDIR);
+                // %         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
+                // %     will have to be dismissed.
+
+                return new readout_mWaveResults(waveForecast.getLatitude(), waveForecast.getLongitude(), true, this.paths.getForecastFile(),
+                        waveForecast.getVTDH(), waveForecast.getVTPK(), VDIR);
+            } catch (Exception ex){
+                return null;
             }
+        } else {//NETCDF
+            String wave_filename = this.paths.getForecastFile();
+            MyNetCDFParser parser = new MyNetCDFParser(wave_filename);
+            boolean wave_status = parser.isFileExists();
 
-            //######################################################################
+            if(wave_status){
+                waveForecastResults waveForecast = parser.parseWaveForecastData(this.paths.getOutDir());
 
-            // %     GM's note 23/5/2016
-            // %     WAM (WW3 pre13Jun2016) convention is the oceanographic (meteorological) convention
-            // %
-            // %     starting since 13/6/2016, INGV will provide VDIR with oceanographic convention
-            // %     Thus, the conversion:
-            // %          VDIR= VDIR + 180* sign(180- VDIR);
-            // %         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
-            // %     will have to be dismissed.
+                double[][][] VDIR = waveForecast.getVDIR();
 
-            return new readout_mWaveResults(waveForecast.getLatitude(), waveForecast.getLongitude(), wave_status, wave_filename,
-                    waveForecast.getVTDH(), waveForecast.getVTPK(), VDIR);
-        } else{
+                //############################ WAM convention used in VISIR!! ###################
+                // if optim.waveModel<optim.relocAnlsCode
+                //     % converting WW3 wave directions to WAM directions convention:
+                //     if numel(regexp(hostflag, 'okeanos'))==0
+                //         VDIR= VDIR + 180* sign(180- VDIR);
+                //         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
+                //     end
+                // elseif optim.waveModel>=optim.relocAnlsCode
+                //     VY=  cos(const.deg2rad*VDIR);
+                //     VX=  sin(const.deg2rad*VDIR);
+                //     VDIR= atan2(VY, VX)/const.deg2rad;
+                // end
+
+
+                if(this.optim.getWaveModel() < this.optim.getRelocAnlsCode()){
+                    for(int i=0;i<VDIR.length; ++i){
+                        for(int j=0;j<VDIR[0].length;++j){
+                            for(int k=0;k<VDIR[0][0].length; ++k){
+                                VDIR[i][j][k] = VDIR[i][j][k] + (180*Math.signum((180.0-VDIR[i][j][k])));
+                                if(VDIR[i][j][k]==180.0)
+                                    VDIR[i][j][k] = 0.0;
+                            }
+                        }
+                    }
+                } else {
+                    for(int i=0;i<VDIR.length; ++i){
+                        for(int j=0;j<VDIR[0].length; ++j){
+                            for(int k=0;k<VDIR[0][0].length; ++k){
+                                double VY = Math.cos(this.constants.getDeg2rad()*VDIR[i][j][k]);
+                                double VX = Math.sin(this.constants.getDeg2rad()*VDIR[i][j][k]);
+                                VDIR[i][j][k] = Math.atan2(VY, VX)/this.constants.getDeg2rad();
+                            }
+                        }
+                    }
+                }
+
+                //######################################################################
+
+                // %     GM's note 23/5/2016
+                // %     WAM (WW3 pre13Jun2016) convention is the oceanographic (meteorological) convention
+                // %
+                // %     starting since 13/6/2016, INGV will provide VDIR with oceanographic convention
+                // %     Thus, the conversion:
+                // %          VDIR= VDIR + 180* sign(180- VDIR);
+                // %         VDIR(VDIR==180) = 0;   % this accounts for the fact that, in Matlab, sign(0)=0
+                // %     will have to be dismissed.
+
+                return new readout_mWaveResults(waveForecast.getLatitude(), waveForecast.getLongitude(), wave_status, wave_filename,
+                        waveForecast.getVTDH(), waveForecast.getVTPK(), VDIR);
+            } else{
 //            lat = new double[0];
 //            lon = new double[0];
 //            VTDH = new double[0][0][0];
 //            VTPK = new double[0][0][0];
 //            VDIR = new double[0][0][0];
-            return new readout_mWaveResults(new double[0], new double[0], wave_status,
-                    wave_filename, new double[0][0][0], new double[0][0][0], new double[0][0][0]);
+                return new readout_mWaveResults(new double[0], new double[0], wave_status,
+                        wave_filename, new double[0][0][0], new double[0][0][0], new double[0][0][0]);
+            }
         }
-       // return new readout_mWaveResults(lat, lon, wave_status, wave_filename, VTDH, VTPK, VDIR);
+
     }
 
 
