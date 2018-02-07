@@ -3,7 +3,6 @@ package it.uniparthenope.Boxing;
 import java.util.LinkedList;
 
 public class RouteInfo {
-//    private Dijkstra2DResults route;
     private int type;
     private double computationTime;//in seconds;
     private double[] partialTimes;
@@ -44,9 +43,6 @@ public class RouteInfo {
         theta_VMC = routeInfo.getTheta_VMC();
     }
 
-//    public Dijkstra2DResults getRoute() {
-//        return route;
-//    }
 
     public double getComputationTime() {
         return computationTime;

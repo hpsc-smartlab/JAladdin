@@ -38,7 +38,7 @@ public class Algorithms {
         return new Dijkstra2DResults(distance.get((int) FID), getPath((int) FID, predecessors));
     }
 
-    public static LinkedList<Integer> getPath(int target, Map<Integer, Integer> predecessors){
+    private static LinkedList<Integer> getPath(int target, Map<Integer, Integer> predecessors){
         LinkedList<Integer> path = new LinkedList<>();
         int step = target;
         if(predecessors.get(step) == null)
@@ -214,14 +214,6 @@ public class Algorithms {
         else
             return edge_cost[destination][(int) itime];
     }
-
-//    private static LinkedList<Double> getPartialCosts(LinkedList<Integer> paths, Map<Integer, Double> distance){
-//        LinkedList<Double> tdep_partial_costs = new LinkedList<>();
-//        for(Integer node : paths){
-//            tdep_partial_costs.add(distance.get(node));
-//        }
-//        return tdep_partial_costs;
-//    }
 
     private static double[] getPartialCosts(LinkedList<Integer> paths, Map<Integer, Double> distance){
         double[] tdep_partial_costs = new double[paths.size()];
