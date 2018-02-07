@@ -5,18 +5,17 @@ import java.util.*;
 import it.uniparthenope.Boxing.*;
 import it.uniparthenope.Debug.MyFileWriter;
 import it.uniparthenope.Parser.*;
+import it.uniparthenope.ShipModel.Motorboat;
 
 public class JVisirModel {
     //input data
     private long bar_flag;
     private long timedep_flag;
-    private int mode;
     private InputPaths paths;
-
     private Fstats fstats;
     private Const constants;
     private Optim optim;
-    private Ship ship;
+    private Motorboat boat;
     private Visualization visualization;
     private SpatialGrid sGrid;
     private TemporalGrid tGrid;
@@ -45,11 +44,10 @@ public class JVisirModel {
         } else {
             this.timedep_flag = timedep_flag;
         }
-        this.mode=0;
         this.fstats = new Fstats();
         this.constants = new Const();
         this.optim = new Optim();
-        this.ship = new Ship();
+        this.boat = new Motorboat();
         this.sGrid = new SpatialGrid();
         this.tGrid = new TemporalGrid();
         this.visualization = new Visualization();
@@ -68,75 +66,19 @@ public class JVisirModel {
         this.seconds = Utility.nanosecToSec(Utility.Toc(tic));
     }
 
-    public JVisirModel(long bar_flag, long timedep_flag, int mode){//Initialize with standard values defined in settings.m
-        this.logFile = new MyFileWriter("","",false, this.paths.getOutDir());
-        this.logFile.WriteLine("");
-        this.logFile.WriteLog("System initialization...");
-        this.logFile.CloseFile();
-        long tic = Utility.Tic();
-
-        //bar_flag = 1: fresh compution of edges not crossing coastline (mode 1 of GMD-D paper)
-        //bar_flag = 2: edges not crossing coastline read out from DB   (mode 2 of GMD-D paper)
-        if((bar_flag!=1) && (bar_flag!=2)) { //If the input incorrect, set bar_flag = 2 as default value.
-            this.bar_flag = 2;
-        } else {
-            this.bar_flag = bar_flag;
-        }
-        // timedep_flag=0: static algorithm with fields at time step #1
-        // timedep_flag=2: time-dependent method
-        if((timedep_flag!=0) && (timedep_flag!=2)) { //Same thing for timedep_flag.
-            this.timedep_flag = 2;
-        } else {
-            this.timedep_flag = timedep_flag;
-        }
-
-        //mode=0: normal execution without serialize objects
-        //mode=1: normal execution serializing objects
-        //mode=2: debugging mode: load data deserializing objects
-        this.mode = mode;
-        if(this.mode==0 || this.mode==1){
-            if(this.mode==1){
-                this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
-                this.logFile.WriteLog("\t[mode flag=1]: normal execution with serialization...");
-                this.logFile.CloseFile();
-            }
-            this.fstats = new Fstats();
-            this.constants = new Const();
-            this.optim = new Optim();
-            this.ship = new Ship();
-            this.sGrid = new SpatialGrid();
-            this.tGrid = new TemporalGrid();
-            this.visualization = new Visualization();
-        } else if(this.mode==2){
-            this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
-            this.logFile.WriteLog("\t[DEBUG MODE] loading serialized objects...");
-            this.logFile.CloseFile();
-            LoadState();
-        } else {
-            this.mode=0;
-            this.fstats = new Fstats();
-            this.constants = new Const();
-            this.optim = new Optim();
-            this.ship = new Ship();
-            this.sGrid = new SpatialGrid();
-            this.tGrid = new TemporalGrid();
-            this.visualization = new Visualization();
-        }
-        this.seconds = Utility.nanosecToSec(Utility.Toc(tic));
-    }
 
     public void Start(){
         long tic = Utility.Tic();
         LoadData();
         CalculateParameters();
-        vessel_ResponseResults vesselResponse;
+        //vessel_ResponseResults vesselResponse;
         Grid_definitionResults gridDefinitionResults;
         Fields_regriddingResults fieldsRegriddingResults;
         Edges_definitionResults edgesDefinitionResults;
         this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
         double stopTime;
         tic = Utility.Tic();
-        vesselResponse = vessel_Response();
+        this.boat.vesselResponse(constants, this.paths.getOutDir());
         this.seconds += Utility.nanosecToSec(Utility.Toc(tic));
         tic = Utility.Tic();
         gridDefinitionResults = Grid_definition();
@@ -147,7 +89,7 @@ public class JVisirModel {
         this.logFile.CloseFile();
         tic = Utility.Tic();
         fieldsRegriddingResults = Fields_regridding(gridDefinitionResults.getLat_bathy_Inset(), gridDefinitionResults.getLon_bathy_Inset(), gridDefinitionResults.getBathy_Inset(),
-                gridDefinitionResults.getLsm_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m(), gridDefinitionResults.getEstGdtDist());
+                gridDefinitionResults.getLsm_mask(), this.boat.getShip_v_LUT(), this.boat.getH_array_m(), gridDefinitionResults.getEstGdtDist());
         stopTime = Utility.nanosecToSec(Utility.Toc(tic));
         seconds += stopTime;
         this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
@@ -156,7 +98,7 @@ public class JVisirModel {
         tic = Utility.Tic();
         edgesDefinitionResults = Edges_definition(gridDefinitionResults.getXy(), gridDefinitionResults.getXg_array(), gridDefinitionResults.getYg_array(), fieldsRegriddingResults.getVTDH_Inset(),
                 fieldsRegriddingResults.getVTPK_Inset(), fieldsRegriddingResults.getVDIR_Inset(), fieldsRegriddingResults.getWindMAGN_Inset(), fieldsRegriddingResults.getWindDIR_Inset(),
-                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+                gridDefinitionResults.getBathy_Inset(), gridDefinitionResults.getJ_mask(), this.boat.getShip_v_LUT(), this.boat.getH_array_m());
         stopTime = Utility.nanosecToSec(Utility.Toc(tic));
         seconds += stopTime;
         this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
@@ -164,7 +106,7 @@ public class JVisirModel {
         this.logFile.CloseFile();
 
         RouteInfo gdtRoute = Gdt_route(gridDefinitionResults.getXy(), edgesDefinitionResults.getFree_edges(),edgesDefinitionResults.getEdge_lenght(),edgesDefinitionResults.getI_bool(),edgesDefinitionResults.getI_ord(),edgesDefinitionResults.getI_point(),
-                this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), vesselResponse.getShip_v_LUT(), vesselResponse.getH_array_m());
+                this.sGrid.getNode_start(), this.sGrid.getNode_end(), edgesDefinitionResults.getNogo_edges(), edgesDefinitionResults.getWaveHeight_edges(), this.boat.getShip_v_LUT(), this.boat.getH_array_m());
 
         RouteInfo requestedRoute;
         if(this.timedep_flag==0){
@@ -178,9 +120,6 @@ public class JVisirModel {
         }
 
         seconds = seconds + gdtRoute.getComputationTime() + requestedRoute.getComputationTime();
-        if(this.mode==1){//Serialize data
-            this.SaveState(vesselResponse, gridDefinitionResults, fieldsRegriddingResults, edgesDefinitionResults);
-        }
         this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Route informations:");
         this.logFile.CloseFile();
@@ -351,7 +290,8 @@ public class JVisirModel {
             if(this.forcing.getAnalytic() == 1)
                 sh_vel = waveHeight_edges[edge_no][0];
             else{
-                if(this.ship.getVessType() != this.ship.getSailType()){ //motorboat
+                //if(this.ship.getVessType() != this.ship.getSailType()){ //motorboat
+                if(this.boat.getVessType() != this.boat.getSailType()){ //motorboat
                     sh_vel = Utility.interp1(H_array_m, ship_v_LUT ,0, waveHeight_edges[edge_no][itime],"extrap", this.paths.getOutDir());
                 } else{ //sailboat
                     sh_vel = const_vel;
@@ -417,52 +357,7 @@ public class JVisirModel {
         return coords;
     }
 
-    private void SaveState(vessel_ResponseResults vesselResponse, Grid_definitionResults gridDefinitionResults, Fields_regriddingResults fieldsRegriddingResults, Edges_definitionResults edgesDefinitionResults){
-        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
-        this.logFile.WriteLog("Saving state...");
-        this.logFile.CloseFile();
-        try{
-            this.fstats.saveState();
-            this.optim.saveState();
-            this.ship.saveState();
-            this.visualization.saveState();
-            this.sGrid.saveState();
-            this.tGrid.saveState();
-            this.extreme_pts.saveState();
-            this.dep_datetime.saveState();
-            this.safety.saveState();
-            this.forcing.saveState();
-            vesselResponse.saveState();
-            gridDefinitionResults.saveState();
-            fieldsRegriddingResults.saveState();
-            edgesDefinitionResults.saveState();
-        } catch (Exception e){
-            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
-            debug.WriteLog("SaveState: "+e.getMessage());
-            debug.CloseFile();
-            e.printStackTrace();
-        }
-    }
 
-    private void LoadState(){
-        try{
-            this.fstats = new Fstats(true);
-            this.optim = new Optim(true);
-            this.ship = new Ship(true);
-            this.visualization = new Visualization(true);
-            this.constants = new Const();
-            this.sGrid = new SpatialGrid(true);
-            this.tGrid = new TemporalGrid(true);
-            this.extreme_pts = new ExtremePoints(true);
-            this.dep_datetime = new DepartureParameters(true);
-
-        } catch (Exception e){
-            MyFileWriter debug = new MyFileWriter("","debug",false, this.paths.getOutDir());
-            debug.WriteLog("LoadState: "+e.getMessage());
-            debug.CloseFile();
-            e.printStackTrace();
-        }
-    }
 
 
 
@@ -470,24 +365,18 @@ public class JVisirModel {
         this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
         this.logFile.WriteLog("Processing namelists...");
         this.logFile.CloseFile();
-//        this.extreme_pts = new ExtremePoints();
-//        this.dep_datetime = new DepartureParameters();
-//        this.ship.LoadVesselParameters();
-//        this.safety = new SafetyParameters();
-//        this.optim.OptimizationParameters();
-//        this.visualization.VisualizationParameters();
         this.extreme_pts = new ExtremePoints(this.paths.getExtr_parameters(), this.paths.getOutDir());
         this.dep_datetime = new DepartureParameters(this.paths.getDep_parameters());
-        this.ship.LoadVesselParameters(this.paths.getShip_parameters(), this.paths.getOutDir());
+        this.boat.LoadVesselParameters(this.paths.getShip_parameters(), this.paths.getOutDir());
         this.safety = new SafetyParameters(this.paths.getSafety_parameters());
         this.optim.OptimizationParameters(this.paths.getOptim_parameters());
         this.visualization.VisualizationParameters(this.paths.getVisualization_parameters());
     }
 
     private void CalculateParameters(){//namelist_postproc.m
-        this.ship.setStepsInPowerReduction(this.optim.getIntentional_speed_red());
+        this.boat.setStepsInPowerReduction(this.optim.getIntentional_speed_red());
         this.sGrid.setInvStepFields(this.optim.getWaveModel());
-        this.forcing = new EnvironmentalFields(this.ship.getVessType(), this.ship.getSailType(),this.optim.getWindModel());
+        this.forcing = new EnvironmentalFields(this.boat.getVessType(), this.boat.getSailType(),this.optim.getWindModel());
         this.safety.setCriteria();
         this.visualization.setData();
         if(this.forcing.getAnalytic() == 1){
@@ -507,7 +396,7 @@ public class JVisirModel {
             this.visualization.setScientific_mode(1);
             this.visualization.setH_s(1);
             this.visualization.setCustomMax(Double.NaN);
-            this.ship.setVessType(1);
+            this.boat.setVessType(1);
             this.timedep_flag = 0;
         }
 
@@ -516,7 +405,7 @@ public class JVisirModel {
 
     private ship_ModelResults ship_Model(){//called from vessel_Response.m, ship_model.m implementation
         //Look-up table for involuntary ship speed reduction in waves.
-        this.ship.setFn_max(this.constants.getMs2kts(), this.constants.getG0());
+        this.boat.setFn_max(this.constants.getMs2kts(), this.constants.getG0());
         //LUT independent variables:
         long Nh = 25; //40
         long Nl = 40; //30
@@ -530,12 +419,12 @@ public class JVisirModel {
         H_array_m.add(0, 0.0);//adding 0 at first element of H_array_m
 
         //preallocations:
-        double[][] vel_LUT = new double[(int)Nh][this.ship.getP_level_hp().size()];
+        double[][] vel_LUT = new double[(int)Nh][this.boat.getP_level_hp().size()];
         //double[][] Rc_LUT =  new double[(int)Nh][this.ship.getP_level_hp().size()];
         //double[][] Raw_LUT =  new double[(int)Nh][this.ship.getP_level_hp().size()];
         //ArrayList<Double> P_level_thro = new ArrayList<Double>();
-        double max = Collections.max(this.ship.getP_level_hp());
-//        for(double element : this.ship.getP_level_hp()){
+        double max = Collections.max(this.boat.getP_level_hp());
+//        for(double element : this.boat.getP_level_hp()){
 //            P_level_thro.add((100*element) / max);
 //        }
 
@@ -547,14 +436,14 @@ public class JVisirModel {
 //        double v0_ref = 18.0; //kts
         //LUT computation
         for(int ih = 0; ih<Nh; ++ih){
-            this.ship.ship_resistance(H_array_m.get(ih), this.constants);
-            for(int j = 0; j<this.ship.getP_level_hp().size(); ++j){
-                vel_LUT[ih][j] = this.ship.getV_out_kts().get(j);
+            this.boat.shipResistance(H_array_m.get(ih), this.constants);
+            for(int j = 0; j<this.boat.getP_level_hp().size(); ++j){
+                vel_LUT[ih][j] = this.boat.getV_out_kts().get(j);
                 //Rc_LUT[ih][j] = this.ship.getR_c().get(j);
                 //Raw_LUT[ih][j] = this.ship.getR_aw().get(j);
             }
         }
-        this.ship.ship_resistance(0.0,this.constants);
+        this.boat.shipResistance(0.0,this.constants);
         //ArrayList<Double> v0 = this.ship.getV_out_kts();
         //ArrayList<Double> Rc0 = this.ship.getR_c();
         //ArrayList<Double> Raw0 = this.ship.getR_aw();
@@ -564,21 +453,6 @@ public class JVisirModel {
 
 
 
-    private vessel_ResponseResults vessel_Response(){//vessel_Response.m implementation
-        this.logFile = new MyFileWriter("","",true, this.paths.getOutDir());
-        if(this.forcing.getAnalytic()==1){
-            this.logFile.WriteLog("Analitical benchmark...");
-        } else{
-            this.logFile.WriteLog("Ship model response (motorboat)...");
-
-        }
-        this.logFile.CloseFile();
-        this.ship.shipPowerLevels();
-        ship_ModelResults tmp = this.ship_Model();
-        this.ship.setMaxWind(Double.NaN);
-        this.ship.setMinWind(Double.NaN);
-        return new vessel_ResponseResults(tmp.getShip_v_LUT(), tmp.getH_array_m(), new ArrayList<Double>(), new ArrayList<Double>());
-    }
 
     private boolean pointInPolygon(double x, double y, Polygon polygon){
         boolean isInside = false;
@@ -755,7 +629,7 @@ public class JVisirModel {
         double[][] UKC_mask = Utility.NaNmatrix(bathy_Inset.length, bathy_Inset[0].length);
         for(int i=0;i<UKC_mask.length;i++){
             for(int j=0;j<UKC_mask[0].length;j++){
-                if(bathy_Inset[i][j]>this.ship.getDraught()){
+                if(bathy_Inset[i][j]>this.boat.getDraught()){
                     UKC_mask[i][j] = 1.0;
                 }
             }
@@ -2406,7 +2280,7 @@ public class JVisirModel {
         double fract = 0.2; //RAM saving setting
         double v_kts_min = Double.NaN;
         double v_kts_max = Double.NaN;
-        if(this.ship.getVessType() != this.ship.getSailType()){
+        if(this.boat.getVessType() != this.boat.getSailType()){
             double[] ship_v_LUT_1stCol = new double[ship_v_LUT.length];
             for(int i=0;i<ship_v_LUT.length;++i){
                 ship_v_LUT_1stCol[i] = ship_v_LUT[i][0];
@@ -3207,7 +3081,7 @@ public class JVisirModel {
         this.logFile.WriteLog("\tcomputing edge delays...");
         this.logFile.CloseFile();
         //edge delays
-        if(this.ship.getVessType() != this.ship.getSailType()){//motorboats
+        if(this.boat.getVessType() != this.boat.getSailType()){//motorboats
             edge_delaysResults edge_delays = edge_delays(free_edges_Number, edgeResults.getTheta_grid(), edgeResults.getEdge_lenght(),
                     fields_node2edgeRes.getWaveHeight_edges(), fields_node2edgeRes.getWavePeriod_edges(), waveDir_edges,
                     fields_node2edgeRes.getWindMAGN_edges(), windDir_edges, nogo_edges, fields_node2edgeRes.getBathy_edges(),
@@ -3258,7 +3132,7 @@ public class JVisirModel {
 
         int[][][] safe_indexes;
         if((int) this.visualization.getSafegram() == 1){
-            safe_indexes = new int[(int) this.tGrid.getNt()][(int) this.ship.getNvel()][free_edges_Number];
+            safe_indexes = new int[(int) this.tGrid.getNt()][(int) this.boat.getNvel()][free_edges_Number];
             Arrays.fill(safe_indexes,Double.NaN);
             //safe_indexes = Utility.NaN((int) this.ship.getNvel(), free_edges_Number, (int) this.tGrid.getNt());
         } else {
@@ -3274,8 +3148,8 @@ public class JVisirModel {
         double steep_max1 = 1.0/5.0;
         double steep_min2 = 1.0/25.0;
         double steep_min3 = 1.0/20.0;
-        this.ship.setMin_lambda_L(0.8);
-        this.ship.setMax_lambda_L(2.0);
+        this.boat.setMin_lambda_L(0.8);
+        this.boat.setMax_lambda_L(2.0);
         double min_vTw = 1.3;
         double max_vTw = 2.0;
         //rolling resonance linewidth parameters after:
@@ -3292,9 +3166,9 @@ public class JVisirModel {
         double fncrit1=0.2324;
         double fncrit2=0.07364;
         //-------------------------------------------------------------------------
-        double[][][] sh_delay_gear = new double[(int) this.tGrid.getNt()][(int) this.ship.getNvel()][edge_length.length];
+        double[][][] sh_delay_gear = new double[(int) this.tGrid.getNt()][(int) this.boat.getNvel()][edge_length.length];
         boolean motorboat = false;
-        if(this.ship.getVessType() < this.ship.getSailType()){ //motorboats
+        if(this.boat.getVessType() < this.boat.getSailType()){ //motorboats
             motorboat=true;
 //            if forcing.analytic
 //                    sh_vel = waveHeight_edges(:,1);
@@ -3323,10 +3197,10 @@ public class JVisirModel {
                 boolean[] lambda_bol = new boolean[waveLenght_edges.length];
                 boolean[] lambda_bol2 = new boolean[waveLenght_edges.length];
                 for(int i=0;i<lambda_bol.length; ++i){
-                    double lambda_L = waveLenght_edges[i]/this.ship.getLength();
-                    if(this.ship.getMin_lambda_L() <= lambda_L){
+                    double lambda_L = waveLenght_edges[i]/this.boat.getLength();
+                    if(this.boat.getMin_lambda_L() <= lambda_L){
                         lambda_bol2[i] = true;
-                        if(lambda_L <= this.ship.getMax_lambda_L())
+                        if(lambda_L <= this.boat.getMax_lambda_L())
                             lambda_bol[i] = true;
                         else
                             lambda_bol[i] = false;
@@ -3340,7 +3214,7 @@ public class JVisirModel {
                 boolean[] HL_bol3 = new boolean[waveHeight_edges.length];
                 double[] steepness = new double[waveLenght_edges.length];
                 for(int i=0;i<waveHeight_edges.length; ++i){
-                    double tmp = waveHeight_edges[i][it]/this.ship.getLength();
+                    double tmp = waveHeight_edges[i][it]/this.boat.getLength();
                     if(tmp >= steep_min2)
                         HL_bol2[i]=true;
                     else
@@ -3356,7 +3230,7 @@ public class JVisirModel {
                 double[] Fr_crit = Utility.interp1(do_fr_crit_lutRes.getSteep_var(), do_fr_crit_lutRes.getFr_LUT(), steepness, Double.POSITIVE_INFINITY, this.paths.getOutDir());
                 //-------------------------------------------------------------------------------------------------
                 //ship speed and ship edge delays:
-                for( int jv = 0; jv<(int) this.ship.getNvel(); ++jv){
+                for( int jv = 0; jv<(int) this.boat.getNvel(); ++jv){
                     double[] sh_vel;
                     if(this.forcing.getAnalytic() != 1){//FALSO
                         sh_vel = Utility.interp1(H_array_m, ship_v_LUT, jv, waveHeight_edges, it, this.paths.getOutDir());
@@ -3380,12 +3254,12 @@ public class JVisirModel {
 
                     for(int i=0;i<parRoll_bol.length;++i){
 
-                        if(absT_E[i] * ONE_inf <= this.ship.getRoll_period() && this.ship.getRoll_period() <= absT_E[i] * ONE_sup)
+                        if(absT_E[i] * ONE_inf <= this.boat.getRoll_period() && this.boat.getRoll_period() <= absT_E[i] * ONE_sup)
                             parRoll_bol[i] = true;
                         else
                             parRoll_bol[i]= false;
 
-                        if(absT_E[i] * TWO_inf <= this.ship.getRoll_period() && this.ship.getRoll_period() <= absT_E[i]* TWO_sup)
+                        if(absT_E[i] * TWO_inf <= this.boat.getRoll_period() && this.boat.getRoll_period() <= absT_E[i]* TWO_sup)
                             syncRoll_bol[i] = true;
                         else
                             syncRoll_bol[i] = false;
@@ -3428,7 +3302,7 @@ public class JVisirModel {
                     boolean[] Fr_bol = new boolean[sh_vel.length];
                     boolean[] surfRid_bol = new boolean[sh_vel.length];
                     for(int i=0;i<Fr.length;++i){
-                        Fr[i] = sh_vel[i]/(this.constants.getMs2kts() * Math.sqrt(this.constants.getG0()*this.ship.getLength()));
+                        Fr[i] = sh_vel[i]/(this.constants.getMs2kts() * Math.sqrt(this.constants.getG0()*this.boat.getLength()));
                         if(Fr[i] >= Fr_crit[i] * IMO_secans[i])
                             Fr_bol[i] = true;
                         else
