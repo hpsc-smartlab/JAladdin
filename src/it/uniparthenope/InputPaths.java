@@ -14,6 +14,7 @@ public class InputPaths {
     private String analysisDB;
     private String forecastFile;
     private String freeEdgesDB;
+    private String virtualFenceDB;
 
     public InputPaths(){
         //default files
@@ -33,12 +34,13 @@ public class InputPaths {
         this.forecastFile = "inputFiles/wave/WW3/forecast/start__20131226.nc";
 //        this.forecastFile = "inputFiles/wave/WW3/forecast/d01_20180129.grb";
         this.freeEdgesDB = "inputFiles/graph/freeedges_DB.dat";
+        this.virtualFenceDB = "inputFiles/Fences/_virtualFences.geojson";
     }
 
     public InputPaths(String dep_parameters,String extr_parameters,String optim_parameters,
                       String safety_parameters, String ship_parameters, String visualization_parameters,
                       String outDir, String freeNodesDB, String coastlineDB, String bathymetryDB,
-                      String analysisDB, String forecastFile, String freeEdgesDB){
+                      String analysisDB, String forecastFile, String freeEdgesDB, String vFence){
         if(outDir==null)
             this.outDir = "Output/";//default output directory
         else
@@ -91,6 +93,10 @@ public class InputPaths {
             this.freeEdgesDB = "inputFiles/graph/freeedges_DB.dat";
         else
             this.freeEdgesDB = freeEdgesDB;
+        if(vFence == null)
+            this.virtualFenceDB = "inputFiles/Fences/_virtualFences.geojson";
+        else
+            this.virtualFenceDB = vFence;
 
     }
 
@@ -147,5 +153,9 @@ public class InputPaths {
 
     public String getFreeEdgesDB() {
         return freeEdgesDB;
+    }
+
+    public String getVirtualFenceDB() {
+        return virtualFenceDB;
     }
 }
