@@ -1,4 +1,4 @@
-JAladdin
+JAladdin: 
 A Java AppLlicAtion framework for Dock to Dock routINg
 
 NOTE:
