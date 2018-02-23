@@ -42,7 +42,7 @@ public class waveCustomNetCDFInputData implements waveInputData {
         int[] longitudeOrigin = new int[1];
         try{
             double[] parsedLongitude = new double[longitudeShape[0]];
-            ArrayFloat.D1 longitudeArray = (ArrayFloat.D1) longitude.read(longitudeOrigin, longitudeShape);
+            ArrayDouble.D1 longitudeArray = (ArrayDouble.D1) longitude.read(longitudeOrigin, longitudeShape);
             for(int i=0;i<longitudeShape[0];++i)
                 parsedLongitude[i] = longitudeArray.get(i);
             return parsedLongitude;
@@ -67,7 +67,7 @@ public class waveCustomNetCDFInputData implements waveInputData {
         int[] latitudeOrigin = new int[1];
         try {
             double[] parsedLatitude = new double[latitudeShape[0]];
-            ArrayFloat.D1 latitudeArray = (ArrayFloat.D1) latitude.read(latitudeOrigin, latitudeShape);
+            ArrayDouble.D1 latitudeArray = (ArrayDouble.D1) latitude.read(latitudeOrigin, latitudeShape);
             for(int i=0;i<latitudeShape[0];++i){
                 parsedLatitude[i] = latitudeArray.get(i);
             }

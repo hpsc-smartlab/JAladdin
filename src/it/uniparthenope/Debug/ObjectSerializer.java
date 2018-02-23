@@ -4,7 +4,7 @@ import java.io.*;
 
 public class ObjectSerializer {
 
-    public static void Serialize(String filename, Object obj) {
+    public static void Serialize(String filename, Object obj, String outPath) {
         String path = "DebugFiles/SerializedObjects/"+filename+".ser";
         ObjectOutputStream oos = null;
         FileOutputStream fout = null;
@@ -15,14 +15,14 @@ public class ObjectSerializer {
             fout.close();
             oos.close();
         } catch (Exception e){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outPath);
             debug.WriteLog("ObjectSerializer - Serialization: "+e.getMessage());
             debug.CloseFile();
             e.printStackTrace();
         }
     }
 
-    public static Object Deserialize(String filename){
+    public static Object Deserialize(String filename, String outpath){
         String path = "DebugFiles/SerializedObjects/"+filename+".ser";
         Object obj = null;
         try {
@@ -32,7 +32,7 @@ public class ObjectSerializer {
             fis.close();
             ois.close();
         } catch (Exception e){
-            MyFileWriter debug = new MyFileWriter("","debug",false);
+            MyFileWriter debug = new MyFileWriter("","debug",false, outpath);
             debug.WriteLog("ObjectSerializer - Deserialization: "+e.getMessage());
             debug.CloseFile();
             e.printStackTrace();

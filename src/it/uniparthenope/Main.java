@@ -6,7 +6,7 @@ package it.uniparthenope;
 public class Main {
 
     public static void main(String[] args) {
-        JVisirModel v = new JVisirModel(2,2, null);//Same input provided for testing .m files
+        JAladdinModel v = new JAladdinModel(2,2, null);//Same input provided for testing .m files
         v.Start();
     }
 }

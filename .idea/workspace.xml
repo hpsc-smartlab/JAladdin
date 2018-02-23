@@ -1,0 +1,1495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list id="04020bdc-da01-4b46-baea-0dab5499dabf" name="free edges DB" comment="">
+      <change beforePath="" afterPath="$PROJECT_DIR$/inputFiles/graph/freeedges_DB.dat" />
+    </list>
+    <list id="233f9199-9840-45a6-9378-ba28a6d78529" name="Revert &quot;WW3 wave forecast and analysis data&quot;-2" comment="Revert &quot;WW3 wave forecast and analysis data&quot;&#10;&#10;This reverts commit b9f357b" />
+    <list id="3089b038-66d1-4fd9-99d7-1a913a344f89" name="Revert &quot;Object serializer for debug purpose&quot;" comment="Revert &quot;Object serializer for debug purpose&quot;&#10;&#10;This reverts commit 20bcec5" />
+    <list id="147b0e6d-238c-49f6-ba5d-4bc4feac7377" name="Object serializer for debug purpose" comment="" />
+    <list default="true" id="2f7ad0bf-1818-4c98-a4c4-61eed39ee76d" name="Default" comment="Fixed">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
+      <change beforePath="$PROJECT_DIR$/DebugFiles/errors.log" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/JVisir.iml" afterPath="$PROJECT_DIR$/JAladdin.iml" />
+      <change beforePath="$PROJECT_DIR$/Output/exec.log" afterPath="$PROJECT_DIR$/Output/exec.log" />
+      <change beforePath="$PROJECT_DIR$/Output/geodeticRoute.geojson" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/Output/shipRoute.geojson" afterPath="$PROJECT_DIR$/Output/shipRoute.geojson" />
+      <change beforePath="$PROJECT_DIR$/Output/waypointInfo.geojson" afterPath="$PROJECT_DIR$/Output/waypointInfo.geojson" />
+      <change beforePath="$PROJECT_DIR$/inputFiles/Fences/virtualFences.geojson" afterPath="$PROJECT_DIR$/inputFiles/Fences/_virtualFences.geojson" />
+      <change beforePath="$PROJECT_DIR$/inputFiles/datetime_pars.json" afterPath="$PROJECT_DIR$/inputFiles/datetime_pars.json" />
+      <change beforePath="$PROJECT_DIR$/inputFiles/extrema_pars.json" afterPath="$PROJECT_DIR$/inputFiles/extrema_pars.json" />
+      <change beforePath="$PROJECT_DIR$/inputFiles/optim_pars.json" afterPath="$PROJECT_DIR$/inputFiles/optim_pars.json" />
+      <change beforePath="$PROJECT_DIR$/inputFiles/ship_pars.json" afterPath="$PROJECT_DIR$/inputFiles/ship_pars.json" />
+      <change beforePath="$PROJECT_DIR$/inputFiles/visualization_pars.json" afterPath="$PROJECT_DIR$/inputFiles/visualization_pars.json" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/Boxing/vessel_ResponseResults.java" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/Debug/MyFileWriter.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/Debug/MyFileWriter.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/Debug/ObjectSerializer.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/Debug/ObjectSerializer.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/AMPInputData.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/VirtualFencesInputData.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/GeoJSONAMPInputData.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/GeoJSONAMPInputData.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveCustomNetCDFInputData.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveCustomNetCDFInputData.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/InputPaths.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/InputPaths.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/JVisirModel.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/JAladdinModel.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/Main.java" afterPath="$PROJECT_DIR$/src/it/uniparthenope/Main.java" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/Ship.java" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/src/it/uniparthenope/VisirModel.java" afterPath="" />
+    </list>
+    <list id="9388ca74-cf90-490d-a1ae-8a8c8b851ebf" name="Revert &quot;WW3 wave forecast and analysis data&quot;" comment="Revert &quot;WW3 wave forecast and analysis data&quot;&#10;&#10;This reverts commit b9f357b" />
+    <ignored path="$PROJECT_DIR$/out/" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/JVisir$Main.coverage" NAME="Main Coverage Results" MODIFIED="1517834100076" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_TABLE_DETAILS" value="true" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <expand />
+    <select />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="JVisir" />
+    <favorites_list name="CodeIris Favorites" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Main.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="204">
+              <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="exec.log" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Output/exec.log">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="597">
+              <caret line="151" column="72" lean-forward="false" selection-start-line="151" selection-start-column="72" selection-end-line="151" selection-end-column="72" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>x_coast</find>
+      <find>nogo_edges</find>
+      <find>fields_regri</find>
+      <find>bathy_Inset</find>
+      <find>lsm</find>
+      <find>inpol</find>
+      <find>mFields</find>
+      <find>substring</find>
+      <find>dep_datetime</find>
+      <find>dep_datetime.set</find>
+      <find>dep_datetime.get</find>
+      <find>dynamic</find>
+      <find>getPath</find>
+      <find>virtual</find>
+      <find>vessel_Response</find>
+      <find>Ship()</find>
+      <find>vesse</find>
+      <find>logfile</find>
+      <find>this.ship</find>
+      <find>this.ship.</find>
+      <find>ship_v_LUT</find>
+      <find>vessel_response</find>
+      <find>setF</find>
+      <find>Newton</find>
+      <find>MyNetCDFParser</find>
+      <find>AAAAAAAAAAAAAA</find>
+      <find>virtualFences</find>
+      <find>time</find>
+      <find>ArrayDouble</find>
+      <find>AMP</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Arturo Iafrate &lt;arturo.iafrate@gmail.com&gt;" />
+      </list>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RESET_MODE" value="MIXED" />
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Parser/JSONManager.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Boxing/Edges_definitionResults.java" />
+        <option value="$PROJECT_DIR$/Output/geodeticRoute.geojson" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/MemorySaver.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Boxing/get_Info_at_NodeResults.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Boxing/getNeighborsResults.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Boxing/Dijkstra2DResults.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Boxing/DijkstraTimeResults.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Boxing/RouteInfo.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/DepartureParameters.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Optim.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/SafetyParameters.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Visualization.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Main.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Parser/MyJSONParser.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Debug/MyFileWriter.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Debug/ObjectSerializer.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/ExtremePoints.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Ship.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Parser/MyTxtParser.java" />
+        <option value="$PROJECT_DIR$/inputFiles/visualization_pars.json" />
+        <option value="$PROJECT_DIR$/inputFiles/ship_pars.json" />
+        <option value="$PROJECT_DIR$/inputFiles/optim_pars.json" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Utility.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Parser/MyNetCDFParser.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/inputdata/DataInputBase.java" />
+        <option value="$PROJECT_DIR$/inputFiles/Fences/virtualFences.geojson" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Polygon.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Parser/GeoJsonFormatter.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Algorithms.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/ShipModel/Ship.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/ShipModel/Motorboat.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/inputdata/CustomNCInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/inputdata/GribDataInput.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/inputdata/VisirIDataInput.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/inputdata/BathymetryInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/inputdata/InputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/NetCDFBathyInput.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/BathymetryInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/InputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveVISIRINetCDFInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveGRIBInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/Parser/MyGribParser.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/AMPInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/GeoJSONAMPInputData.java" />
+        <option value="$PROJECT_DIR$/inputFiles/datetime_pars.json" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveCustomNetCDFInputData.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/InputPaths.java" />
+        <option value="$PROJECT_DIR$/src/it/uniparthenope/JVisirModel.java" />
+        <option value="$PROJECT_DIR$/inputFiles/extrema_pars.json" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="MavenProjectNavigator">
+    <treeState>
+      <expand />
+      <select />
+    </treeState>
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="1366" />
+    <option name="width" value="1920" />
+    <option name="height" value="1080" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>Android</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="JAladdin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="JAladdin" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="JAladdin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="JAladdin" type="462c0819:PsiDirectoryNode" />
+              <item name="inputFiles" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="JAladdin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="JAladdin" type="462c0819:PsiDirectoryNode" />
+              <item name="libs" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="JAladdin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="JAladdin" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="JAladdin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="JAladdin" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="uniparthenope" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="AndroidView" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="project.structure.last.edited" value="Artifacts" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+    <property name="ToolWindowCode Iris.ShowToolbar" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/inputFiles/Fences" />
+      <recent name="$PROJECT_DIR$/inputFiles/wave/WW3/forecast" />
+      <recent name="$PROJECT_DIR$/libs" />
+      <recent name="$PROJECT_DIR$/inputFiles/graph" />
+      <recent name="$PROJECT_DIR$/inputFiles/wave/WW3/analysis" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration name="Main" type="Application" factoryName="Application" temporary="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" value="it.uniparthenope.Main" />
+      <option name="VM_PARAMETERS" value="-Xms4096m -Xmx8192m" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="JVisir" />
+      <envs />
+      <RunnerSettings RunnerId="Run" />
+      <ConfigurationWrapper RunnerId="Run" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType" factoryName="Kotlin">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="JVisir" />
+      <envs />
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <recent_temporary>
+      <list size="1">
+        <item index="0" class="java.lang.String" itemvalue="Application.Main" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="2f7ad0bf-1818-4c98-a4c4-61eed39ee76d" name="Default" comment="" />
+      <changelist id="147b0e6d-238c-49f6-ba5d-4bc4feac7377" name="Object serializer for debug purpose" comment="" />
+      <changelist id="04020bdc-da01-4b46-baea-0dab5499dabf" name="free edges DB" comment="" />
+      <created>1510746031332</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1510746031332</updated>
+      <workItem from="1510746036573" duration="11508000" />
+      <workItem from="1510818062650" duration="6617000" />
+      <workItem from="1510825341032" duration="5315000" />
+      <workItem from="1510830739659" duration="1588000" />
+      <workItem from="1510837282778" duration="461000" />
+      <workItem from="1510845168818" duration="7242000" />
+      <workItem from="1511166796566" duration="24000" />
+      <workItem from="1511166951697" duration="24354000" />
+      <workItem from="1511199718897" duration="1601000" />
+      <workItem from="1511252913605" duration="15334000" />
+      <workItem from="1511339914936" duration="3883000" />
+      <workItem from="1511345083368" duration="13560000" />
+      <workItem from="1511424811862" duration="442000" />
+      <workItem from="1511425278418" duration="198000" />
+      <workItem from="1511425747981" duration="6386000" />
+      <workItem from="1511432444203" duration="17088000" />
+      <workItem from="1511521718528" duration="249000" />
+      <workItem from="1511522112639" duration="1366000" />
+      <workItem from="1511630772810" duration="466000" />
+      <workItem from="1511771141921" duration="20864000" />
+      <workItem from="1511859722204" duration="23468000" />
+      <workItem from="1511945265546" duration="2298000" />
+      <workItem from="1511955144828" duration="777000" />
+      <workItem from="1511958552568" duration="25000" />
+      <workItem from="1511959471042" duration="12000" />
+      <workItem from="1511960201113" duration="24150000" />
+      <workItem from="1512033396698" duration="18210000" />
+      <workItem from="1512117086357" duration="9532000" />
+      <workItem from="1512130451424" duration="1513000" />
+      <workItem from="1512135112399" duration="7165000" />
+      <workItem from="1512142309687" duration="69000" />
+      <workItem from="1512154078905" duration="5730000" />
+      <workItem from="1512207626701" duration="452000" />
+      <workItem from="1512208161290" duration="76000" />
+      <workItem from="1512208266493" duration="9619000" />
+      <workItem from="1512229557162" duration="48000" />
+      <workItem from="1512229638935" duration="939000" />
+      <workItem from="1512230620925" duration="60000" />
+      <workItem from="1512232250987" duration="78000" />
+      <workItem from="1512258313894" duration="13000" />
+      <workItem from="1512260541480" duration="1088000" />
+      <workItem from="1512262552773" duration="5000" />
+      <workItem from="1512376364946" duration="4876000" />
+      <workItem from="1512399769325" duration="4086000" />
+      <workItem from="1512463397635" duration="39000" />
+      <workItem from="1512463846343" duration="16138000" />
+      <workItem from="1512547549937" duration="18809000" />
+      <workItem from="1512640724225" duration="9270000" />
+      <workItem from="1512981049815" duration="6192000" />
+      <workItem from="1512988325668" duration="3659000" />
+      <workItem from="1513002895734" duration="6725000" />
+      <workItem from="1513028467033" duration="163000" />
+      <workItem from="1513067425350" duration="8294000" />
+      <workItem from="1513085560261" duration="4811000" />
+      <workItem from="1513112410671" duration="196000" />
+      <workItem from="1513157870205" duration="5656000" />
+      <workItem from="1513176554069" duration="759000" />
+      <workItem from="1513240059865" duration="128000" />
+      <workItem from="1513252690651" duration="478000" />
+      <workItem from="1513325225903" duration="6469000" />
+      <workItem from="1513508728293" duration="641000" />
+      <workItem from="1513585071251" duration="17744000" />
+      <workItem from="1513671758235" duration="9684000" />
+      <workItem from="1513681605840" duration="7883000" />
+      <workItem from="1513708513683" duration="1278000" />
+      <workItem from="1513716438158" duration="894000" />
+      <workItem from="1513766536752" duration="3936000" />
+      <workItem from="1513843578798" duration="14878000" />
+      <workItem from="1513865971220" duration="8002000" />
+      <workItem from="1513930459015" duration="7401000" />
+      <workItem from="1513962776269" duration="20854000" />
+      <workItem from="1514023664538" duration="3704000" />
+      <workItem from="1514204462556" duration="1701000" />
+      <workItem from="1514448253658" duration="28000" />
+      <workItem from="1514448319209" duration="20005000" />
+      <workItem from="1514481241913" duration="155000" />
+      <workItem from="1514482195073" duration="68000" />
+      <workItem from="1514483671620" duration="2611000" />
+      <workItem from="1514490273230" duration="60000" />
+      <workItem from="1514494711914" duration="118000" />
+      <workItem from="1514494857601" duration="246000" />
+      <workItem from="1514535443774" duration="9772000" />
+      <workItem from="1514971352099" duration="11068000" />
+      <workItem from="1515056928650" duration="6507000" />
+      <workItem from="1515063652236" duration="222000" />
+      <workItem from="1515064051889" duration="1610000" />
+      <workItem from="1515066091720" duration="45000" />
+      <workItem from="1515139015726" duration="11052000" />
+      <workItem from="1515175775200" duration="24215000" />
+      <workItem from="1515398664357" duration="9323000" />
+      <workItem from="1515410230945" duration="237000" />
+      <workItem from="1515411273992" duration="10072000" />
+      <workItem from="1515445164638" duration="2484000" />
+      <workItem from="1515484582816" duration="31126000" />
+      <workItem from="1515517936676" duration="1619000" />
+      <workItem from="1515519949226" duration="58000" />
+      <workItem from="1515571775190" duration="5869000" />
+      <workItem from="1515583793367" duration="11639000" />
+      <workItem from="1515660176356" duration="3144000" />
+      <workItem from="1515664739710" duration="1045000" />
+      <workItem from="1515666354238" duration="10018000" />
+      <workItem from="1515683121798" duration="3613000" />
+      <workItem from="1515745171134" duration="599000" />
+      <workItem from="1515751619228" duration="617000" />
+      <workItem from="1516005149901" duration="4035000" />
+      <workItem from="1516012323347" duration="12630000" />
+      <workItem from="1516038940640" duration="10000" />
+      <workItem from="1516049686775" duration="123000" />
+      <workItem from="1516051084370" duration="53000" />
+      <workItem from="1516052646929" duration="854000" />
+      <workItem from="1516091173650" duration="5942000" />
+      <workItem from="1516114311121" duration="512000" />
+      <workItem from="1516115551784" duration="5612000" />
+      <workItem from="1516184075892" duration="15966000" />
+      <workItem from="1516264859945" duration="4377000" />
+      <workItem from="1516269480950" duration="970000" />
+      <workItem from="1516270492839" duration="9638000" />
+      <workItem from="1516283922606" duration="8092000" />
+      <workItem from="1516296770022" duration="1822000" />
+      <workItem from="1516298823408" duration="2515000" />
+      <workItem from="1516303718433" duration="850000" />
+      <workItem from="1516305609834" duration="681000" />
+      <workItem from="1516352617281" duration="3585000" />
+      <workItem from="1516357702747" duration="12872000" />
+      <workItem from="1516609464265" duration="25000" />
+      <workItem from="1516609529592" duration="30025000" />
+      <workItem from="1516647975937" duration="4682000" />
+      <workItem from="1516662241416" duration="262000" />
+      <workItem from="1516694510955" duration="26491000" />
+      <workItem from="1516731678334" duration="10050000" />
+      <workItem from="1516789428608" duration="16848000" />
+      <workItem from="1516818569743" duration="11257000" />
+      <workItem from="1516868228869" duration="1675000" />
+      <workItem from="1516870436595" duration="23497000" />
+      <workItem from="1516904676917" duration="12871000" />
+      <workItem from="1516954074375" duration="17217000" />
+      <workItem from="1516989076695" duration="366000" />
+      <workItem from="1516990987877" duration="7966000" />
+      <workItem from="1517000073466" duration="10108000" />
+      <workItem from="1517050049441" duration="3529000" />
+      <workItem from="1517132280825" duration="12554000" />
+      <workItem from="1517151167933" duration="31000" />
+      <workItem from="1517214552406" duration="8032000" />
+      <workItem from="1517300281502" duration="8954000" />
+      <workItem from="1517337879141" duration="5061000" />
+      <workItem from="1517386988909" duration="12000" />
+      <workItem from="1517405994504" duration="973000" />
+      <workItem from="1517420612029" duration="12719000" />
+      <workItem from="1517481891326" duration="210000" />
+      <workItem from="1517482165089" duration="3683000" />
+      <workItem from="1517510505856" duration="1944000" />
+      <workItem from="1517512554482" duration="1864000" />
+      <workItem from="1517519110676" duration="1245000" />
+      <workItem from="1517559427729" duration="16650000" />
+      <workItem from="1517581162819" duration="8066000" />
+      <workItem from="1517595629595" duration="3190000" />
+      <workItem from="1517599058229" duration="12274000" />
+      <workItem from="1517820782730" duration="121000" />
+      <workItem from="1517829984711" duration="5077000" />
+      <workItem from="1517836542066" duration="1530000" />
+      <workItem from="1517846977322" duration="2720000" />
+      <workItem from="1517948149268" duration="425000" />
+      <workItem from="1517948606198" duration="2066000" />
+      <workItem from="1517950716638" duration="562000" />
+      <workItem from="1517992169840" duration="3887000" />
+      <workItem from="1517997337522" duration="234000" />
+      <workItem from="1518022592680" duration="6092000" />
+      <workItem from="1518165025325" duration="16677000" />
+      <workItem from="1518213555722" duration="6167000" />
+      <workItem from="1519418438701" duration="83000" />
+      <workItem from="1519418527040" duration="986000" />
+      <workItem from="1519419589862" duration="138000" />
+    </task>
+    <task id="LOCAL-00210" summary="Now implements Cloneable method.">
+      <created>1516652574460</created>
+      <option name="number" value="00210" />
+      <option name="presentableId" value="LOCAL-00210" />
+      <option name="project" value="LOCAL" />
+      <updated>1516652574464</updated>
+    </task>
+    <task id="LOCAL-00211" summary="Edges_definition method now works properly.">
+      <created>1516652627123</created>
+      <option name="number" value="00211" />
+      <option name="presentableId" value="LOCAL-00211" />
+      <option name="project" value="LOCAL" />
+      <updated>1516652627123</updated>
+    </task>
+    <task id="LOCAL-00212" summary="Added -Xmx option to give 4096 MB to the JVM heap size">
+      <created>1516652677929</created>
+      <option name="number" value="00212" />
+      <option name="presentableId" value="LOCAL-00212" />
+      <option name="project" value="LOCAL" />
+      <updated>1516652677929</updated>
+    </task>
+    <task id="LOCAL-00213" summary="JSONManager initial release.">
+      <created>1516662408586</created>
+      <option name="number" value="00213" />
+      <option name="presentableId" value="LOCAL-00213" />
+      <option name="project" value="LOCAL" />
+      <updated>1516662408587</updated>
+    </task>
+    <task id="LOCAL-00214" summary="Now uses .clone method for DangerIndexes">
+      <created>1516662494441</created>
+      <option name="number" value="00214" />
+      <option name="presentableId" value="LOCAL-00214" />
+      <option name="project" value="LOCAL" />
+      <updated>1516662494441</updated>
+    </task>
+    <task id="LOCAL-00215" summary="JSON Parser">
+      <created>1516720326834</created>
+      <option name="number" value="00215" />
+      <option name="presentableId" value="LOCAL-00215" />
+      <option name="project" value="LOCAL" />
+      <updated>1516720326836</updated>
+    </task>
+    <task id="LOCAL-00216" summary="Now can load and save persistent data through JSON parsing.">
+      <created>1516720389856</created>
+      <option name="number" value="00216" />
+      <option name="presentableId" value="LOCAL-00216" />
+      <option name="project" value="LOCAL" />
+      <updated>1516720389856</updated>
+    </task>
+    <task id="LOCAL-00217" summary="Code optimizations.">
+      <created>1516725290761</created>
+      <option name="number" value="00217" />
+      <option name="presentableId" value="LOCAL-00217" />
+      <option name="project" value="LOCAL" />
+      <updated>1516725290762</updated>
+    </task>
+    <task id="LOCAL-00218" summary="Now can take times. See exec.log for example.">
+      <created>1516733675000</created>
+      <option name="number" value="00218" />
+      <option name="presentableId" value="LOCAL-00218" />
+      <option name="project" value="LOCAL" />
+      <updated>1516733675001</updated>
+    </task>
+    <task id="LOCAL-00219" summary="Fixed some stuff in serialization, now works properly.">
+      <created>1516742195164</created>
+      <option name="number" value="00219" />
+      <option name="presentableId" value="LOCAL-00219" />
+      <option name="project" value="LOCAL" />
+      <updated>1516742195165</updated>
+    </task>
+    <task id="LOCAL-00220" summary="Bug fixing.">
+      <created>1516792466396</created>
+      <option name="number" value="00220" />
+      <option name="presentableId" value="LOCAL-00220" />
+      <option name="project" value="LOCAL" />
+      <updated>1516792466400</updated>
+    </task>
+    <task id="LOCAL-00221" summary="Initial Dijkstra 2D implementation.">
+      <created>1516813929937</created>
+      <option name="number" value="00221" />
+      <option name="presentableId" value="LOCAL-00221" />
+      <option name="project" value="LOCAL" />
+      <updated>1516813929938</updated>
+    </task>
+    <task id="LOCAL-00222" summary="Fixed Dijkstra algorithm">
+      <created>1516915870964</created>
+      <option name="number" value="00222" />
+      <option name="presentableId" value="LOCAL-00222" />
+      <option name="project" value="LOCAL" />
+      <updated>1516915870965</updated>
+    </task>
+    <task id="LOCAL-00223" summary="Added GeoJSON Formatter; added an example of geodetic route computed with Djikstra.">
+      <created>1516915954994</created>
+      <option name="number" value="00223" />
+      <option name="presentableId" value="LOCAL-00223" />
+      <option name="project" value="LOCAL" />
+      <updated>1516915954995</updated>
+    </task>
+    <task id="LOCAL-00224" summary="Initial GeoJSON Maker.">
+      <created>1516916130215</created>
+      <option name="number" value="00224" />
+      <option name="presentableId" value="LOCAL-00224" />
+      <option name="project" value="LOCAL" />
+      <updated>1516916130215</updated>
+    </task>
+    <task id="LOCAL-00225" summary="Execution example">
+      <created>1516917582135</created>
+      <option name="number" value="00225" />
+      <option name="presentableId" value="LOCAL-00225" />
+      <option name="project" value="LOCAL" />
+      <updated>1516917582135</updated>
+    </task>
+    <task id="LOCAL-00226" summary="added color and stroke to the line, added start point end arrival point markers.">
+      <created>1516917643006</created>
+      <option name="number" value="00226" />
+      <option name="presentableId" value="LOCAL-00226" />
+      <option name="project" value="LOCAL" />
+      <updated>1516917643006</updated>
+    </task>
+    <task id="LOCAL-00227" summary="Code refactoring">
+      <created>1516958637369</created>
+      <option name="number" value="00227" />
+      <option name="presentableId" value="LOCAL-00227" />
+      <option name="project" value="LOCAL" />
+      <updated>1516958637374</updated>
+    </task>
+    <task id="LOCAL-00228" summary="Added static algorithm">
+      <created>1516966828844</created>
+      <option name="number" value="00228" />
+      <option name="presentableId" value="LOCAL-00228" />
+      <option name="project" value="LOCAL" />
+      <updated>1516966828844</updated>
+    </task>
+    <task id="LOCAL-00229" summary="Now geodetic and static path are writed on the same GeoJSON file.">
+      <created>1516983115214</created>
+      <option name="number" value="00229" />
+      <option name="presentableId" value="LOCAL-00229" />
+      <option name="project" value="LOCAL" />
+      <updated>1516983115215</updated>
+    </task>
+    <task id="LOCAL-00230" summary="Static algorithm execution example.">
+      <created>1516983149036</created>
+      <option name="number" value="00230" />
+      <option name="presentableId" value="LOCAL-00230" />
+      <option name="project" value="LOCAL" />
+      <updated>1516983149036</updated>
+    </task>
+    <task id="LOCAL-00231" summary="Added route informations">
+      <created>1517010669254</created>
+      <option name="number" value="00231" />
+      <option name="presentableId" value="LOCAL-00231" />
+      <option name="project" value="LOCAL" />
+      <updated>1517010669256</updated>
+    </task>
+    <task id="LOCAL-00232" summary="Informations about the route">
+      <created>1517010762971</created>
+      <option name="number" value="00232" />
+      <option name="presentableId" value="LOCAL-00232" />
+      <option name="project" value="LOCAL" />
+      <updated>1517010762972</updated>
+    </task>
+    <task id="LOCAL-00233" summary="Static algorithm route info; Fixed a little bug in Dijkstra algorithm.">
+      <created>1517053588688</created>
+      <option name="number" value="00233" />
+      <option name="presentableId" value="LOCAL-00233" />
+      <option name="project" value="LOCAL" />
+      <updated>1517053588691</updated>
+    </task>
+    <task id="LOCAL-00234" summary="Fixed a bug in Dijkstra implementation">
+      <created>1517146612729</created>
+      <option name="number" value="00234" />
+      <option name="presentableId" value="LOCAL-00234" />
+      <option name="project" value="LOCAL" />
+      <updated>1517146612732</updated>
+    </task>
+    <task id="LOCAL-00235" summary="Fixed get_Info_at_Node">
+      <created>1517222901916</created>
+      <option name="number" value="00235" />
+      <option name="presentableId" value="LOCAL-00235" />
+      <option name="project" value="LOCAL" />
+      <updated>1517222901917</updated>
+    </task>
+    <task id="LOCAL-00236" summary="Example of static execution">
+      <created>1517222943147</created>
+      <option name="number" value="00236" />
+      <option name="presentableId" value="LOCAL-00236" />
+      <option name="project" value="LOCAL" />
+      <updated>1517222943148</updated>
+    </task>
+    <task id="LOCAL-00237" summary="Added Dijkstra3D implementation. Milestone reached">
+      <created>1517308807300</created>
+      <option name="number" value="00237" />
+      <option name="presentableId" value="LOCAL-00237" />
+      <option name="project" value="LOCAL" />
+      <updated>1517308807301</updated>
+    </task>
+    <task id="LOCAL-00238" summary="Time dipendent algorithm execution example">
+      <created>1517309091846</created>
+      <option name="number" value="00238" />
+      <option name="presentableId" value="LOCAL-00238" />
+      <option name="project" value="LOCAL" />
+      <updated>1517309091846</updated>
+    </task>
+    <task id="LOCAL-00239" summary="Code refactoring. Now GeoJSON output file contains route info">
+      <created>1517341975920</created>
+      <option name="number" value="00239" />
+      <option name="presentableId" value="LOCAL-00239" />
+      <option name="project" value="LOCAL" />
+      <updated>1517341975922</updated>
+    </task>
+    <task id="LOCAL-00240" summary="Code refactoring; now input can be from string (InputPaths class)">
+      <created>1517428061945</created>
+      <option name="number" value="00240" />
+      <option name="presentableId" value="LOCAL-00240" />
+      <option name="project" value="LOCAL" />
+      <updated>1517428061947</updated>
+    </task>
+    <task id="LOCAL-00241" summary="Now more useful: can read more type of netcdf files.">
+      <created>1517434082489</created>
+      <option name="number" value="00241" />
+      <option name="presentableId" value="LOCAL-00241" />
+      <option name="project" value="LOCAL" />
+      <updated>1517434082489</updated>
+    </task>
+    <task id="LOCAL-00242" summary="Added info (time, speed, distance) for each waypoint of the route">
+      <created>1517485012432</created>
+      <option name="number" value="00242" />
+      <option name="presentableId" value="LOCAL-00242" />
+      <option name="project" value="LOCAL" />
+      <updated>1517485012433</updated>
+    </task>
+    <task id="LOCAL-00243" summary="Execution example">
+      <created>1517485243013</created>
+      <option name="number" value="00243" />
+      <option name="presentableId" value="LOCAL-00243" />
+      <option name="project" value="LOCAL" />
+      <updated>1517485243013</updated>
+    </task>
+    <task id="LOCAL-00244" summary="Files are updated for &quot;caseStudy1&quot;; test.tar.gz contains &quot;test&quot; input files">
+      <created>1517514432838</created>
+      <option name="number" value="00244" />
+      <option name="presentableId" value="LOCAL-00244" />
+      <option name="project" value="LOCAL" />
+      <updated>1517514432841</updated>
+    </task>
+    <task id="LOCAL-00245" summary="Fixed a (little) bug. Now don't need an_datesDB, latest analysis date it's derived from the .nc file.">
+      <created>1517514563612</created>
+      <option name="number" value="00245" />
+      <option name="presentableId" value="LOCAL-00245" />
+      <option name="project" value="LOCAL" />
+      <updated>1517514563612</updated>
+    </task>
+    <task id="LOCAL-00246" summary="execution of caseStudy1">
+      <created>1517514605352</created>
+      <option name="number" value="00246" />
+      <option name="presentableId" value="LOCAL-00246" />
+      <option name="project" value="LOCAL" />
+      <updated>1517514605352</updated>
+    </task>
+    <task id="LOCAL-00247" summary="Bugfixing">
+      <created>1517591029051</created>
+      <option name="number" value="00247" />
+      <option name="presentableId" value="LOCAL-00247" />
+      <option name="project" value="LOCAL" />
+      <updated>1517591029053</updated>
+    </task>
+    <task id="LOCAL-00248" summary="Now producing 2 different geojson files: shipRoute and waypointInfo">
+      <created>1517598194160</created>
+      <option name="number" value="00248" />
+      <option name="presentableId" value="LOCAL-00248" />
+      <option name="project" value="LOCAL" />
+      <updated>1517598194161</updated>
+    </task>
+    <task id="LOCAL-00249" summary="Virtual fences db (testing purposes only)">
+      <created>1517611120709</created>
+      <option name="number" value="00249" />
+      <option name="presentableId" value="LOCAL-00249" />
+      <option name="project" value="LOCAL" />
+      <updated>1517611120711</updated>
+    </task>
+    <task id="LOCAL-00250" summary="NEW FEATURE: now optimal route prevents virtual fences">
+      <created>1517611231499</created>
+      <option name="number" value="00250" />
+      <option name="presentableId" value="LOCAL-00250" />
+      <option name="project" value="LOCAL" />
+      <updated>1517611231500</updated>
+    </task>
+    <task id="LOCAL-00251" summary="Example prevents fences">
+      <created>1517611286702</created>
+      <option name="number" value="00251" />
+      <option name="presentableId" value="LOCAL-00251" />
+      <option name="project" value="LOCAL" />
+      <updated>1517611286702</updated>
+    </task>
+    <task id="LOCAL-00252" summary="Libraries for JGrib">
+      <created>1517849314062</created>
+      <option name="number" value="00252" />
+      <option name="presentableId" value="LOCAL-00252" />
+      <option name="project" value="LOCAL" />
+      <updated>1517849314065</updated>
+    </task>
+    <task id="LOCAL-00253" summary="[NEW] Added Grib module. Bug fixing.">
+      <created>1517849414623</created>
+      <option name="number" value="00253" />
+      <option name="presentableId" value="LOCAL-00253" />
+      <option name="project" value="LOCAL" />
+      <updated>1517849414623</updated>
+    </task>
+    <task id="LOCAL-00254" summary="CaseStudy1 ok.">
+      <created>1518023125934</created>
+      <option name="number" value="00254" />
+      <option name="presentableId" value="LOCAL-00254" />
+      <option name="project" value="LOCAL" />
+      <updated>1518023125934</updated>
+    </task>
+    <task id="LOCAL-00255" summary="Code refactoring. Ship is now an interface, motorboat is the class that implements the interface. Removed some unused stuff.">
+      <created>1518026570592</created>
+      <option name="number" value="00255" />
+      <option name="presentableId" value="LOCAL-00255" />
+      <option name="project" value="LOCAL" />
+      <updated>1518026570592</updated>
+    </task>
+    <task id="LOCAL-00256" summary="AMP &amp; virtual fences GeoJSON DB">
+      <created>1518187931298</created>
+      <option name="number" value="00256" />
+      <option name="presentableId" value="LOCAL-00256" />
+      <option name="project" value="LOCAL" />
+      <updated>1518187931301</updated>
+    </task>
+    <task id="LOCAL-00257" summary="[NEW] static and dynamic fileds are now implementing interfaces.">
+      <created>1518188025682</created>
+      <option name="number" value="00257" />
+      <option name="presentableId" value="LOCAL-00257" />
+      <option name="project" value="LOCAL" />
+      <updated>1518188025682</updated>
+    </task>
+    <task id="LOCAL-00258" summary="Added virtual fence to path class and attribute">
+      <created>1518188067000</created>
+      <option name="number" value="00258" />
+      <option name="presentableId" value="LOCAL-00258" />
+      <option name="project" value="LOCAL" />
+      <updated>1518188067000</updated>
+    </task>
+    <option name="localTasksCounter" value="259" />
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="1030701000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="1366" y="0" width="1920" height="1080" extended-state="6" />
+    <layout>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.497552" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="simpleUML" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20319149" sideWeight="0.4194237" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1893617" sideWeight="0.58484846" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32924226" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3006757" sideWeight="0.4151515" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32857144" sideWeight="0.49510404" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.22637363" sideWeight="0.497552" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14674494" sideWeight="0.4956044" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32986537" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.249694" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23296703" sideWeight="0.5440636" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.21848226" sideWeight="0.5043956" order="6" side_tool="true" content_ui="tabs" />
+      <window_info id="Code Iris" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32954547" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.249694" sideWeight="0.5" order="3" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Coverage" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32986537" sideWeight="0.5" order="10" side_tool="true" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32857144" sideWeight="0.48592412" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.log" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="RECENTLY_FILTERED_USER_GROUPS">
+                <collection />
+              </option>
+              <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+                <collection />
+              </option>
+              <option name="COLUMN_ORDER">
+                <list>
+                  <option value="0" />
+                  <option value="1" />
+                  <option value="2" />
+                  <option value="3" />
+                </list>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Fixed a bug in Dijkstra implementation" />
+    <MESSAGE value="Fixed get_Info_at_Node" />
+    <MESSAGE value="Example of static execution" />
+    <MESSAGE value="Added Dijkstra3D implementation. Milestone reached" />
+    <MESSAGE value="Time dipendent algorithm execution example" />
+    <MESSAGE value="Code refactoring. Now GeoJSON output file contains route info" />
+    <MESSAGE value="Code refactoring; now input can be from string (InputPaths class)" />
+    <MESSAGE value="Now more useful: can read more type of netcdf files." />
+    <MESSAGE value="Added info (time, speed, distance) for each waypoint of the route" />
+    <MESSAGE value="Execution example" />
+    <MESSAGE value="Files are updated for &quot;caseStudy1&quot;; test.tar.gz contains &quot;test&quot; input files" />
+    <MESSAGE value="Fixed a (little) bug. Now don't need an_datesDB, latest analysis date it's derived from the .nc file." />
+    <MESSAGE value="execution of caseStudy1" />
+    <MESSAGE value="Bugfixing" />
+    <MESSAGE value="Now producing 2 different geojson files: shipRoute and waypointInfo" />
+    <MESSAGE value="Virtual fences db (testing purposes only)" />
+    <MESSAGE value="NEW FEATURE: now optimal route prevents virtual fences" />
+    <MESSAGE value="Example prevents fences" />
+    <MESSAGE value="Libraries for JGrib" />
+    <MESSAGE value="[NEW] Added Grib module. Bug fixing." />
+    <MESSAGE value="CaseStudy1 ok." />
+    <MESSAGE value="Code refactoring. Ship is now an interface, motorboat is the class that implements the interface. Removed some unused stuff." />
+    <MESSAGE value="AMP &amp; virtual fences GeoJSON DB" />
+    <MESSAGE value="[NEW] static and dynamic fileds are now implementing interfaces." />
+    <MESSAGE value="Added virtual fence to path class and attribute" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added virtual fence to path class and attribute" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <option name="time" value="865" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="true" />
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-12).charAt(0) == '_'</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-12).charAt(0) == 'c'</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-12).charAt(0)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-12)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-13)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-15)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(this.paths.getForecastFile().length()-10)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(15)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>this.paths.getForecastFile().substring(0)</expression-string>
+        <language-id>JAVA</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Boxing/Dijkstra2DResults.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="26" lean-forward="true" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Boxing/DijkstraTimeResults.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Fstats.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="7" column="13" lean-forward="false" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uml/general.uml" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Const.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="11" column="29" lean-forward="true" selection-start-line="11" selection-start-column="29" selection-end-line="11" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/DepartureParameters.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-408">
+          <caret line="49" column="52" lean-forward="true" selection-start-line="49" selection-start-column="52" selection-end-line="49" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvironmentalFields.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="8" column="13" lean-forward="false" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Optim.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="482">
+          <caret line="42" column="51" lean-forward="true" selection-start-line="42" selection-start-column="51" selection-end-line="42" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/uml/GeoJSONFormatter.uml" />
+    <entry file="file://$PROJECT_DIR$/src/uml/Algorithms.uml" />
+    <entry file="file://$PROJECT_DIR$/src/uml/Utility.uml" />
+    <entry file="file://$PROJECT_DIR$/src/uml/Objects_1.uml" />
+    <entry file="file://$PROJECT_DIR$/src/uml/Objects_2.uml" />
+    <entry file="file://$PROJECT_DIR$/src/uml/sGrid.uml" />
+    <entry file="file://$PROJECT_DIR$/src/uml/InputData.uml" />
+    <entry file="file://$PROJECT_DIR$/src/uml/JVisir.uml" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Algorithms.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="122" column="26" lean-forward="true" selection-start-line="122" selection-start-column="26" selection-end-line="122" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/ShipModel/Ship.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="48" lean-forward="false" selection-start-line="6" selection-start-column="48" selection-end-line="6" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Boxing/vessel_ResponseResults.java" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Ship.java" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/inputdata/CustomNCInputData.java" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/inputdata/GribDataInput.java" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/inputdata/BathymetryInputData.java" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/inputdata/VisirIDataInput.java" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/ShipModel/Motorboat.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="304">
+          <caret line="190" column="24" lean-forward="false" selection-start-line="190" selection-start-column="16" selection-end-line="190" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Utility.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="185">
+          <caret line="230" column="29" lean-forward="false" selection-start-line="230" selection-start-column="29" selection-end-line="230" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Boxing/parseMedOneMinResults.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="26" lean-forward="true" selection-start-line="6" selection-start-column="26" selection-end-line="6" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Output/shipRoute.geojson">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/InputData.java" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveVISIRINetCDFInputData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="534">
+          <caret line="127" column="36" lean-forward="false" selection-start-line="127" selection-start-column="36" selection-end-line="127" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveInputData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Parser/MyGribParser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1122">
+          <caret line="71" column="52" lean-forward="true" selection-start-line="71" selection-start-column="52" selection-end-line="71" selection-end-column="52" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveGRIBInputData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="57" column="5" lean-forward="true" selection-start-line="57" selection-start-column="5" selection-end-line="57" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/BathymetryInputData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" column="4" lean-forward="false" selection-start-line="6" selection-start-column="4" selection-end-line="6" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/NetCDFBathyInput.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="15" column="28" lean-forward="true" selection-start-line="15" selection-start-column="28" selection-end-line="15" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/VirtualFencesInputData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="44" lean-forward="false" selection-start-line="10" selection-start-column="44" selection-end-line="10" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Parser/GeoJsonFormatter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="27" column="74" lean-forward="false" selection-start-line="27" selection-start-column="74" selection-end-line="27" selection-end-column="74" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/GeoJSONAMPInputData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="221">
+          <caret line="13" column="28" lean-forward="true" selection-start-line="13" selection-start-column="28" selection-end-line="13" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inputFiles/Fences/falseAMP.geojson">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inputFiles/datetime_pars.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="11" lean-forward="true" selection-start-line="4" selection-start-column="11" selection-end-line="4" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/DebugFiles/errors.log" />
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/EnvFieldsIn/waveCustomNetCDFInputData.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="69" column="55" lean-forward="false" selection-start-line="69" selection-start-column="55" selection-end-line="69" selection-end-column="55" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/ExtremePoints.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1065">
+          <caret line="78" column="0" lean-forward="false" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Parser/MyNetCDFParser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-586">
+          <caret line="226" column="48" lean-forward="true" selection-start-line="226" selection-start-column="48" selection-end-line="226" selection-end-column="48" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inputFiles/Fences/fakeAMPTEST.geojson">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inputFiles/extrema_pars.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="30" lean-forward="false" selection-start-line="4" selection-start-column="30" selection-end-line="4" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/JAladdinModel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="855" column="14" lean-forward="false" selection-start-line="855" selection-start-column="14" selection-end-line="855" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/InputPaths.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="36" column="60" lean-forward="false" selection-start-line="36" selection-start-column="60" selection-end-line="36" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/it/uniparthenope/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="12" column="0" lean-forward="false" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/inputFiles/wave/WW3/info.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Output/exec.log">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="597">
+          <caret line="151" column="72" lean-forward="false" selection-start-line="151" selection-start-column="72" selection-end-line="151" selection-end-column="72" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArquillianSettingsConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>No facets are configured</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>JAladdin</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+                <option value="0.6" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>1.8</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>jgrib</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+  <component name="simpleUML.UMLToolWindowPlugin">
+    <General>
+      <option name="birdViewUpdateDelay" value="2000" />
+      <option name="defaultFileLocation" value="file://$PROJECT_DIR$/.." />
+    </General>
+    <Classdiagram>
+      <option name="diagramTitleFont" value="SansSerif,1,12" />
+      <option name="diagramFont" value="SansSerif,0,10" />
+      <option name="defaultFieldsExpanded" value="false" />
+      <option name="defaultContructorsExpanded" value="false" />
+      <option name="defaultMethodsExpanded" value="false" />
+      <option name="showParameters" value="true" />
+      <option name="showTooltip" value="true" />
+      <option name="showReturnValues" value="true" />
+      <option name="longModifier" value="true" />
+      <option name="implementsBehaviour" value="1" />
+      <option name="extendsBehaviour" value="1" />
+      <option name="compartmentBehaviour" value="1" />
+      <option name="interfaceBackgroundColor" value="-6494306" />
+      <option name="abstractClassBackgroundColor" value="-1580132" />
+      <option name="classBackgroundColor" value="-6508057" />
+      <option name="diagramBackgroundColor" value="-1" />
+      <option name="useAntialiasedConnectors" value="true" />
+      <option name="quickSourceLinkColor" value="-16776961" />
+      <option name="quickDiagramLinkColor" value="-8454144" />
+      <option name="drawDecorations" value="false" />
+      <option name="hideFieldList" value="" />
+      <option name="showFieldList" value="" />
+      <option name="hideConstructorList" value="" />
+      <option name="showConstructorList" value="" />
+      <option name="hideMethodList" value="" />
+      <option name="showMethodList" value="" />
+      <option name="minimumFigureSize" value="0,0" />
+    </Classdiagram>
+    <Dependencydiagram>
+      <option name="diagramTitleFont" value="SansSerif,1,12" />
+      <option name="diagramFont" value="SansSerif,0,10" />
+      <option name="diagramBackgroundColor" value="-1" />
+      <option name="useAntialiasedConnectors" value="true" />
+      <option name="packageNameCompressionLevel" value="0" />
+    </Dependencydiagram>
+    <Packagediagram>
+      <option name="diagramTitleFont" value="SansSerif,0,12" />
+      <option name="diagramFont" value="SansSerif,0,10" />
+      <option name="packageBackgroundColor" value="-4144960" />
+      <option name="diagramBackgroundColor" value="-1" />
+      <option name="useAntialiasedConnectors" value="true" />
+      <option name="packageNameCompressionLevel" value="2" />
+    </Packagediagram>
+  </component>
+</project>

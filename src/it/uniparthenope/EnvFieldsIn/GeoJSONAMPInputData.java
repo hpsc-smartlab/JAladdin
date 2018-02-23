@@ -9,7 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class GeoJSONAMPInputData implements AMPInputData {
+public class GeoJSONAMPInputData implements VirtualFencesInputData {
     private String outDir;
     private Object polyFile;
 

@@ -1,7 +1,5 @@
 package it.uniparthenope.Debug;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,15 +13,7 @@ public class MyFileWriter {
     private BufferedWriter bw;
     private static final DateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-    public MyFileWriter(String fileName){
-        this.fileName = fileName;
-        try {
-            this.bw = new BufferedWriter(new FileWriter("DebugFiles/"+this.fileName+".txt"));
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-    public MyFileWriter(String fileName,String mode, boolean append){
+    public MyFileWriter(String fileName,String mode, boolean append, String outDir){
         //this.fileName = fileName;
         try {
             if(mode =="debug"){
@@ -31,7 +21,7 @@ public class MyFileWriter {
                 this.fileName="errors";
             }
             else{
-                this.bw = new BufferedWriter(new FileWriter("Output/exec.log",append));
+                this.bw = new BufferedWriter(new FileWriter(outDir+"exec.log",append));
                 this.fileName="exec";
             }
             if(!append){
@@ -42,14 +32,6 @@ public class MyFileWriter {
         }
     }
 
-    public MyFileWriter(boolean out, String fileName){
-        this.fileName = fileName;
-        try{
-            this.bw = new BufferedWriter(new FileWriter("Output/"+fileName));
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
 
     private String dateTime(){
         return this.sdf.format(new Date());
